@@ -19,6 +19,7 @@ describe('contacthub.js', () => {
 
   describe('Config API', () => {
     beforeEach(() => {
+      cookies.remove(cookieName);
       _ch('config', {
         workspaceId: 'workspace_id',
         nodeId: 'node_id',
@@ -58,7 +59,7 @@ describe('contacthub.js', () => {
         token: 'ABC123',
         context: 'foo'
       });
-      expect(getCookie().context).to.equal('WEB');
+      expect(getCookie().context).to.equal('foo');
     });
 
     it('allows to override a single required param', () => {
