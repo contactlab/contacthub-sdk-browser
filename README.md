@@ -1,0 +1,64 @@
+# Contacthub.js
+
+Official JS tracking code for
+[Contactlab](http://developer.contactlab.com/documentation/). The easiest way to
+send pageviews, events and customer information from your website to the
+[Contacthub API](http://developer.contactlab.com/documentation/).
+
+
+## How to use
+
+Insert this snippet in your website:
+
+```html
+<script>
+window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
+ch('config', {/* see below */});
+ch('customer', {/* see below */});
+ch('event', {/* see below */});
+</script>
+<script async src='https://www.contactlab.com/contacthub.js'></script>
+```
+
+### The config API
+
+```js
+ch('config', {
+  workspaceId: 'w_id', // required, found in the ContactHub admin area
+  nodeId: 'node_id', // required, found in the ContactHub admin area
+  token: 'UYTF546FUTF636JH', // required, found in the ContactHub admin area
+  context: 'CTX' // optional, defaults to 'WEB'
+});
+```
+
+### The customer API
+
+```js
+ch('customer', {
+  externalId: '456', // optional
+  customer: { // optional
+    firstName: 'Mario',
+    lastName: 'Rossi',
+    contacts: {
+      email: 'mario.rossi@example.com'
+    }
+  }
+});
+```
+
+### The event API
+
+```js
+ch('event',
+  '<eventType>', // type
+  // optional Properties object (eventType dependent)
+  // default is "all the props we can infer automatically":
+  properties: {
+    path, referrer, title, url
+  }
+);
+```
+
+## How to build locally
+
+
