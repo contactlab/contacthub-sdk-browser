@@ -2,7 +2,15 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import cookies from 'js-cookie';
 
-const apiUrl = 'https://api.contactlab.it/hub/v1/';
+const xrPostStub = sinon.spy();
+const inject = require('inject!../lib/contacthub');
+inject({
+  xr: {
+    configure: () => {},
+    post: xrPostStub
+  }
+});
+
 const cookieName = '_ch';
 const varName = 'ch';
 
@@ -13,13 +21,17 @@ const getCookie = () => cookies.getJSON(cookieName) || {};
 describe('contacthub.js', () => {
   const _ch = window[varName];
 
+  beforeEach(() => {
+    cookies.remove(cookieName);
+    xrPostStub.reset();
+  });
+
   it('creates the _ch function', () => {
     expect(_ch).to.be.a('function');
   });
 
   describe('Config API', () => {
     beforeEach(() => {
-      cookies.remove(cookieName);
       _ch('config', {
         workspaceId: 'workspace_id',
         nodeId: 'node_id',
@@ -73,27 +85,27 @@ describe('contacthub.js', () => {
   });
 
   describe('Event API', () => {
-    // const xhr = sinon.useFakeXMLHttpRequest();
-    // const requests = [];
-    //
-    // xhr.onCreate = (xhr) => {
-    //   requests.push(xhr);
-    // };
 
-    const server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    server.respondWith('POST', `${apiUrl}workspaces/1/events`, (req) => {
-      req.respond(200, {}, '');
+    const setConfig = () => {
+      _ch('config', {
+        workspaceId: 'workspace_id',
+        nodeId: 'node_id',
+        token: 'ABC123'
+      });
+    };
+
+    it('checks if required config is set', () => {
+      expect(() => {
+        _ch('event', 'viewedPage');
+      }).to.throw(Error);
+
+      expect(xrPostStub.callCount).to.equal(0);
     });
 
-    it('sends the event to the API', (done) => {
-      _ch('event', 'viewed_page').then(() => {
-        // console.log('WUT', res);
-        done();
-      }).catch((err) => {
-        // console.log('FAIL');
-        done(err);
-      });
+    it('sends the event to the API', () => {
+      setConfig();
+      _ch('event', 'viewedPage');
+      expect(xrPostStub.callCount).to.equal(1);
     });
   });
 });

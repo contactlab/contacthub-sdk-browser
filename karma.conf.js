@@ -9,14 +9,12 @@ module.exports = function(config) {
     frameworks: ['mocha'],
 
     preprocessors: {
-      'lib/contacthub.js': ['webpack', 'sourcemap'],
       'test/contacthub.js': ['webpack', 'sourcemap']
     },
 
     webpack: webpackConfig,
 
     files: [
-      'lib/contacthub.js',
       'test/contacthub.js'
     ],
 
