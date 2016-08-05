@@ -7,8 +7,16 @@ import cookies from 'js-cookie';
 
 sinon.stub(xr, 'post');
 
+const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
 const varName = 'ch';
+const config = {
+  workspaceId: 'workspace_id',
+  nodeId: 'node_id',
+  token: 'ABC123'
+};
+
+const getCookie = () => cookies.getJSON(cookieName) || {};
 
 const _ch = window[varName];
 
@@ -19,11 +27,7 @@ describe('Event API', () => {
   });
 
   const setConfig = () => {
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'ABC123'
-    });
+    _ch('config', config);
   };
 
   it('checks if required config is set', () => {
@@ -38,5 +42,22 @@ describe('Event API', () => {
     setConfig();
     _ch('event', 'viewedPage');
     expect(xr.post.callCount).to.equal(1);
+    const call = xr.post.getCall(0);
+    expect(call.args[0]).to.equal(
+      `${apiUrl}/workspaces/${config.workspaceId}/events`
+    );
+    expect(call.args[2].headers.Authorization).to.eql(
+      `Bearer ${config.token}`
+    );
+    expect(call.args[1]).to.eql({
+      type: 'viewedPage',
+      context: 'WEB',
+      properties: {},
+      bringBackProperties: {
+        type: 'SESSION_ID',
+        value: getCookie().sid,
+        nodeId: config.nodeId
+      }
+    });
   });
 });
