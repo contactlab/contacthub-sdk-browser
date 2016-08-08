@@ -61,4 +61,9 @@ ch('event',
 
 ## How to build locally
 
+`npm run build` will generate `dist/contactlab.js` and `dist/contactlab.min.js`.
 
+
+## Ho to run tests
+
+`npm test`
