@@ -1,11 +1,8 @@
 import { expect } from 'chai';
-import sinon from 'sinon';
 import xr from 'xr';
 import cookies from 'js-cookie';
 
 /* global describe, it, beforeEach */
-
-sinon.stub(xr, 'post');
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -46,9 +43,6 @@ describe('Event API', () => {
     expect(call.args[0]).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
     );
-    expect(call.args[2].headers.Authorization).to.eql(
-      `Bearer ${config.token}`
-    );
     expect(call.args[1]).to.eql({
       type: 'viewedPage',
       context: 'WEB',
@@ -59,5 +53,8 @@ describe('Event API', () => {
         nodeId: config.nodeId
       }
     });
+    expect(call.args[2].headers.Authorization).to.eql(
+      `Bearer ${config.token}`
+    );
   });
 });
