@@ -59,7 +59,7 @@ describe('Event API', () => {
         nodeId: config.nodeId
       }
     });
-    expect(req.requestHeaders.Authorization).to.eql(
+    expect(req.requestHeaders.Authorization).to.equal(
       `Bearer ${config.token}`
     );
   });

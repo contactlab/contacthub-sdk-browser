@@ -70,7 +70,7 @@ describe('Customer API', () => {
         nodeId: config.nodeId,
         base: mario.base
       });
-      expect(req.requestHeaders.Authorization).to.eql(
+      expect(req.requestHeaders.Authorization).to.equal(
         `Bearer ${config.token}`
       );
     });
