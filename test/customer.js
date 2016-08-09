@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import xr from 'xr';
 import cookies from 'js-cookie';
+import sinon from 'sinon';
 
-/* global describe, it, beforeEach */
+/* global describe, it, beforeEach, afterEach */
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -13,65 +13,77 @@ const config = {
   token: 'ABC123'
 };
 
-// const getCookie = () => cookies.getJSON(cookieName) || {};
+const mario = {
+  base: {
+    firstName: 'mario',
+    lastName: 'rossi',
+    dob: '1980-03-17',
+    contacts: {
+      email: 'mario.rossi@example.com'
+    }
+  }
+};
+
+const getCookie = () => cookies.getJSON(cookieName) || {};
+
+const setConfig = () => { _ch('config', config); };
 
 const _ch = window[varName];
+
+let requests = [];
+let xhr;
 
 describe('Customer API', () => {
   beforeEach(() => {
     cookies.remove(cookieName);
-    xr.post.reset();
+    requests = [];
+    xhr = sinon.useFakeXMLHttpRequest();
+    xhr.onCreate = (xhr) => {
+      requests.push(xhr);
+    };
   });
 
-  const setConfig = () => {
-    _ch('config', config);
-  };
-
-  const mario = {
-    base: {
-      firstName: 'mario',
-      lastName: 'rossi',
-      dob: '1980-03-17',
-      contacts: {
-        email: 'mario.rossi@example.com'
-      }
-    }
-  };
+  afterEach(() => {
+    xhr.restore();
+  });
 
   it('checks if required config is set', () => {
     expect(() => {
       _ch('customer', mario);
     }).to.throw(Error);
 
-    expect(xr.post.callCount).to.equal(0);
+    expect(requests.length).to.equal(0);
   });
 
   describe('when customerId is not known', () => {
-    beforeEach(() => {
-    });
-
     it('creates a new customer', () => {
       setConfig();
       _ch('customer', mario);
-      expect(xr.post.callCount).to.equal(1);
-      const call = xr.post.getCall(0);
-      expect(call.args[0]).to.equal(
+
+      expect(requests.length).to.equal(1);
+      const req = requests[0];
+      expect(req.url).to.equal(
         `${apiUrl}/workspaces/${config.workspaceId}/customers`
       );
-      expect(call.args[1]).to.eql({
+      expect(JSON.parse(req.requestBody)).to.eql({
         enabled: true,
         nodeId: config.nodeId,
-        base: mario.base,
-        extended: undefined,
-        extra: undefined,
-        tags: undefined
+        base: mario.base
       });
-      expect(call.args[2].headers.Authorization).to.eql(
+      expect(req.requestHeaders.Authorization).to.eql(
         `Bearer ${config.token}`
       );
     });
 
-    it('stores the customerId for future calls', () => {
+    it('stores the customerId for future calls', (done) => {
+      setConfig();
+      _ch('customer', mario);
+
+      requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+      setTimeout(() => {
+        expect(getCookie().customerId).to.equal('new-cid');
+        done();
+      }, 0);
     });
 
     it('reconciles the sessionId with the customerId', () => {
@@ -83,6 +95,16 @@ describe('Customer API', () => {
 
   describe('when customerId is already known', () => {
     beforeEach(() => {
+      setConfig();
+      cookies.set(cookieName, Object.assign(getCookie(), {
+        customerId: 'my-cid'
+      }));
+      _ch('customer', mario);
+    });
+
+    it('does not create a new customer', () => {
+      const req = requests[0];
+      if (req) expect(req.method).not.to.equal('POST');
     });
 
     it('does not update the customer if the hash matches', () => {
@@ -93,6 +115,5 @@ describe('Customer API', () => {
 
     it('removes fields set to "null"', () => {
     });
-
   });
 });

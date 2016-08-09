@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import xr from 'xr';
 import cookies from 'js-cookie';
+import sinon from 'sinon';
 
 /* global describe, it, beforeEach */
 
@@ -17,10 +17,17 @@ const getCookie = () => cookies.getJSON(cookieName) || {};
 
 const _ch = window[varName];
 
+let requests;
+let xhr;
+
 describe('Event API', () => {
   beforeEach(() => {
     cookies.remove(cookieName);
-    xr.post.reset();
+    requests = [];
+    xhr = sinon.useFakeXMLHttpRequest();
+    xhr.onCreate = (xhr) => {
+      requests.push(xhr);
+    };
   });
 
   const setConfig = () => {
@@ -32,18 +39,17 @@ describe('Event API', () => {
       _ch('event', 'viewedPage');
     }).to.throw(Error);
 
-    expect(xr.post.callCount).to.equal(0);
+    expect(requests.length).to.equal(0);
   });
 
   it('sends the event to the API', () => {
     setConfig();
     _ch('event', 'viewedPage');
-    expect(xr.post.callCount).to.equal(1);
-    const call = xr.post.getCall(0);
-    expect(call.args[0]).to.equal(
+    const req = requests[0];
+    expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
     );
-    expect(call.args[1]).to.eql({
+    expect(JSON.parse(req.requestBody)).to.eql({
       type: 'viewedPage',
       context: 'WEB',
       properties: {},
@@ -53,7 +59,7 @@ describe('Event API', () => {
         nodeId: config.nodeId
       }
     });
-    expect(call.args[2].headers.Authorization).to.eql(
+    expect(req.requestHeaders.Authorization).to.eql(
       `Bearer ${config.token}`
     );
   });
