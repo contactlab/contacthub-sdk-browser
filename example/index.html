@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<body>
+  <h1>Your awesome website</h1>
+
+  <script src='../dist/contacthub.min.js'></script>
+  <script>
+  window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
+
+  var userData = {
+    base: {
+      firstName: 'mario',
+      lastName: 'rossi',
+      dob: '1980-03-17',
+      contacts: {
+        email: 'mario.rossi@example.com'
+      }
+    }
+  }
+
+  ch('config', {
+    workspaceId: '{WORKSPACE_ID}',
+    nodeId: '{NODE_ID}',
+    token: '{TOKEN}'
+  });
+  ch('event', 'viewedPage');
+  ch('customer', userData);
+  </script>
+
+</body>
+</html>
