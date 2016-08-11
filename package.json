@@ -1,10 +1,11 @@
 {
   "name": "contacthub",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Contacthub Tracking Script",
   "main": "lib/contacthub.js",
   "scripts": {
-    "test": "karma start",
+    "test": "karma start --single-run",
+    "test-watch": "karma start",
     "build": "webpack && uglifyjs ./dist/contacthub.js -c -m -o ./dist/contacthub.min.js"
   },
   "repository": {

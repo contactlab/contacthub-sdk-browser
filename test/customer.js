@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-/* global describe, it, beforeEach, afterEach */
+/* global describe, it, xit, beforeEach, afterEach */
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -24,6 +24,15 @@ const mario = {
   }
 };
 
+const giulia = {
+  base: {
+    firstName: 'giulia',
+    lastName: 'ferrari',
+    dob: '1980-01-20'
+  },
+  externalId: 'giulia.ferrari'
+};
+
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
 const setConfig = () => { _ch('config', config); };
@@ -33,7 +42,7 @@ const _ch = window[varName];
 let requests = [];
 let xhr;
 
-describe('Customer API', () => {
+describe('Customer API:', () => {
   beforeEach(() => {
     cookies.remove(cookieName);
     requests = [];
@@ -55,41 +64,101 @@ describe('Customer API', () => {
     expect(requests.length).to.equal(0);
   });
 
-  describe('when customerId is not known', () => {
-    it('creates a new customer', () => {
+  describe('when customerId is unknown and externalId is not provided,', () => {
+    beforeEach(() => {
       setConfig();
       _ch('customer', mario);
-
-      expect(requests.length).to.equal(1);
-      const req = requests[0];
-      expect(req.url).to.equal(
-        `${apiUrl}/workspaces/${config.workspaceId}/customers`
-      );
-      expect(JSON.parse(req.requestBody)).to.eql({
-        enabled: true,
-        nodeId: config.nodeId,
-        base: mario.base
-      });
-      expect(req.requestHeaders.Authorization).to.equal(
-        `Bearer ${config.token}`
-      );
     });
 
-    it('stores the customerId for future calls', (done) => {
-      setConfig();
-      _ch('customer', mario);
-
-      requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+    it('creates a new customer', (done) => {
       setTimeout(() => {
-        expect(getCookie().customerId).to.equal('new-cid');
+        expect(requests.length).to.equal(1);
+        const req = requests[0];
+        expect(req.url).to.equal(
+          `${apiUrl}/workspaces/${config.workspaceId}/customers`
+        );
+        expect(JSON.parse(req.requestBody)).to.eql({
+          enabled: true,
+          nodeId: config.nodeId,
+          base: mario.base
+        });
+        expect(req.requestHeaders.Authorization).to.equal(
+          `Bearer ${config.token}`
+        );
         done();
       }, 0);
     });
 
-    it('reconciles the sessionId with the customerId', () => {
+    it('stores the customerId for future calls', (done) => {
+      setTimeout(() => {
+        requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+        setTimeout(() => {
+          expect(getCookie().customerId).to.equal('new-cid');
+        }, 0);
+        done();
+      }, 0);
     });
 
-    it('tries to find a customer matching externalId if provided', () => {
+    xit('stores a hash of the customer data for future calls', () => {
+    });
+
+    xit('reconciles the sessionId with the customerId', () => {
+    });
+
+  });
+
+  describe('when customerId is unknown but externalId is provided,', () => {
+    beforeEach(() => {
+      setConfig();
+      _ch('customer', giulia);
+    });
+
+    it('tries to find a customer matching externalId if provided,', () => {
+      const req = requests[0];
+      expect(req.method).to.equal('GET');
+      expect(req.url).to.equal(
+        `${apiUrl}/workspaces/${config.workspaceId}/customers?nodeId=${config.nodeId}&externalId=${giulia.externalId}`
+      );
+    });
+
+    xit('url-encodes externalId', () => {
+    });
+
+    describe('if no results,', () => {
+      it('creates a new customer attaching the externalId', (done) => {
+        requests[0].respond(404);
+        setTimeout(() => {
+          expect(requests.length).to.equal(2);
+          const req = requests[1];
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            enabled: true,
+            nodeId: config.nodeId,
+            externalId: giulia.externalId,
+            base: giulia.base
+          });
+          done();
+        }, 0);
+      });
+
+      it('stores the newly created customerId in the cookie', (done) => {
+        requests[0].respond(404);
+        setTimeout(() => {
+          expect(requests.length).to.equal(2);
+          requests[1].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+          setTimeout(() => {
+            expect(getCookie().customerId).to.equal('new-cid');
+            done();
+          }, 0);
+        }, 0);
+      });
+    });
+
+    describe('if found,', () => {
+      xit('updates an existing customer using the retrieved customerId', () => {
+      });
     });
   });
 
@@ -102,18 +171,16 @@ describe('Customer API', () => {
       _ch('customer', mario);
     });
 
-    it('does not create a new customer', () => {
-      const req = requests[0];
-      if (req) expect(req.method).not.to.equal('POST');
+    xit('updates the customer if the hash does not match', () => {
     });
 
-    it('does not update the customer if the hash matches', () => {
+    xit('does not update the customer if the hash matches', () => {
     });
 
-    it('updates the customer if the hash does not match', () => {
+    xit('removes fields set to "null"', () => {
     });
 
-    it('removes fields set to "null"', () => {
+    xit('allows to completely overwrite the existing data', () => {
     });
   });
 });

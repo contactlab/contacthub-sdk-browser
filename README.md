@@ -66,4 +66,8 @@ ch('event',
 
 ## How to run tests
 
-`npm test`
+`npm test` to run once
+
+or
+
+`npm test-watch` to automatically re-run tests on every change
