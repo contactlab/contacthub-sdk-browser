@@ -63,4 +63,25 @@ describe('Event API', () => {
       `Bearer ${config.token}`
     );
   });
+
+  it('sends customerId when available in cookie', () => {
+    setConfig();
+    cookies.set(cookieName, Object.assign(getCookie(), {
+      customerId: 'my-cid'
+    }));
+    _ch('event', 'viewedPage');
+    const req = requests[0];
+    expect(req.url).to.equal(
+      `${apiUrl}/workspaces/${config.workspaceId}/events`
+    );
+    expect(JSON.parse(req.requestBody)).to.eql({
+      type: 'viewedPage',
+      context: 'WEB',
+      properties: {},
+      customerId: 'my-cid'
+    });
+    expect(req.requestHeaders.Authorization).to.equal(
+      `Bearer ${config.token}`
+    );
+  });
 });

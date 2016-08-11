@@ -8,6 +8,7 @@
   window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
 
   var userData = {
+    externalId: 'eid',
     base: {
       firstName: 'mario',
       lastName: 'rossi',
@@ -23,8 +24,8 @@
     nodeId: '{NODE_ID}',
     token: '{TOKEN}'
   });
-  ch('event', 'viewedPage');
   ch('customer', userData);
+  ch('event', 'viewedPage');
   </script>
 
 </body>
