@@ -52,8 +52,8 @@ describe('Customer API:', () => {
     };
   });
 
-  afterEach(() => {
-    xhr.restore();
+  afterEach((done) => {
+    setTimeout(() => done(), 10);
   });
 
   it('checks if required config is set', () => {
