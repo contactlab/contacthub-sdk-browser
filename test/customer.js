@@ -156,9 +156,30 @@ describe('Customer API:', () => {
       });
     });
 
-    describe('if found,', () => {
-      xit('updates an existing customer using the retrieved customerId', () => {
+    describe('if exactly one result found,', () => {
+      it('updates the existing customer using its customerId', (done) => {
+        requests[0].respond(200, {}, JSON.stringify(
+          { _embedded: { customers: [{ id: 'existing-cid' }] } }
+        ));
+        setTimeout(() => {
+          expect(requests.length).to.equal(2);
+          const req = requests[1];
+          expect(req.method).to.equal('PATCH');
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            enabled: true,
+            nodeId: config.nodeId,
+            externalId: giulia.externalId,
+            base: giulia.base
+          });
+          done();
+        }, 0);
       });
+    });
+
+    describe('if more than one result found,', () => {
     });
   });
 
@@ -171,7 +192,18 @@ describe('Customer API:', () => {
       _ch('customer', mario);
     });
 
-    xit('updates the customer if the hash does not match', () => {
+    it('updates the customer', () => {
+      expect(requests.length).to.equal(1);
+      const req = requests[0];
+      expect(req.method).to.equal('PATCH');
+      expect(req.url).to.equal(
+        `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
+      );
+      expect(JSON.parse(req.requestBody)).to.eql({
+        enabled: true,
+        nodeId: config.nodeId,
+        base: mario.base
+      });
     });
 
     xit('does not update the customer if the hash matches', () => {
