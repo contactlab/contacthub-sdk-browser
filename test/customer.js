@@ -128,7 +128,13 @@ describe('Customer API:', () => {
       );
     });
 
-    xit('url-encodes externalId', () => {
+    it('url-encodes externalId', () => {
+      giulia.externalId = 'giulia.ferrari@example.com';
+      _ch('customer', giulia);
+      const req = requests[1];
+      expect(req.url).to.equal(
+        `${apiUrl}/workspaces/${config.workspaceId}/customers?nodeId=${config.nodeId}&externalId=${encodeURIComponent(giulia.externalId)}`
+      );
     });
 
     describe('if no results,', () => {
