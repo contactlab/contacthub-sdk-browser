@@ -53,6 +53,7 @@
   "dependencies": {
     "es6-promise": "^3.2.1",
     "js-cookie": "^2.1.2",
+    "jssha": "^2.2.0",
     "uuid": "^2.0.2",
     "xr": "github:dhinus/xr"
   }

@@ -36,11 +36,19 @@ ch('config', {
 ```js
 ch('customer', {
   externalId: '456', // optional
-  customer: { // optional
-    firstName: 'Mario',
-    lastName: 'Rossi',
-    contacts: {
-      email: 'mario.rossi@example.com'
+  customer: {
+    base: {
+      firstName: 'Mario',
+      lastName: 'Rossi',
+      contacts: {
+        email: 'mario.rossi@example.com'
+      }
+    },
+    extended: {}, // optional
+    extra: '', // optional
+    tags: { //optional
+      auto: [],
+      manual: []
     }
   }
 });

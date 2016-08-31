@@ -94,12 +94,19 @@ describe('Customer API:', () => {
         requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
         setTimeout(() => {
           expect(getCookie().customerId).to.equal('new-cid');
+          done();
         }, 0);
-        done();
       }, 0);
     });
 
-    xit('stores a hash of the customer data for future calls', () => {
+    it('stores a hash of the customer data for future calls', (done) => {
+      setTimeout(() => {
+        requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+        setTimeout(() => {
+          expect(getCookie().hash).not.to.be.undefined;
+          done();
+        }, 0);
+      }, 0);
     });
 
     xit('reconciles the sessionId with the customerId', () => {
@@ -180,6 +187,7 @@ describe('Customer API:', () => {
     });
 
     describe('if more than one result found,', () => {
+      // Behaviour to be defined
     });
   });
 
@@ -206,7 +214,29 @@ describe('Customer API:', () => {
       });
     });
 
-    xit('does not update the customer if the hash matches', () => {
+    it('does not update the customer if the same data is sent', (done) => {
+      _ch('customer', mario);
+      requests[1].respond(200, {}, JSON.stringify(
+        { _embedded: { customers: [{ id: 'existing-cid' }] } }
+      ));
+      setTimeout(() => {
+        _ch('customer', mario);
+        expect(requests.length).to.equal(2);
+        done();
+      }, 0);
+    });
+
+    it('does update the customer if updated data is sent', (done) => {
+      _ch('customer', mario);
+      requests[1].respond(200, {}, JSON.stringify(
+        { _embedded: { customers: [{ id: 'existing-cid' }] } }
+      ));
+      setTimeout(() => {
+        mario.base.lastName = 'Rossini';
+        _ch('customer', mario);
+        expect(requests.length).to.equal(3);
+        done();
+      }, 0);
     });
 
     xit('removes fields set to "null"', () => {
