@@ -109,9 +109,23 @@ describe('Customer API:', () => {
       }, 0);
     });
 
-    xit('reconciles the sessionId with the customerId', () => {
+    it('reconciles the sessionId with the customerId', (done) => {
+      const sid = getCookie().sid;
+      setTimeout(() => {
+        requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+        setTimeout(() => {
+          expect(requests.length).to.equal(2);
+          const req = requests[1];
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/new-cid/sessions`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            value: sid
+          });
+          done();
+        }, 0);
+      }, 0);
     });
-
   });
 
   describe('when customerId is unknown but externalId is provided,', () => {
@@ -138,8 +152,11 @@ describe('Customer API:', () => {
     });
 
     describe('if no results,', () => {
-      it('creates a new customer attaching the externalId', (done) => {
+      beforeEach(() => {
         requests[0].respond(404);
+      });
+
+      it('creates a new customer attaching the externalId', (done) => {
         setTimeout(() => {
           expect(requests.length).to.equal(2);
           const req = requests[1];
@@ -157,7 +174,6 @@ describe('Customer API:', () => {
       });
 
       it('stores the newly created customerId in the cookie', (done) => {
-        requests[0].respond(404);
         setTimeout(() => {
           expect(requests.length).to.equal(2);
           requests[1].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
@@ -167,13 +183,34 @@ describe('Customer API:', () => {
           }, 0);
         }, 0);
       });
+
+      it('reconciles the sessionId with the customerId', (done) => {
+        const sid = getCookie().sid;
+        setTimeout(() => {
+          requests[1].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+          setTimeout(() => {
+            expect(requests.length).to.equal(3);
+            const req = requests[2];
+            expect(req.url).to.equal(
+              `${apiUrl}/workspaces/${config.workspaceId}/customers/new-cid/sessions`
+            );
+            expect(JSON.parse(req.requestBody)).to.eql({
+              value: sid
+            });
+            done();
+          }, 0);
+        }, 0);
+      });
     });
 
     describe('if exactly one result found,', () => {
-      it('updates the existing customer using its customerId', (done) => {
+      beforeEach(() => {
         requests[0].respond(200, {}, JSON.stringify(
           { _embedded: { customers: [{ id: 'existing-cid' }] } }
         ));
+      });
+
+      it('updates the existing customer using its customerId', (done) => {
         setTimeout(() => {
           expect(requests.length).to.equal(2);
           const req = requests[1];
@@ -188,6 +225,24 @@ describe('Customer API:', () => {
             base: giulia.base
           });
           done();
+        }, 0);
+      });
+
+      it('reconciles the sessionId with the customerId', (done) => {
+        const sid = getCookie().sid;
+        setTimeout(() => {
+          requests[1].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+          setTimeout(() => {
+            expect(requests.length).to.equal(3);
+            const req = requests[2];
+            expect(req.url).to.equal(
+              `${apiUrl}/workspaces/${config.workspaceId}/customers/new-cid/sessions`
+            );
+            expect(JSON.parse(req.requestBody)).to.eql({
+              value: sid
+            });
+            done();
+          }, 0);
         }, 0);
       });
     });
