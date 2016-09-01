@@ -36,7 +36,7 @@ ch('config', {
 Include this call only if you have details about the current user (e.g. the user
 is logged in).
 
-You can also call this function asynchronously when a user logs in or add new
+You can also call this function asynchronously when a user logs in or adds new
 personal information.
 
 ```js
