@@ -8,11 +8,11 @@ send pageviews, events and customer information from your website to the
 
 ## How to use
 
-Insert this snippet in your website:
+Insert this snippet in your website (preferably in the `<HEAD>` section):
 
 ```html
 <script>
-window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
+window.ch=function(){(ch.q=ch.q||[]).push(arguments)};
 ch('config', {/* see below */});
 ch('customer', {/* see below */});
 ch('event', {/* see below */});
@@ -32,6 +32,12 @@ ch('config', {
 ```
 
 ### The customer API
+
+Include this call only if you have details about the current user (e.g. the user
+is logged in).
+
+You can also call this function asynchronously when a user logs in or add new
+personal information.
 
 ```js
 ch('customer', {
@@ -58,14 +64,15 @@ ch('customer', {
 
 ```js
 ch('event',
-  '<eventType>', // type
-  // optional Properties object (eventType dependent)
-  // default is "all the props we can infer automatically":
-  properties: {
-    path, referrer, title, url
-  }
+  '<eventType>', // a valid event type, e.g. 'viewedPage'
+  properties: {} // optional Properties object (eventType dependent)
 );
 ```
+
+Please note we will infer some standard properties automically (url, title,
+referrer, path). If you want, you can override those in your custom `properties`
+object.
+
 
 ## How to build locally
 

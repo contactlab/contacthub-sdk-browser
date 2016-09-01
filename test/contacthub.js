@@ -1,4 +1,4 @@
-import '../lib/contacthub';
+import './load';
 import './config';
 import './event';
 import './customer';

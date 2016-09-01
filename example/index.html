@@ -1,32 +1,52 @@
 <!doctype html>
 <html>
+<head>
+  <script>
+    window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
+
+    var userData = {
+      externalId: 'mario.rossi',
+      base: {
+        firstName: 'mario',
+        lastName: 'rossi',
+        dob: '1980-03-17',
+        contacts: {
+          email: 'mario.rossi@example.com'
+        }
+      }
+    };
+
+    ch('config', {
+      workspaceId: '{WORKSPACE_ID}',
+      nodeId: '{NODE_ID}',
+      token: '{TOKEN}'
+    });
+    ch('customer', userData);
+    ch('event', 'viewedPage');
+  </script>
+  <script async src='../dist/contacthub.js'></script>
+</head>
 <body>
+
   <h1>Your awesome website</h1>
 
-  <script src='../dist/contacthub.min.js'></script>
   <script>
-  window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
-
-  var userData = {
-    externalId: 'mario.rossi',
-    base: {
-      firstName: 'mario',
-      lastName: 'rossi',
-      dob: '1980-03-17',
-      contacts: {
-        email: 'mario.rossi@example.com'
-      }
+    // Patch customer data
+    function update () {
+      ch('customer', {
+        base: {
+          firstName: 'mario luigi'
+        }
+      });
     }
-  };
 
-  ch('config', {
-    workspaceId: '{WORKSPACE_ID}',
-    nodeId: '{NODE_ID}',
-    token: '{TOKEN}'
-  });
-  ch('customer', userData);
-  ch('event', 'viewedPage');
+    function login () {
+      ch('customer', userData);
+    }
   </script>
+
+  <button onclick="javascript:login();">LOGIN</button>
+  <button onclick="javascript:update();">UPDATE</button>
 
 </body>
 </html>
