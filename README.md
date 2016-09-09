@@ -36,7 +36,7 @@ ch('config', {
 Include this call only if you have details about the current user (e.g. the user
 is logged in).
 
-You can also call this function asynchronously when a user logs in or adds new
+You can also call this function asynchronously when a user logs in or add new
 personal information.
 
 ```js
@@ -63,10 +63,10 @@ ch('customer', {
 ### The event API
 
 ```js
-ch('event',
-  '<eventType>', // a valid event type, e.g. 'viewedPage'
+ch('event', {
+  type: '<eventType>', // a valid event type, e.g. 'viewedPage'
   properties: {} // optional Properties object (eventType dependent)
-);
+});
 ```
 
 Please note we will infer some standard properties automically (url, title,

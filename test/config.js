@@ -34,7 +34,7 @@ describe('Config API', () => {
 
   it('does not regenerate sessionId if already present', () => {
     const sid = getCookie().sid;
-    _ch('config');
+    _ch('config', {});
     expect(getCookie().sid).to.equal(sid);
   });
 

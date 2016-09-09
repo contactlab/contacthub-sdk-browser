@@ -36,7 +36,7 @@ describe('Event API', () => {
 
   it('checks if required config is set', () => {
     expect(() => {
-      _ch('event', 'viewedPage');
+      _ch('event', { type: 'viewedPage' });
     }).to.throw(Error);
 
     expect(requests.length).to.equal(0);
@@ -44,7 +44,7 @@ describe('Event API', () => {
 
   it('sends the event to the API', () => {
     setConfig();
-    _ch('event', 'viewedPage');
+    _ch('event', { type: 'viewedPage' });
     const req = requests[0];
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
@@ -69,7 +69,7 @@ describe('Event API', () => {
     cookies.set(cookieName, Object.assign(getCookie(), {
       customerId: 'my-cid'
     }));
-    _ch('event', 'viewedPage');
+    _ch('event', { type: 'viewedPage' });
     const req = requests[0];
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
