@@ -1,3 +1,5 @@
+[![Build Status](https://drone.our.buildo.io/api/badges/buildo/contacthub/status.svg)](https://drone.our.buildo.io/buildo/contacthub)
+
 # Contacthub.js
 
 Official JS tracking code for
