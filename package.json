@@ -6,7 +6,8 @@
   "scripts": {
     "test": "karma start --single-run",
     "test-watch": "karma start",
-    "build": "webpack && uglifyjs ./dist/contacthub.js --support-ie8 -c -m -o ./dist/contacthub.min.js"
+    "build": "webpack && uglifyjs ./dist/contacthub.js --support-ie8 -c -m -o ./dist/contacthub.min.js",
+    "lint": "eslint lib && eslint test"
   },
   "repository": {
     "type": "git",
@@ -38,8 +39,9 @@
     "babel-preset-es2015-loose": "^7.0.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
-    "eslint": "^3.2.0",
+    "eslint": "^3.5.0",
     "eslint-config-buildo": "^0.1.0",
+    "eslint-plugin-flowtype": "^2.16.1",
     "flow-bin": "^0.32.0",
     "karma": "^1.1.2",
     "karma-chrome-launcher": "^1.0.1",
