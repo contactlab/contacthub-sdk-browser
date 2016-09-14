@@ -5,8 +5,12 @@ build:
       - NPM_CONFIG_CACHE=/drone/.npm
       - NPM_CONFIG_LOGLEVEL=warn
     commands:
+      ## required for running flow
+      - apt-get update -qq
+      - apt-get install -qy libelf1
       - npm i
       - npm run lint
+      - npm run flow
       - npm test
 
 cache:
