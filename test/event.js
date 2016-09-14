@@ -46,22 +46,21 @@ describe('Event API', () => {
     setConfig();
     _ch('event', { type: 'viewedPage' });
     const req = requests[0];
+    const res = JSON.parse(req.requestBody);
+
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
     );
-    expect(JSON.parse(req.requestBody)).to.eql({
-      type: 'viewedPage',
-      context: 'WEB',
-      properties: {},
-      bringBackProperties: {
-        type: 'SESSION_ID',
-        value: getCookie().sid,
-        nodeId: config.nodeId
-      }
-    });
     expect(req.requestHeaders.Authorization).to.equal(
       `Bearer ${config.token}`
     );
+    expect(res.type).to.equal('viewedPage');
+    expect(res.context).to.equal('WEB');
+    expect(res.bringBackProperties).to.eql({
+      type: 'SESSION_ID',
+      value: getCookie().sid,
+      nodeId: config.nodeId
+    });
   });
 
   it('sends customerId when available in cookie', () => {
@@ -74,14 +73,31 @@ describe('Event API', () => {
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
     );
-    expect(JSON.parse(req.requestBody)).to.eql({
-      type: 'viewedPage',
-      context: 'WEB',
-      properties: {},
-      customerId: 'my-cid'
+    expect(JSON.parse(req.requestBody).customerId).to.eql('my-cid');
+  });
+
+  it('infers common event properties', () => {
+    document.title = 'Hello world';
+    setConfig();
+    _ch('event', { type: 'viewedPage' });
+    const req = requests[0];
+    const props = JSON.parse(req.requestBody).properties;
+
+    expect(props.title).to.eql('Hello world');
+    expect(props.url).to.match(/^http:.*context.html$/);
+    expect(props.path).to.eql('/context.html');
+    expect(props.referrer).to.match(/^http:.*?id=.*$/);
+  });
+
+  it('allows to override inferred properties', () => {
+    setConfig();
+    _ch('event', { type: 'viewedPage', properties: {
+      title: 'Custom title' }
     });
-    expect(req.requestHeaders.Authorization).to.equal(
-      `Bearer ${config.token}`
-    );
+    const req = requests[0];
+    const props = JSON.parse(req.requestBody).properties;
+
+    expect(props.title).to.eql('Custom title');
+    expect(props.path).to.eql('/context.html');
   });
 });
