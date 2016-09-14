@@ -9,7 +9,11 @@ build:
       - apt-get update -qq
       - apt-get install -qy libelf1
       - npm i
-      - npm run build
+      - npm run lint
+      - npm run flow
+      - npm run test
+      - npm run webpack
+      - npm run uglify
 
 cache:
   mount:
