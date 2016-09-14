@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
 <head>
+  <title>ContactHub Example Page</title>
   <script>
     window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
 
@@ -21,8 +22,7 @@
       nodeId: '{NODE_ID}',
       token: '{TOKEN}'
     });
-    ch('customer', userData);
-    ch('event', 'viewedPage');
+    ch('event', { type: 'viewedPage' });
   </script>
   <script async src='../dist/contacthub.js'></script>
 </head>
