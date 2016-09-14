@@ -6,7 +6,8 @@
   "scripts": {
     "test": "karma start --single-run",
     "test-watch": "karma start",
-    "build": "webpack && uglifyjs ./dist/contacthub.js --support-ie8 -c -m -o ./dist/contacthub.min.js",
+    "build": "npm run lint && flow && npm run test && webpack && npm run uglify",
+    "uglify": "uglifyjs ./dist/contacthub.js --support-ie8 -c -m -o ./dist/contacthub.min.js",
     "lint": "eslint lib && eslint test"
   },
   "repository": {
