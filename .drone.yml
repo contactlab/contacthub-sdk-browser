@@ -9,9 +9,7 @@ build:
       - apt-get update -qq
       - apt-get install -qy libelf1
       - npm i
-      - npm run lint
-      - npm run flow
-      - npm test
+      - npm run build
 
 cache:
   mount:
