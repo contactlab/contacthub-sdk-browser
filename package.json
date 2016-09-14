@@ -8,7 +8,8 @@
     "test-watch": "karma start",
     "build": "npm run lint && flow && npm run test && webpack && npm run uglify",
     "uglify": "uglifyjs ./dist/contacthub.js --support-ie8 -c -m -o ./dist/contacthub.min.js",
-    "lint": "eslint lib && eslint test"
+    "lint": "eslint src && eslint test",
+    "flow": "flow"
   },
   "repository": {
     "type": "git",
