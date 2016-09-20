@@ -231,12 +231,12 @@ describe('Customer API:', () => {
       it('reconciles the sessionId with the customerId', (done) => {
         const sid = getCookie().sid;
         setTimeout(() => {
-          requests[1].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+          requests[1].respond(200);
           setTimeout(() => {
             expect(requests.length).to.equal(3);
             const req = requests[2];
             expect(req.url).to.equal(
-              `${apiUrl}/workspaces/${config.workspaceId}/customers/new-cid/sessions`
+              `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid/sessions`
             );
             expect(JSON.parse(req.requestBody)).to.eql({
               value: sid
@@ -276,26 +276,24 @@ describe('Customer API:', () => {
     });
 
     it('does not update the customer if the same data is sent', (done) => {
-      _ch('customer', mario);
-      requests[1].respond(200, {}, JSON.stringify(
+      requests[0].respond(200, {}, JSON.stringify(
         { _embedded: { customers: [{ id: 'existing-cid' }] } }
       ));
       setTimeout(() => {
         _ch('customer', mario);
-        expect(requests.length).to.equal(2);
+        expect(requests.length).to.equal(1);
         done();
       }, 0);
     });
 
     it('does update the customer if updated data is sent', (done) => {
-      _ch('customer', mario);
-      requests[1].respond(200, {}, JSON.stringify(
+      requests[0].respond(200, {}, JSON.stringify(
         { _embedded: { customers: [{ id: 'existing-cid' }] } }
       ));
       setTimeout(() => {
         mario.base.lastName = 'Rossini';
         _ch('customer', mario);
-        expect(requests.length).to.equal(3);
+        expect(requests.length).to.equal(2);
         done();
       }, 0);
     });
