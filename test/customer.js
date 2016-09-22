@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-/* global describe, it, xit, beforeEach, afterEach */
+/* global describe, it, beforeEach, afterEach */
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -296,12 +296,6 @@ describe('Customer API:', () => {
         expect(requests.length).to.equal(2);
         done();
       }, 0);
-    });
-
-    xit('removes fields set to "null"', () => {
-    });
-
-    xit('allows to completely overwrite the existing data', () => {
     });
   });
 });
