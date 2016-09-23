@@ -38,6 +38,27 @@ module.exports = function(config) {
 
     singleRun: false,
 
-    concurrency: Infinity
+    concurrency: Infinity,
+
+    browserStack: {
+      username: process.env.BROWSERSTACK_USER,
+      accessKey: process.env.BROWSERSTACK_KEY
+    },
+
+    customLaunchers: {
+      bs_firefox_mac: {
+        base: 'BrowserStack',
+        browser: 'firefox',
+        browser_version: '21.0',
+        os: 'OS X',
+        os_version: 'Mountain Lion'
+      },
+      bs_iphone5: {
+        base: 'BrowserStack',
+        device: 'iPhone 5',
+        os: 'ios',
+        os_version: '6.0'
+      }
+    }
   });
 };
