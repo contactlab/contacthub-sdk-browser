@@ -49,15 +49,15 @@ module.exports = function(config) {
       bs_firefox_mac: {
         base: 'BrowserStack',
         browser: 'firefox',
-        browser_version: '21.0',
+        browser_version: '48.0',
         os: 'OS X',
         os_version: 'Mountain Lion'
       },
       bs_iphone5: {
         base: 'BrowserStack',
-        device: 'iPhone 5',
+        device: 'iPhone 6',
         os: 'ios',
-        os_version: '6.0'
+        os_version: '8.3'
       }
     }
   });
