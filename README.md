@@ -83,8 +83,10 @@ object.
 
 ## How to run tests
 
-`npm test` to run once
+`npm test` will run all tests once using PhantomJS
 
-or
+`npm test-watch` will automatically re-run tests using PhantomJS on every change
 
-`npm test-watch` to automatically re-run tests on every change
+`BROWSERSTACK_USER=<user> BROWSERSTACK_KEY=<key> npm test-bs` will run tests
+on real browsers using BrowserStack. The list of browsers is statically defined
+in `package.json` and `karma.conf.js`

@@ -6,6 +6,7 @@
   "scripts": {
     "test": "karma start --single-run",
     "test-watch": "karma start",
+    "test-bs": "karma start --single-run --browsers bs_iphone5,bs_firefox_mac",
     "build": "npm run lint && npm run flow && npm run test && npm run webpack && npm run uglify",
     "lint": "eslint src && eslint test",
     "flow": "flow",
@@ -47,6 +48,7 @@
     "eslint-plugin-flowtype": "^2.16.1",
     "flow-bin": "^0.32.0",
     "karma": "^1.1.2",
+    "karma-browserstack-launcher": "^1.1.1",
     "karma-chrome-launcher": "^1.0.1",
     "karma-mocha": "^1.1.1",
     "karma-phantomjs-launcher": "^1.0.1",
