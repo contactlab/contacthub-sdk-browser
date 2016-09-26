@@ -1,5 +1,5 @@
 module.exports = {
-  entry: './lib/contacthub.js',
+  entry: './src/contacthub.js',
   output: {
     path: './dist',
     filename: 'contacthub.js'
