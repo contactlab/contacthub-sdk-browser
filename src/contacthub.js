@@ -5,115 +5,16 @@ import sha256 from 'jssha/src/sha256';
 import cookies from 'js-cookie';
 import { Promise } from 'es6-promise';
 
-type ContactHubFunction = Config & Customer & Event;
-
-type Config = (method: 'config', options: ConfigOptions) => void;
-type Customer = (method: 'customer', options: CustomerData) => void;
-type Event = (method: 'event', options: EventOptions) => void;
-
-type Auth = {
-  token: string,
-  workspaceId: string,
-  nodeId: string
-};
-
-type ContacthubCookie = Auth & {
-  sid: string,
-  context: string,
-  hash?: string,
-  customerId?: string
-};
-
-type ConfigOptions = {
-  token: string,
-  workspaceId: string,
-  nodeId: string,
-  context?: string
-};
-
-type EventOptions = {
-  type: string,
-  properties?: Object
-};
-
-type CustomerId = {
-  customerId: string
-};
-
-type ExternalId = {
-  externalId?: string
-};
-
-type CustomerTags = {
-  auto?: Array<string>,
-  manual?: Array<string>
-};
-
-type CustomerData = {
-  base: CustomerBase,
-  extended?: Object,
-  extra?: string,
-  tags?: CustomerTags,
-  externalId?: string
-};
-
-type CustomerContacts = {
-  email?: string,
-  fax?: string,
-  mobilePhone?: string,
-  phone?: string,
-  otherContacts?: string,
-  mobileDevices?: string
-};
-
-type CustomerAddress = {
-  street?: string,
-  city?: string,
-  country?: string,
-  province?: string,
-  zip?: string,
-  geo?: CustomerGeo
-};
-
-type CustomerGeo = {
-  lat: string,
-  lon: string
-};
-
-type CustomerCredential = {
-  username?: string,
-  password?: string
-};
-
-type CustomerSocial = {
-  facebook?: string,
-  google?: string,
-  instagram?: string,
-  linkedin?: string,
-  qzone?: string,
-  twitter?: string
-};
-
-type CustomerBase = {
-  pictureUrl?: string,
-  title?: string,
-  prefix?: string,
-  firstName?: string,
-  lastName?: string,
-  middleName?: string,
-  gender?: string,
-  dob?: string,
-  locale?: string,
-  timezone?: string,
-  contacts?: CustomerContacts,
-  address?: CustomerAddress,
-  credential: CustomerCredential,
-  educations?: string,
-  likes?: Number,
-  socialProfile: CustomerSocial,
-  jobs?: string,
-  subscriptions?: string
-};
+import type {
+  ContactHubFunction,
+  ContactHubCookie,
+  Auth,
+  ConfigOptions,
+  EventOptions,
+  CustomerData,
+  ExternalId,
+  CustomerId
+} from '../lib/types';
 
 xr.configure({
   promise: fn => new Promise(fn)
@@ -123,7 +24,7 @@ const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
 const varName = 'ch';
 
-const getCookie = (): ContacthubCookie => {
+const getCookie = (): ContactHubCookie => {
   const cookie = cookies.getJSON(cookieName);
 
   if (!cookie) {

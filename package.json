@@ -2,7 +2,7 @@
   "name": "contacthub",
   "version": "0.2.0",
   "description": "Contacthub Tracking Script",
-  "main": "lib/contacthub.js",
+  "main": "src/contacthub.js",
   "scripts": {
     "test": "karma start --single-run",
     "test-watch": "karma start",
