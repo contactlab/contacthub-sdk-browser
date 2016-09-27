@@ -86,7 +86,7 @@ describe('Customer API:', () => {
           `Bearer ${config.token}`
         );
         done();
-      }, 0);
+      }, 2);
     });
 
     it('stores the customerId for future calls', (done) => {
@@ -95,8 +95,8 @@ describe('Customer API:', () => {
         setTimeout(() => {
           expect(getCookie().customerId).to.equal('new-cid');
           done();
-        }, 0);
-      }, 0);
+        }, 2);
+      }, 2);
     });
 
     it('stores a hash of the customer data for future calls', (done) => {
@@ -105,8 +105,8 @@ describe('Customer API:', () => {
         setTimeout(() => {
           expect(getCookie().hash).not.to.be.undefined;
           done();
-        }, 0);
-      }, 0);
+        }, 2);
+      }, 2);
     });
 
     it('reconciles the sessionId with the customerId', (done) => {
@@ -123,8 +123,8 @@ describe('Customer API:', () => {
             value: sid
           });
           done();
-        }, 0);
-      }, 0);
+        }, 2);
+      }, 2);
     });
   });
 
@@ -170,7 +170,7 @@ describe('Customer API:', () => {
             base: giulia.base
           });
           done();
-        }, 0);
+        }, 2);
       });
 
       it('stores the newly created customerId in the cookie', (done) => {
@@ -180,8 +180,8 @@ describe('Customer API:', () => {
           setTimeout(() => {
             expect(getCookie().customerId).to.equal('new-cid');
             done();
-          }, 0);
-        }, 0);
+          }, 2);
+        }, 2);
       });
 
       it('reconciles the sessionId with the customerId', (done) => {
@@ -198,8 +198,8 @@ describe('Customer API:', () => {
               value: sid
             });
             done();
-          }, 0);
-        }, 0);
+          }, 2);
+        }, 2);
       });
     });
 
@@ -225,7 +225,7 @@ describe('Customer API:', () => {
             base: giulia.base
           });
           done();
-        }, 0);
+        }, 2);
       });
 
       it('reconciles the sessionId with the customerId', (done) => {
@@ -242,8 +242,8 @@ describe('Customer API:', () => {
               value: sid
             });
             done();
-          }, 0);
-        }, 0);
+          }, 2);
+        }, 2);
       });
     });
 
@@ -283,7 +283,7 @@ describe('Customer API:', () => {
         _ch('customer', mario);
         expect(requests.length).to.equal(1);
         done();
-      }, 0);
+      }, 2);
     });
 
     it('does update the customer if updated data is sent', (done) => {
@@ -295,7 +295,7 @@ describe('Customer API:', () => {
         _ch('customer', mario);
         expect(requests.length).to.equal(2);
         done();
-      }, 0);
+      }, 2);
     });
   });
 });
