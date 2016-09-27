@@ -42,6 +42,14 @@ const _ch = window[varName];
 let requests = [];
 let xhr;
 
+// Mocked Ajax calls return immediately but need a short setTimeout to avoid
+// race conditions. 0 ms works fine on all browsers except IE 10 which requires
+// at least 2 ms.
+// TODO: find a more elegant way to mock Ajax calls
+const whenDone = (f) => {
+  setTimeout(() => f(), 2);
+};
+
 describe('Customer API:', () => {
   beforeEach(() => {
     cookies.remove(cookieName);
@@ -53,7 +61,7 @@ describe('Customer API:', () => {
   });
 
   afterEach((done) => {
-    setTimeout(() => done(), 10);
+    whenDone(() => done());
   });
 
   it('checks if required config is set', () => {
@@ -71,7 +79,7 @@ describe('Customer API:', () => {
     });
 
     it('creates a new customer', (done) => {
-      setTimeout(() => {
+      whenDone(() => {
         expect(requests.length).to.equal(1);
         const req = requests[0];
         expect(req.url).to.equal(
@@ -86,34 +94,34 @@ describe('Customer API:', () => {
           `Bearer ${config.token}`
         );
         done();
-      }, 0);
+      });
     });
 
     it('stores the customerId for future calls', (done) => {
-      setTimeout(() => {
+      whenDone(() => {
         requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
-        setTimeout(() => {
+        whenDone(() => {
           expect(getCookie().customerId).to.equal('new-cid');
           done();
-        }, 0);
-      }, 0);
+        });
+      });
     });
 
     it('stores a hash of the customer data for future calls', (done) => {
-      setTimeout(() => {
+      whenDone(() => {
         requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
-        setTimeout(() => {
+        whenDone(() => {
           expect(getCookie().hash).not.to.be.undefined;
           done();
-        }, 0);
-      }, 0);
+        });
+      });
     });
 
     it('reconciles the sessionId with the customerId', (done) => {
       const sid = getCookie().sid;
-      setTimeout(() => {
+      whenDone(() => {
         requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
-        setTimeout(() => {
+        whenDone(() => {
           expect(requests.length).to.equal(2);
           const req = requests[1];
           expect(req.url).to.equal(
@@ -123,8 +131,8 @@ describe('Customer API:', () => {
             value: sid
           });
           done();
-        }, 0);
-      }, 0);
+        });
+      });
     });
   });
 
@@ -157,7 +165,7 @@ describe('Customer API:', () => {
       });
 
       it('creates a new customer attaching the externalId', (done) => {
-        setTimeout(() => {
+        whenDone(() => {
           expect(requests.length).to.equal(2);
           const req = requests[1];
           expect(req.url).to.equal(
@@ -170,25 +178,25 @@ describe('Customer API:', () => {
             base: giulia.base
           });
           done();
-        }, 0);
+        });
       });
 
       it('stores the newly created customerId in the cookie', (done) => {
-        setTimeout(() => {
+        whenDone(() => {
           expect(requests.length).to.equal(2);
           requests[1].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
-          setTimeout(() => {
+          whenDone(() => {
             expect(getCookie().customerId).to.equal('new-cid');
             done();
-          }, 0);
-        }, 0);
+          });
+        });
       });
 
       it('reconciles the sessionId with the customerId', (done) => {
         const sid = getCookie().sid;
-        setTimeout(() => {
+        whenDone(() => {
           requests[1].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
-          setTimeout(() => {
+          whenDone(() => {
             expect(requests.length).to.equal(3);
             const req = requests[2];
             expect(req.url).to.equal(
@@ -198,8 +206,8 @@ describe('Customer API:', () => {
               value: sid
             });
             done();
-          }, 0);
-        }, 0);
+          });
+        });
       });
     });
 
@@ -211,7 +219,7 @@ describe('Customer API:', () => {
       });
 
       it('updates the existing customer using its customerId', (done) => {
-        setTimeout(() => {
+        whenDone(() => {
           expect(requests.length).to.equal(2);
           const req = requests[1];
           expect(req.method).to.equal('PATCH');
@@ -225,14 +233,14 @@ describe('Customer API:', () => {
             base: giulia.base
           });
           done();
-        }, 0);
+        });
       });
 
       it('reconciles the sessionId with the customerId', (done) => {
         const sid = getCookie().sid;
-        setTimeout(() => {
+        whenDone(() => {
           requests[1].respond(200);
-          setTimeout(() => {
+          whenDone(() => {
             expect(requests.length).to.equal(3);
             const req = requests[2];
             expect(req.url).to.equal(
@@ -242,8 +250,8 @@ describe('Customer API:', () => {
               value: sid
             });
             done();
-          }, 0);
-        }, 0);
+          });
+        });
       });
     });
 
@@ -279,23 +287,23 @@ describe('Customer API:', () => {
       requests[0].respond(200, {}, JSON.stringify(
         { _embedded: { customers: [{ id: 'existing-cid' }] } }
       ));
-      setTimeout(() => {
+      whenDone(() => {
         _ch('customer', mario);
         expect(requests.length).to.equal(1);
         done();
-      }, 0);
+      });
     });
 
     it('does update the customer if updated data is sent', (done) => {
       requests[0].respond(200, {}, JSON.stringify(
         { _embedded: { customers: [{ id: 'existing-cid' }] } }
       ));
-      setTimeout(() => {
+      whenDone(() => {
         mario.base.lastName = 'Rossini';
         _ch('customer', mario);
         expect(requests.length).to.equal(2);
         done();
-      }, 0);
+      });
     });
   });
 });

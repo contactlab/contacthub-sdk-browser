@@ -46,17 +46,30 @@ module.exports = function(config) {
     },
 
     customLaunchers: {
-      bs_firefox_mac: {
+      bs_mac_firefox: {
         base: 'BrowserStack',
-        browser: 'firefox',
-        browser_version: '48.0',
+        browser: 'Firefox',
+        browser_version: '48',
         os: 'OS X',
-        os_version: 'Mountain Lion'
+        os_version: 'El Capitan'
       },
-      bs_iphone5: {
+      bs_win7_ie10: {
+        base: 'BrowserStack',
+        browser: 'IE',
+        browser_version: '10',
+        os: 'Windows',
+        os_version: '7'
+      },
+      bs_android_galaxys5: {
+        base: 'BrowserStack',
+        device: 'Samsung Galaxy S5',
+        os: 'Android',
+        os_version: '4.4'
+      },
+      bs_ios_iphone6: {
         base: 'BrowserStack',
         device: 'iPhone 6',
-        os: 'ios',
+        os: 'iOS',
         os_version: '8.3'
       }
     }

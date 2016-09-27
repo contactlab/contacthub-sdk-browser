@@ -6,7 +6,7 @@
   "scripts": {
     "test": "karma start --single-run",
     "test-watch": "karma start",
-    "test-bs": "karma start --single-run --browsers bs_iphone5,bs_firefox_mac",
+    "test-bs": "karma start --single-run --browsers bs_mac_firefox,bs_win7_ie10,bs_android_galaxys5,bs_ios_iphone6",
     "build": "npm run lint && npm run flow && npm run test && npm run webpack && npm run uglify",
     "lint": "eslint src && eslint test",
     "flow": "flow",
