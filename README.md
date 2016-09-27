@@ -76,6 +76,48 @@ referrer, path). If you want, you can override those in your custom `properties`
 object.
 
 
+## Advanced: renaming the global ContactHub object
+
+This script will register a global variable in your `window` object called `ch`.
+This is similar for example to the `ga` global variable used by Google
+Analytics. If for any reason you already have a global variable called `ch` in
+your website, you can ask ContactHub to use a different name. Simply add this
+line _before_ the standard ContactHub snippet:
+
+```js
+window.ContactHubObject = 'chub';
+```
+
+You also have to replace all occurrences of `ch` in the snippet:
+
+```html
+<script>
+window.chub=function(){(chub.q=chub.q||[]).push(arguments)};
+chub('config', { ... });
+chub('customer', { ... });
+chub('event', { ... });
+</script>
+<script async src='https://www.contactlab.com/contacthub.js'></script>
+```
+
+
+### Advanced: renaming the ContactHub cookie
+
+In the same way, you can set a custom name for the ContactHub cookie using:
+
+```js
+window.ContactHubCookie = '__chub';
+```
+
+### Advanced: using a different API URL
+
+For testing or debugging purposes, you might want to use a different API server:
+
+```js
+window.ContactHubAPI = 'https://test-api/hub/v2';
+```
+
+
 ## How to build locally
 
 `npm run build` will generate `dist/contactlab.js` and `dist/contactlab.min.js`.

@@ -20,9 +20,9 @@ xr.configure({
   promise: fn => new Promise(fn)
 });
 
-const apiUrl = 'https://api.contactlab.it/hub/v1';
-const cookieName = '_ch';
-const varName = 'ch';
+const varName = window.ContactHubObject || 'ch';
+const cookieName = window.ContactHubCookie || '_ch';
+const apiUrl = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
 const getCookie = (): ContactHubCookie => {
   const cookie = cookies.getJSON(cookieName);
