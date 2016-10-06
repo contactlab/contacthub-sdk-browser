@@ -86,7 +86,6 @@ describe('Customer API:', () => {
           `${apiUrl}/workspaces/${config.workspaceId}/customers`
         );
         expect(JSON.parse(req.requestBody)).to.eql({
-          enabled: true,
           nodeId: config.nodeId,
           base: mario.base
         });
@@ -172,7 +171,6 @@ describe('Customer API:', () => {
             `${apiUrl}/workspaces/${config.workspaceId}/customers`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
-            enabled: true,
             nodeId: config.nodeId,
             externalId: giulia.externalId,
             base: giulia.base
@@ -227,8 +225,6 @@ describe('Customer API:', () => {
             `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
-            enabled: true,
-            nodeId: config.nodeId,
             externalId: giulia.externalId,
             base: giulia.base
           });
@@ -277,8 +273,6 @@ describe('Customer API:', () => {
         `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
       );
       expect(JSON.parse(req.requestBody)).to.eql({
-        enabled: true,
-        nodeId: config.nodeId,
         base: mario.base
       });
     });
