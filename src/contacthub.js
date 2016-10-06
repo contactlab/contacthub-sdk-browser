@@ -140,7 +140,6 @@ const createCustomer = ({
     Authorization: `Bearer ${token}`
   },
   data: {
-    enabled: true,
     nodeId,
     externalId,
     base,
@@ -153,7 +152,7 @@ const createCustomer = ({
 });
 
 const updateCustomer = ({
-  customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
+  customerId, workspaceId, token, externalId, base, extended, extra, tags
 }: Auth & CustomerData & CustomerId): Promise<string> => xr({
   method: 'PATCH',
   url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}`,
@@ -163,8 +162,6 @@ const updateCustomer = ({
     Authorization: `Bearer ${token}`
   },
   data: {
-    enabled: true,
-    nodeId,
     externalId,
     base,
     extended,
