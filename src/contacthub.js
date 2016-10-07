@@ -67,26 +67,30 @@ const config = (options: ConfigOptions): void => {
   cookies.set(cookieName, _ch);
 };
 
-const inferProperties = (customProperties?: Object): Object => {
-  const inferredProperties = {
-    title: document.title,
-    url: window.location.href,
-    path: window.location.pathname,
-    referrer: document.referrer
-  };
+const inferProperties = (type: string, customProperties?: Object): Object => {
+  if (type === 'viewedPage') {
+    const inferredProperties = {
+      title: document.title,
+      url: window.location.href,
+      path: window.location.pathname,
+      referrer: document.referrer
+    };
 
-  return Object.assign(inferredProperties, customProperties);
+    return Object.assign(inferredProperties, customProperties);
+  } else {
+    return Object.assign({}, customProperties);
+  }
 };
 
 const event = (options: EventOptions): void => {
   const { workspaceId, nodeId, token, context, sid, customerId } = getCookie();
   const { type, properties: customProperties } = options;
 
-  const properties = inferProperties(customProperties);
-
   if (!type) {
     throw new Error('Missing required event type');
   }
+
+  const properties = inferProperties(type, customProperties);
 
   const bringBackProperties = customerId ? undefined : {
     type: 'SESSION_ID',
