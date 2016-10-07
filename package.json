@@ -1,6 +1,6 @@
 {
   "name": "contacthub",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Contacthub Tracking Script",
   "main": "src/contacthub.js",
   "scripts": {

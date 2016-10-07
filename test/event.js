@@ -76,7 +76,7 @@ describe('Event API', () => {
     expect(JSON.parse(req.requestBody).customerId).to.eql('my-cid');
   });
 
-  it('infers common event properties', () => {
+  it('infers common "viewedPage" event properties', () => {
     document.title = 'Hello world';
     setConfig();
     _ch('event', { type: 'viewedPage' });
@@ -99,5 +99,18 @@ describe('Event API', () => {
 
     expect(props.title).to.eql('Custom title');
     expect(props.path).to.eql('/context.html');
+  });
+
+  it('does not infer properties on other event types', () => {
+    document.title = 'Hello world';
+    setConfig();
+    _ch('event', { type: 'something' });
+    const req = requests[0];
+    const props = JSON.parse(req.requestBody).properties;
+
+    expect(props.title).to.be.undefined;
+    expect(props.url).to.be.undefined;
+    expect(props.path).to.be.undefined;
+    expect(props.referrer).to.be.undefined;
   });
 });
