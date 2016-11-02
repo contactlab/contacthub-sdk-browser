@@ -82,6 +82,7 @@ describe('Customer API:', () => {
       whenDone(() => {
         expect(requests.length).to.equal(1);
         const req = requests[0];
+        expect(req.method).to.equal('POST');
         expect(req.url).to.equal(
           `${apiUrl}/workspaces/${config.workspaceId}/customers`
         );
@@ -93,6 +94,30 @@ describe('Customer API:', () => {
           `Bearer ${config.token}`
         );
         done();
+      });
+    });
+
+    it('handles 409 conflicts and updates the existing customer', (done) => {
+      whenDone(() => {
+        requests[0].respond(409, {}, JSON.stringify({
+          _links: {
+            customer: {
+              href: 'http://api.contactlab.it/link/to/existing-cid'
+            }
+          }
+        }));
+        whenDone(() => {
+          expect(requests.length).to.equal(2);
+          const req = requests[1];
+          expect(req.method).to.equal('PATCH');
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            base: mario.base
+          });
+          done();
+        });
       });
     });
 
@@ -176,6 +201,31 @@ describe('Customer API:', () => {
             base: giulia.base
           });
           done();
+        });
+      });
+
+      it('handles 409 conflicts and updates the existing customer', (done) => {
+        whenDone(() => {
+          requests[1].respond(409, {}, JSON.stringify({
+            _links: {
+              customer: {
+                href: 'http://api.contactlab.it/link/to/existing-cid'
+              }
+            }
+          }));
+          whenDone(() => {
+            expect(requests.length).to.equal(3);
+            const req = requests[2];
+            expect(req.method).to.equal('PATCH');
+            expect(req.url).to.equal(
+              `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
+            );
+            expect(JSON.parse(req.requestBody)).to.eql({
+              externalId: giulia.externalId,
+              base: giulia.base
+            });
+            done();
+          });
         });
       });
 

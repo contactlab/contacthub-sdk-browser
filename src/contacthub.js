@@ -73,7 +73,7 @@ const inferProperties = (type: string, customProperties?: Object): Object => {
       title: document.title,
       url: window.location.href,
       path: window.location.pathname,
-      referrer: document.referrer
+      referer: document.referrer
     };
 
     return Object.assign(inferredProperties, customProperties);
@@ -129,7 +129,7 @@ const findByExternalId = ({
       Authorization: `Bearer ${token}`
     }
   }).then((response) => {
-    return Promise.resolve(response.data._embedded.customers[0].id);
+    return response.data._embedded.customers[0].id;
   });
 };
 
@@ -152,7 +152,7 @@ const createCustomer = ({
     tags
   }
 }).then((response) => {
-  return Promise.resolve(response.data.id);
+  return response.data.id;
 });
 
 const updateCustomer = ({
@@ -173,7 +173,7 @@ const updateCustomer = ({
     tags
   }
 }).then(() => {
-  return Promise.resolve(customerId);
+  return customerId;
 });
 
 const reconcileCustomer = ({
@@ -190,7 +190,7 @@ const reconcileCustomer = ({
     value: getCookie().sid
   }
 }).then(() => {
-  return Promise.resolve(customerId);
+  return customerId;
 });
 
 const computeHash = (data: CustomerData): string => {
@@ -212,13 +212,26 @@ const customer = (options: CustomerData): void => {
     workspaceId, nodeId, token, externalId, base, extended, extra, tags
   });
 
-  const reconcile = customerId => reconcileCustomer({
+  const merge = (err: Object): Promise<string> => {
+    if (err.status === 409) {
+      const res = JSON.parse(err.response);
+      const customerHref = res._links.customer.href;
+      const customerId = customerHref.split('/').pop();
+      return updateCustomer({
+        customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
+      });
+    } else {
+      return Promise.reject(err);
+    }
+  };
+
+  const reconcile = (customerId: string): Promise<string> => reconcileCustomer({
     customerId, workspaceId, token, nodeId
   });
 
-  const store = (customerId: string): Promise<string> => {
+  const store = (customerId: string): string => {
     cookies.set(cookieName, Object.assign(getCookie(), { customerId, hash: newHash }));
-    return Promise.resolve(customerId);
+    return customerId;
   };
 
   if (hash === newHash) return;
@@ -232,12 +245,16 @@ const customer = (options: CustomerData): void => {
     findByExternalId({ workspaceId, nodeId, token, externalId })
       .then(update)
       .catch(create)
+      .catch(merge)
       .then(store)
       .then(reconcile);
 
   } else {
 
-    create().then(store).then(reconcile);
+    create()
+      .catch(merge)
+      .then(store)
+      .then(reconcile);
 
   }
 };
