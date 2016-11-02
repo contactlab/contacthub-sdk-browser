@@ -212,7 +212,20 @@ const customer = (options: CustomerData): void => {
     workspaceId, nodeId, token, externalId, base, extended, extra, tags
   });
 
-  const reconcile = customerId => reconcileCustomer({
+  const merge = (err: Object): Promise<string> => {
+    if (err.status === 409) {
+      const res = JSON.parse(err.response);
+      const customerHref = res._links.customer.href;
+      const customerId = customerHref.split('/').pop();
+      return updateCustomer({
+        customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
+      });
+    } else {
+      return Promise.reject(err);
+    }
+  };
+
+  const reconcile = (customerId: string): Promise<string> => reconcileCustomer({
     customerId, workspaceId, token, nodeId
   });
 
@@ -232,12 +245,16 @@ const customer = (options: CustomerData): void => {
     findByExternalId({ workspaceId, nodeId, token, externalId })
       .then(update)
       .catch(create)
+      .catch(merge)
       .then(store)
       .then(reconcile);
 
   } else {
 
-    create().then(store).then(reconcile);
+    create()
+      .catch(merge)
+      .then(store)
+      .then(reconcile);
 
   }
 };
