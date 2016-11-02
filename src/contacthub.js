@@ -129,7 +129,7 @@ const findByExternalId = ({
       Authorization: `Bearer ${token}`
     }
   }).then((response) => {
-    return Promise.resolve(response.data._embedded.customers[0].id);
+    return response.data._embedded.customers[0].id;
   });
 };
 
@@ -152,7 +152,7 @@ const createCustomer = ({
     tags
   }
 }).then((response) => {
-  return Promise.resolve(response.data.id);
+  return response.data.id;
 });
 
 const updateCustomer = ({
@@ -173,7 +173,7 @@ const updateCustomer = ({
     tags
   }
 }).then(() => {
-  return Promise.resolve(customerId);
+  return customerId;
 });
 
 const reconcileCustomer = ({
@@ -190,7 +190,7 @@ const reconcileCustomer = ({
     value: getCookie().sid
   }
 }).then(() => {
-  return Promise.resolve(customerId);
+  return customerId;
 });
 
 const computeHash = (data: CustomerData): string => {
@@ -216,9 +216,9 @@ const customer = (options: CustomerData): void => {
     customerId, workspaceId, token, nodeId
   });
 
-  const store = (customerId: string): Promise<string> => {
+  const store = (customerId: string): string => {
     cookies.set(cookieName, Object.assign(getCookie(), { customerId, hash: newHash }));
-    return Promise.resolve(customerId);
+    return customerId;
   };
 
   if (hash === newHash) return;
