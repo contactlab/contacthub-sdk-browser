@@ -73,7 +73,7 @@ const inferProperties = (type: string, customProperties?: Object): Object => {
       title: document.title,
       url: window.location.href,
       path: window.location.pathname,
-      referrer: document.referrer
+      referer: document.referrer
     };
 
     return Object.assign(inferredProperties, customProperties);

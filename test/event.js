@@ -86,7 +86,7 @@ describe('Event API', () => {
     expect(props.title).to.eql('Hello world');
     expect(props.url).to.match(/^http:.*context.html$/);
     expect(props.path).to.eql('/context.html');
-    expect(props.referrer).to.match(/^http:.*?id=.*$/);
+    expect(props.referer).to.match(/^http:.*?id=.*$/);
   });
 
   it('allows to override inferred properties', () => {
@@ -111,6 +111,6 @@ describe('Event API', () => {
     expect(props.title).to.be.undefined;
     expect(props.url).to.be.undefined;
     expect(props.path).to.be.undefined;
-    expect(props.referrer).to.be.undefined;
+    expect(props.referer).to.be.undefined;
   });
 });
