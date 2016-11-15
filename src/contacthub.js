@@ -12,7 +12,6 @@ import type {
   ConfigOptions,
   EventOptions,
   CustomerData,
-  ExternalId,
   CustomerId
 } from '../lib/types';
 
@@ -113,23 +112,6 @@ const event = (options: EventOptions): void => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`
     }
-  });
-};
-
-const findByExternalId = ({
-  workspaceId, nodeId, token, externalId
-}: Auth & ExternalId): Promise<string> => {
-  return xr({
-    method: 'GET',
-    url: `${apiUrl}/workspaces/${workspaceId}/customers`,
-    params: { nodeId, externalId },
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    }
-  }).then((response) => {
-    return response.data._embedded.customers[0].id;
   });
 };
 
@@ -239,15 +221,6 @@ const customer = (options: CustomerData): void => {
   if (customerId) {
 
     update(customerId).then(store);
-
-  } else if (externalId) {
-
-    findByExternalId({ workspaceId, nodeId, token, externalId })
-      .then(update)
-      .catch(create)
-      .catch(merge)
-      .then(store)
-      .then(reconcile);
 
   } else {
 
