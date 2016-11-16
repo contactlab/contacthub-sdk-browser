@@ -38,29 +38,63 @@ ch('config', {
 Include this call only if you have details about the current user (e.g. the user
 is logged in).
 
-You can also call this function asynchronously when a user logs in or add new
-personal information.
-
 ```js
 ch('customer', {
   externalId: '456', // optional
-  customer: {
-    base: {
-      firstName: 'Mario',
-      lastName: 'Rossi',
-      contacts: {
-        email: 'mario.rossi@example.com'
-      }
-    },
-    extended: {}, // optional
-    extra: '', // optional
-    tags: { //optional
-      auto: [],
-      manual: []
+  base: {
+    firstName: 'Mario',
+    lastName: 'Rossi',
+    contacts: {
+      email: 'mario.rossi@example.com'
+    }
+  },
+  extended: {}, // optional
+  extra: '', // optional
+  tags: { //optional
+    auto: [],
+    manual: []
+  }
+});
+```
+
+If you have defined a matching policy in the ContactHub web interface, and the
+data you're providing matches the data of an existing customer, the existing
+customer will be updated instead.
+
+#### Resending identical data
+
+It's safe to call this function multiple times with the same data (e.g. in the
+HEAD section of all of your pages) as an encrypted hash of this data is stored
+in a cookie and won't be resent to the API if no value has changed.
+
+#### Single Page Apps
+
+You can also call this function the moment a user succesfully logs in, if the
+login action doesn't involve a page refresh.
+
+#### Updating the current user
+
+If a user adds some personal information to his/her profile, you don't need to
+send his full profile again, as the new data you send will be automatically
+merged with the data that is already available on the ContactHub database.
+
+```js
+// Add the mobile phone to the existing customer data
+ch('customer', {
+  base: {
+    contacts: {
+      mobilePhone: '+393331234567'
     }
   }
 });
 ```
+
+#### Logging out
+
+If a user logs out, you might want to stop linking events to his/her session.
+You can call `ch('customer')` without the second parameter and a new ContactHub
+session id will be generated. All the events from this point will be associated
+to the new session id and will not be linked to the previous user.
 
 ### The event API
 
@@ -76,7 +110,9 @@ referrer, path). If you want, you can override those in your custom `properties`
 object.
 
 
-## Advanced: renaming the global ContactHub object
+## Advanced usage
+
+#### Renaming the global ContactHub object
 
 This script will register a global variable in your `window` object called `ch`.
 This is similar for example to the `ga` global variable used by Google
@@ -101,7 +137,7 @@ chub('event', { ... });
 ```
 
 
-### Advanced: renaming the ContactHub cookie
+#### Renaming the ContactHub cookie
 
 In the same way, you can set a custom name for the ContactHub cookie using:
 
@@ -109,7 +145,7 @@ In the same way, you can set a custom name for the ContactHub cookie using:
 window.ContactHubCookie = '__chub';
 ```
 
-### Advanced: using a different API URL
+#### Using a different API URL
 
 For testing or debugging purposes, you might want to use a different API server:
 
@@ -117,13 +153,14 @@ For testing or debugging purposes, you might want to use a different API server:
 window.ContactHubAPI = 'https://test-api/hub/v2';
 ```
 
+## Contributing to this library
 
-## How to build locally
+### How to build locally
 
 `npm run build` will generate `dist/contactlab.js` and `dist/contactlab.min.js`.
 
 
-## How to run tests
+### How to run tests
 
 `npm test` will run all tests once using PhantomJS
 
@@ -132,3 +169,12 @@ window.ContactHubAPI = 'https://test-api/hub/v2';
 `BROWSERSTACK_USER=<user> BROWSERSTACK_KEY=<key> npm test-bs` will run tests
 on real browsers using BrowserStack. The list of browsers is statically defined
 in `package.json` and `karma.conf.js`
+
+### How to open the example page in your browser
+
+`npm run example` will start a local HTTP server and open the example page in
+your local browser. Replace the placeholders in the query string with your
+authorization token and ids. Remember also to add `http://127.0.0.1.xip.io` to
+the allowed URLs for your Source in the ContactHub web interface (under
+Settings, Sources, {source name}, Settings).
+
