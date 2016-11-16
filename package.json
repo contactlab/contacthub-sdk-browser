@@ -10,6 +10,7 @@
     "build": "npm run lint && npm run flow && npm run test && npm run webpack && npm run uglify",
     "lint": "eslint src && eslint test",
     "flow": "flow",
+    "example": "opn 'http://127.0.0.1.xip.io:8080/example/?workspaceId=WORKSPACE_ID&nodeId=NODE_ID&token=TOKEN' && http-server",
     "webpack": "webpack",
     "uglify": "uglifyjs ./dist/contacthub.js --support-ie8 -c -m -o ./dist/contacthub.min.js"
   },
@@ -47,6 +48,7 @@
     "eslint-config-buildo": "^0.1.0",
     "eslint-plugin-flowtype": "^2.16.1",
     "flow-bin": "^0.32.0",
+    "http-server": "^0.9.0",
     "karma": "^1.1.2",
     "karma-browserstack-launcher": "^1.1.1",
     "karma-chrome-launcher": "^1.0.1",
@@ -55,6 +57,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
     "mocha": "^3.0.0",
+    "opn-cli": "^3.1.0",
     "sinon": "^2.0.0-pre.2",
     "uglify-js": "^2.7.0",
     "webpack": "^1.13.1",

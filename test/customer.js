@@ -196,4 +196,25 @@ describe('Customer API:', () => {
       });
     });
   });
+
+  describe('when no object is provided', () => {
+    beforeEach(() => {
+      setConfig();
+
+      cookies.set(cookieName, Object.assign(getCookie(), {
+        customerId: 'old-customer-id',
+        sid: 'old-session-id'
+      }));
+
+      _ch('customer');
+    });
+
+    it('removes user data from cookie', () => {
+      expect(getCookie().customerId).to.be.undefined;
+    });
+
+    it('generates a new sessionId', () => {
+      expect(getCookie().sid).to.match(/^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+    });
+  });
 });
