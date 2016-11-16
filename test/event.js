@@ -76,6 +76,19 @@ describe('Event API', () => {
     expect(JSON.parse(req.requestBody).customerId).to.eql('my-cid');
   });
 
+  it('omits bringBackProperties when customerId is available', () => {
+    setConfig();
+    cookies.set(cookieName, Object.assign(getCookie(), {
+      customerId: 'my-cid'
+    }));
+    _ch('event', { type: 'viewedPage' });
+    const req = requests[0];
+    expect(req.url).to.equal(
+      `${apiUrl}/workspaces/${config.workspaceId}/events`
+    );
+    expect(JSON.parse(req.requestBody).bringBackProperties).to.be.undefined;
+  });
+
   it('infers common "viewedPage" event properties', () => {
     document.title = 'Hello world';
     setConfig();
