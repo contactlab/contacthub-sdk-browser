@@ -23,6 +23,10 @@ const varName = window.ContactHubObject || 'ch';
 const cookieName = window.ContactHubCookie || '_ch';
 const apiUrl = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
+const newSessionId = () => {
+  return uuid.v4();
+};
+
 const getCookie = (): ContactHubCookie => {
   const cookie = cookies.getJSON(cookieName);
 
@@ -47,7 +51,7 @@ const config = (options: ConfigOptions): void => {
   const _ch = cookies.getJSON(cookieName) || {};
 
   // generate sid if not already present
-  _ch.sid = _ch.sid || uuid.v4();
+  _ch.sid = _ch.sid || newSessionId();
 
   // set all valid option params, keeping current value (if any)
   for (let i = 0; i < optionKeys.length; i = i + 1) {
@@ -182,6 +186,17 @@ const computeHash = (data: CustomerData): string => {
 };
 
 const customer = (options: CustomerData): void => {
+  if (!options) {
+    // Remove user data from cookie (e.g. when a customer logs out)
+    cookies.set(cookieName, Object.assign(getCookie(), {
+      sid: newSessionId(),
+      customerId: undefined,
+      hash: undefined
+    }));
+
+    return;
+  }
+
   const { workspaceId, nodeId, token, customerId, hash } = getCookie();
   const { externalId, base, extended, extra, tags } = options;
   const newHash = computeHash({ base, extended, extra, tags });
