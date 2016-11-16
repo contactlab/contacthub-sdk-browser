@@ -3,24 +3,20 @@
 <head>
   <title>ContactHub Example Page</title>
   <script>
+    // Read ContactHub auth values from query string
+    var qs = document.location.search;
+    workspaceId = qs.match(/workspaceId=([a-z0-9-]*)/)[1];
+    nodeId = qs.match(/nodeId=([a-z0-9-]*)/)[1];
+    token = qs.match(/token=([a-z0-9-]*)/)[1];
+  </script>
+
+  <script>
     window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
 
-    var userData = {
-      externalId: 'mario.rossi',
-      base: {
-        firstName: 'mario',
-        lastName: 'rossi',
-        dob: '1980-03-17',
-        contacts: {
-          email: 'mario.rossi@example.com'
-        }
-      }
-    };
-
     ch('config', {
-      workspaceId: '{WORKSPACE_ID}',
-      nodeId: '{NODE_ID}',
-      token: '{TOKEN}'
+      workspaceId: workspaceId,
+      nodeId: nodeId,
+      token: token
     });
     ch('event', { type: 'viewedPage' });
   </script>
@@ -31,22 +27,55 @@
   <h1>Your awesome website</h1>
 
   <script>
-    // Patch customer data
-    function update () {
+    function randomEmail() {
+      return Math.random().toString(36).substr(2, 8) + '@example.com';
+    }
+
+    var initialEmail = randomEmail();
+
+    function login() {
       ch('customer', {
         base: {
-          firstName: 'mario luigi'
+          firstName: 'Mario',
+          lastName: 'Rossi',
+          contacts: {
+            email: initialEmail
+          }
         }
       });
     }
 
-    function login () {
-      ch('customer', userData);
+    function update() {
+      ch('customer', {
+        base: {
+          contacts: {
+            email: randomEmail()
+          }
+        }
+      });
+    }
+
+    function logout() {
+      ch('customer');
+    }
+
+    function sendEvent() {
+      ch('event', { type: 'addedProduct' });
     }
   </script>
 
+  <p>
   <button onclick="javascript:login();">LOGIN</button>
+  <button onclick="javascript:logout();">LOGOUT</button>
+  </p>
+
+  <p>
   <button onclick="javascript:update();">UPDATE</button>
+  </p>
+
+  <p>
+  <button onclick="javascript:sendEvent();">EVENT</button>
+  </p>
 
 </body>
 </html>
