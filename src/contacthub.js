@@ -26,7 +26,7 @@ const apiUrl: string = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1
 const newSessionId = (): string => uuid.v4();
 
 const getCookie = (): ContactHubCookie => {
-  const cookie:? ContactHubCookie = cookies.getJSON(cookieName);
+  const cookie: ?ContactHubCookie = cookies.getJSON(cookieName);
 
   if (!cookie) {
     throw new Error('Missing required ContactHub configuration.');
