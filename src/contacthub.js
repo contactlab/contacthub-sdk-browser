@@ -19,16 +19,14 @@ xr.configure({
   promise: fn => new Promise(fn)
 });
 
-const varName = window.ContactHubObject || 'ch';
-const cookieName = window.ContactHubCookie || '_ch';
-const apiUrl = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
+const varName: string = window.ContactHubObject || 'ch';
+const cookieName: string = window.ContactHubCookie || '_ch';
+const apiUrl: string = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
-const newSessionId = () => {
-  return uuid.v4();
-};
+const newSessionId = (): string => uuid.v4();
 
 const getCookie = (): ContactHubCookie => {
-  const cookie = cookies.getJSON(cookieName);
+  const cookie:? ContactHubCookie = cookies.getJSON(cookieName);
 
   if (!cookie) {
     throw new Error('Missing required ContactHub configuration.');
