@@ -205,7 +205,8 @@ describe('Customer API:', () => {
         { _embedded: { customers: [{ id: 'existing-cid' }] } }
       ));
       whenDone(() => {
-        _ch('customer', { externalId: 'supermario' });
+        mario.externalId = 'supermario';
+        _ch('customer', mario);
         expect(requests.length).to.equal(2);
         done();
       });
