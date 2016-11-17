@@ -14,6 +14,7 @@ const config = {
 };
 
 const mario = {
+  externalId: 'mario.rossi',
   base: {
     firstName: 'mario',
     lastName: 'rossi',
@@ -79,6 +80,7 @@ describe('Customer API:', () => {
         );
         expect(JSON.parse(req.requestBody)).to.eql({
           nodeId: config.nodeId,
+          externalId: mario.externalId,
           base: mario.base
         });
         expect(req.requestHeaders.Authorization).to.equal(
@@ -105,6 +107,7 @@ describe('Customer API:', () => {
             `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
+            externalId: mario.externalId,
             base: mario.base
           });
           done();
@@ -169,6 +172,7 @@ describe('Customer API:', () => {
         `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
       );
       expect(JSON.parse(req.requestBody)).to.eql({
+        externalId: mario.externalId,
         base: mario.base
       });
     });
@@ -191,6 +195,17 @@ describe('Customer API:', () => {
       whenDone(() => {
         mario.base.lastName = 'Rossini';
         _ch('customer', mario);
+        expect(requests.length).to.equal(2);
+        done();
+      });
+    });
+
+    it('does update the customer if only the externalId has changed', (done) => {
+      requests[0].respond(200, {}, JSON.stringify(
+        { _embedded: { customers: [{ id: 'existing-cid' }] } }
+      ));
+      whenDone(() => {
+        _ch('customer', { externalId: 'supermario' });
         expect(requests.length).to.equal(2);
         done();
       });

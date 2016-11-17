@@ -197,7 +197,7 @@ const customer = (options: CustomerData): void => {
 
   const { workspaceId, nodeId, token, customerId, hash } = getCookie();
   const { externalId, base, extended, extra, tags } = options;
-  const newHash = computeHash({ base, extended, extra, tags });
+  const newHash = computeHash({ base, extended, extra, tags, externalId });
 
   const update = (customerId: string): Promise<string> => updateCustomer({
     customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
