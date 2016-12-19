@@ -210,8 +210,7 @@ const customer = (options: CustomerData): void => {
   const merge = (err: Object): Promise<string> => {
     if (err.status === 409) {
       const res = JSON.parse(err.response);
-      const customerHref = res._links.customer.href;
-      const customerId = customerHref.split('/').pop();
+      const customerId = res.data.customer.id;
       return updateCustomer({
         customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
       });
