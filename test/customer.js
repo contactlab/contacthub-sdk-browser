@@ -93,9 +93,9 @@ describe('Customer API:', () => {
     it('handles 409 conflicts and updates the existing customer', (done) => {
       whenDone(() => {
         requests[0].respond(409, {}, JSON.stringify({
-          _links: {
+          data: {
             customer: {
-              href: 'http://api.contactlab.it/link/to/existing-cid'
+              id: 'existing-cid'
             }
           }
         }));
@@ -178,9 +178,7 @@ describe('Customer API:', () => {
     });
 
     it('does not update the customer if the same data is sent', (done) => {
-      requests[0].respond(200, {}, JSON.stringify(
-        { _embedded: { customers: [{ id: 'existing-cid' }] } }
-      ));
+      requests[0].respond(200);
       whenDone(() => {
         _ch('customer', mario);
         expect(requests.length).to.equal(1);
@@ -189,9 +187,7 @@ describe('Customer API:', () => {
     });
 
     it('does update the customer if updated data is sent', (done) => {
-      requests[0].respond(200, {}, JSON.stringify(
-        { _embedded: { customers: [{ id: 'existing-cid' }] } }
-      ));
+      requests[0].respond(200);
       whenDone(() => {
         mario.base.lastName = 'Rossini';
         _ch('customer', mario);
@@ -201,9 +197,7 @@ describe('Customer API:', () => {
     });
 
     it('does update the customer if only the externalId has changed', (done) => {
-      requests[0].respond(200, {}, JSON.stringify(
-        { _embedded: { customers: [{ id: 'existing-cid' }] } }
-      ));
+      requests[0].respond(200);
       whenDone(() => {
         mario.externalId = 'supermario';
         _ch('customer', mario);
