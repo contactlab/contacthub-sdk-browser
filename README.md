@@ -43,7 +43,7 @@ Use CDNs can offer a performance benefit by hosting Contacthub Analytics JS on s
 
 #### Specific version uncompressed 
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.min.js"></script> 
+<script async src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.js"></script> 
 ```
 
 We recommend that you load libraries from the CDN via HTTPS, even if your own website only uses HTTP
