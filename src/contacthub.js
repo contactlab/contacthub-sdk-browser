@@ -228,7 +228,7 @@ const customer = (options: CustomerData): void => {
     return customerId;
   };
 
-  if (hash === newHash) return;
+  if (hash === newHash) {return;}
 
   if (customerId) {
 
