@@ -1,4 +1,4 @@
-[![Build Status](https://drone.our.buildo.io/api/badges/buildo/contacthub/status.svg)](https://drone.our.buildo.io/buildo/contacthub)
+[![Build Status](https://travis-ci.org/contactlab/contacthub-sdk-browser.svg?branch=master)](https://travis-ci.org/contactlab/contacthub-sdk-browser)
 ![Version 0.4.1 beta](https://img.shields.io/badge/version-0.4.1%20beta-0072bc.svg)
 
 # Contacthub.js
