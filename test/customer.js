@@ -25,11 +25,11 @@ const mario = {
   }
 };
 
+const _ch = window[varName];
+
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
 const setConfig = () => { _ch('config', config); };
-
-const _ch = window[varName];
 
 let requests = [];
 let xhr;
@@ -224,7 +224,9 @@ describe('Customer API:', () => {
     });
 
     it('generates a new sessionId', () => {
-      expect(getCookie().sid).to.match(/^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+      expect(getCookie().sid).to.match(
+        /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
+      );
     });
   });
 });

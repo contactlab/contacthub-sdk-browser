@@ -29,7 +29,9 @@ describe('Config API', () => {
   });
 
   it('generates a UUIDv4 sessionId', () => {
-    expect(getCookie().sid).to.match(/^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+    expect(getCookie().sid).to.match(
+      /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
+    );
   });
 
   it('does not regenerate sessionId if already present', () => {

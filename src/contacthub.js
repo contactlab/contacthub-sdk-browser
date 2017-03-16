@@ -43,7 +43,7 @@ const getCookie = (): ContactHubCookie => {
   return { workspaceId, nodeId, token, context, sid, customerId, hash };
 };
 
-const optionKeys = ['token', 'workspaceId', 'nodeId', 'context'];
+const allowedOptions = ['token', 'workspaceId', 'nodeId', 'context'];
 const config = (options: ConfigOptions): void => {
   // get current _ch, if any
   const _ch = cookies.getJSON(cookieName) || {};
@@ -52,12 +52,13 @@ const config = (options: ConfigOptions): void => {
   _ch.sid = _ch.sid || newSessionId();
 
   // set all valid option params, keeping current value (if any)
-  for (let i = 0; i < optionKeys.length; i = i + 1) {
-    const k = optionKeys[i];
-    if (options.hasOwnProperty(k)) {
-      _ch[k] = options[k];
-    }
-  }
+  const filteredOptions = Object.keys(options)
+  .filter(key => allowedOptions.indexOf(key) !== -1)
+  .reduce((obj, key) => {
+    obj[key] = options[key];
+    return obj;
+  }, {});
+  Object.assign(_ch, filteredOptions);
 
   // default context to 'WEB', respecting cookie and options
   if (!_ch.hasOwnProperty('context')) {
@@ -228,7 +229,7 @@ const customer = (options: CustomerData): void => {
     return customerId;
   };
 
-  if (hash === newHash) {return;}
+  if (hash === newHash) { return; }
 
   if (customerId) {
 
@@ -259,9 +260,8 @@ const ContactHub:ContactHubFunction = (method, options) => {
 
 // Process queued commands
 if (window[varName] && window[varName].q) {
-  for (let i = 0, q = window[varName].q; i < q.length; i = i + 1) {
-    ContactHub(q[i][0], q[i][1]);
-  }
+  const q = window[varName].q;
+  q.map(command => ContactHub(command[0], command[1]));
 }
 
 // Replace queue with CH object
