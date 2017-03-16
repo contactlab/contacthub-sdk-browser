@@ -8,7 +8,7 @@
     "test-watch": "karma start",
     "test-bs": "karma start --single-run --browsers bs_mac_firefox,bs_win7_ie10,bs_android_galaxys5,bs_ios_iphone6",
     "build": "npm run lint && npm run flow && npm run test && npm run webpack && npm run uglify",
-    "lint": "eslint src && eslint test",
+    "lint": "eslint src && eslint test && eslint lib",
     "flow": "flow",
     "example": "opn 'http://127.0.0.1.xip.io:8080/example/?workspaceId=WORKSPACE_ID&nodeId=NODE_ID&token=TOKEN' && http-server",
     "package": "npm run build && zip -j dist/contacthub-$(git tag | tail -n 1).zip dist/*js",
