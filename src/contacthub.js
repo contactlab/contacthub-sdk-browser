@@ -23,6 +23,11 @@ const varName: string = window.ContactHubObject || 'ch';
 const cookieName: string = window.ContactHubCookie || '_ch';
 const apiUrl: string = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
+function getQueryParam(name) {
+  const match = RegExp(`[?&]${name}=([^&]*)`).exec(window.location.search);
+  return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
 const newSessionId = (): string => uuid.v4();
 
 const getCookie = (): ContactHubCookie => {
@@ -32,32 +37,42 @@ const getCookie = (): ContactHubCookie => {
     throw new Error('Missing required ContactHub configuration.');
   }
 
-  const {
-    workspaceId, nodeId, token, context, sid, customerId, hash
-  } = cookie;
-
-  if (!(workspaceId && nodeId && token)) {
+  if (!(cookie.workspaceId && cookie.nodeId && cookie.token)) {
     throw new Error('Missing required ContactHub configuration.');
   }
 
-  return { workspaceId, nodeId, token, context, sid, customerId, hash };
+  return cookie;
 };
 
 const allowedOptions = ['token', 'workspaceId', 'nodeId', 'context'];
 const config = (options: ConfigOptions): void => {
-  // get current _ch, if any
+  // get current ch cookie, if any
   const _ch = cookies.getJSON(cookieName) || {};
+
+  // read Google Analytics query params if present
+  const utm_source = getQueryParam('utm_source');
+
+  if (utm_source) {
+    // Store ga values in the ch cookie, overwriting any previous ga value.
+    _ch.ga = {
+      utm_source,
+      utm_medium: getQueryParam('utm_medium') || undefined,
+      utm_term: getQueryParam('utm_term') || undefined,
+      utm_content: getQueryParam('utm_content') || undefined,
+      utm_campaign: getQueryParam('utm_campaign') || undefined
+    };
+  }
 
   // generate sid if not already present
   _ch.sid = _ch.sid || newSessionId();
 
   // set all valid option params, keeping current value (if any)
   const filteredOptions = Object.keys(options)
-  .filter(key => allowedOptions.indexOf(key) !== -1)
-  .reduce((obj, key) => {
-    obj[key] = options[key];
-    return obj;
-  }, {});
+    .filter(key => allowedOptions.indexOf(key) !== -1)
+    .reduce((obj, key) => {
+      obj[key] = options[key];
+      return obj;
+    }, {});
   Object.assign(_ch, filteredOptions);
 
   // default context to 'WEB', respecting cookie and options
@@ -66,7 +81,7 @@ const config = (options: ConfigOptions): void => {
   }
 
   // set updated cookie
-  cookies.set(cookieName, _ch);
+  cookies.set(cookieName, _ch, { expires: 365 });
 };
 
 const inferProperties = (type: string, customProperties?: Object): Object => {
@@ -85,7 +100,9 @@ const inferProperties = (type: string, customProperties?: Object): Object => {
 };
 
 const event = (options: EventOptions): void => {
-  const { workspaceId, nodeId, token, context, sid, customerId } = getCookie();
+  const {
+    workspaceId, nodeId, token, context, sid, customerId, ga
+  } = getCookie();
   const { type, properties: customProperties } = options;
 
   if (!type) {
@@ -93,6 +110,8 @@ const event = (options: EventOptions): void => {
   }
 
   const properties = inferProperties(type, customProperties);
+
+  const tracking = ga ? { ga } : undefined;
 
   const bringBackProperties = customerId ? undefined : {
     type: 'SESSION_ID',
@@ -107,6 +126,7 @@ const event = (options: EventOptions): void => {
       type,
       context,
       properties,
+      tracking,
       customerId,
       bringBackProperties
     },
