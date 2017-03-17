@@ -1,13 +1,12 @@
 [![Build Status](https://travis-ci.org/contactlab/contacthub-sdk-browser.svg?branch=master)](https://travis-ci.org/contactlab/contacthub-sdk-browser)
-![Version 0.4.1 beta](https://img.shields.io/badge/version-0.4.1%20beta-0072bc.svg)
+[![GitHub release](https://img.shields.io/github/release/contactlab/contacthub-sdk-browser.svg)](https://github.com/contactlab/contacthub-sdk-browser/releases)
 
 # Contacthub.js
 
-Official JS tracking code for
-[Contactlab](http://developer.contactlab.com/documentation/). The easiest way to
-send pageviews, events and customer information from your website to the
-[Contacthub API](http://developer.contactlab.com/documentation/).
+Browser SDK for the Contacthub API.
 
+The easiest way to send pageviews, events and customer information from your
+website to the [Contacthub API](http://developer.contactlab.com/documentation/).
 
 ## How to use
 
@@ -24,28 +23,28 @@ ch('event', {/* see below */});
 ```
 
 Compressed and uncompressed copies of Contacthub Analytics JS files are available. The uncompressed file is best used during development or debugging; the compressed file saves bandwidth and improves performance in production.
-Use CDNs can offer a performance benefit by hosting Contacthub Analytics JS on servers spread across the globe. This also offers an advantage that if the visitor to your webpage has already downloaded a copy of Contacthub Analytics JS from the same CDN, it won't have to be re-downloaded. 
+Use CDNs can offer a performance benefit by hosting Contacthub Analytics JS on servers spread across the globe. This also offers an advantage that if the visitor to your webpage has already downloaded a copy of Contacthub Analytics JS from the same CDN, it won't have to be re-downloaded.
 
 To load a hosted library, copy and paste the HTML snippet for that library (shown below) in your web page.
 
-#### Latest version minified 
+#### Latest version minified
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js"></script> 
+<script async src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js"></script>
 ```
 
-#### Latest version uncompressed 
+#### Latest version uncompressed
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.js"></script> 
+<script async src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.js"></script>
 ```
 
-#### Specific version minified 
+#### Specific version minified
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.min.js"></script> 
+<script async src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.min.js"></script>
 ```
 
-#### Specific version uncompressed 
+#### Specific version uncompressed
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.js"></script> 
+<script async src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.js"></script>
 ```
 
 We recommend that you load libraries from the CDN via HTTPS, even if your own website only uses HTTP
