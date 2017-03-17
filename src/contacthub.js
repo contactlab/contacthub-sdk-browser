@@ -25,7 +25,8 @@ const apiUrl: string = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1
 
 function getQueryParam(name) {
   const match = RegExp(`[?&]${name}=([^&]*)`).exec(window.location.search);
-  return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+  const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+  return val || undefined;
 }
 
 const newSessionId = (): string => uuid.v4();
@@ -56,10 +57,10 @@ const config = (options: ConfigOptions): void => {
     // Store ga values in the ch cookie, overwriting any previous ga value.
     _ch.ga = {
       utm_source,
-      utm_medium: getQueryParam('utm_medium') || undefined,
-      utm_term: getQueryParam('utm_term') || undefined,
-      utm_content: getQueryParam('utm_content') || undefined,
-      utm_campaign: getQueryParam('utm_campaign') || undefined
+      utm_medium: getQueryParam('utm_medium'),
+      utm_term: getQueryParam('utm_term'),
+      utm_content: getQueryParam('utm_content'),
+      utm_campaign: getQueryParam('utm_campaign')
     };
   }
 
