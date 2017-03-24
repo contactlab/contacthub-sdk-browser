@@ -137,6 +137,10 @@ Please note we will infer some standard properties automically (url, title,
 referrer, path). If you want, you can override those in your custom `properties`
 object.
 
+Since v1.0.0 of this library, `utm_` tags from Google Analytics are also
+automatically detected from the query string, stored in the ContactHub cookie
+and attached automatically to all ContactHub Events.
+
 
 ## Advanced usage
 
