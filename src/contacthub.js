@@ -23,11 +23,11 @@ const varName: string = window.ContactHubObject || 'ch';
 const cookieName: string = window.ContactHubCookie || '_ch';
 const apiUrl: string = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
-function getQueryParam(name) {
+const getQueryParam = (name) => {
   const match = RegExp(`[?&]${name}=([^&]*)`).exec(window.location.search);
   const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
   return val || undefined;
-}
+};
 
 const newSessionId = (): string => uuid.v4();
 
@@ -43,46 +43,6 @@ const getCookie = (): ContactHubCookie => {
   }
 
   return cookie;
-};
-
-const allowedOptions = ['token', 'workspaceId', 'nodeId', 'context'];
-const config = (options: ConfigOptions): void => {
-  // get current ch cookie, if any
-  const _ch = cookies.getJSON(cookieName) || {};
-
-  // read Google Analytics query params if present
-  const utm_source = getQueryParam('utm_source');
-
-  if (utm_source) {
-    // Store ga values in the ch cookie, overwriting any previous ga value.
-    _ch.ga = {
-      utm_source,
-      utm_medium: getQueryParam('utm_medium'),
-      utm_term: getQueryParam('utm_term'),
-      utm_content: getQueryParam('utm_content'),
-      utm_campaign: getQueryParam('utm_campaign')
-    };
-  }
-
-  // generate sid if not already present
-  _ch.sid = _ch.sid || newSessionId();
-
-  // set all valid option params, keeping current value (if any)
-  const filteredOptions = Object.keys(options)
-    .filter(key => allowedOptions.indexOf(key) !== -1)
-    .reduce((obj, key) => {
-      obj[key] = options[key];
-      return obj;
-    }, {});
-  Object.assign(_ch, filteredOptions);
-
-  // default context to 'WEB', respecting cookie and options
-  if (!_ch.hasOwnProperty('context')) {
-    _ch.context = 'WEB';
-  }
-
-  // set updated cookie
-  cookies.set(cookieName, _ch, { expires: 365 });
 };
 
 const inferProperties = (type: string, customProperties?: Object): Object => {
@@ -285,6 +245,53 @@ const customer = (options: CustomerData): void => {
       .then(store)
       .then(reconcile);
 
+  }
+};
+
+const allowedOptions = ['token', 'workspaceId', 'nodeId', 'context'];
+const config = (options: ConfigOptions): void => {
+  // get current ch cookie, if any
+  const _ch = cookies.getJSON(cookieName) || {};
+
+  // read Google Analytics query params if present
+  const utm_source = getQueryParam('utm_source');
+
+  if (utm_source) {
+    // Store ga values in the ch cookie, overwriting any previous ga value.
+    _ch.ga = {
+      utm_source,
+      utm_medium: getQueryParam('utm_medium'),
+      utm_term: getQueryParam('utm_term'),
+      utm_content: getQueryParam('utm_content'),
+      utm_campaign: getQueryParam('utm_campaign')
+    };
+  }
+
+  // generate sid if not already present
+  _ch.sid = _ch.sid || newSessionId();
+
+  // set all valid option params, keeping current value (if any)
+  const filteredOptions = Object.keys(options)
+    .filter(key => allowedOptions.indexOf(key) !== -1)
+    .reduce((obj, key) => {
+      obj[key] = options[key];
+      return obj;
+    }, {});
+  Object.assign(_ch, filteredOptions);
+
+  // default context to 'WEB', respecting cookie and options
+  if (!_ch.hasOwnProperty('context')) {
+    _ch.context = 'WEB';
+  }
+
+  // set updated cookie
+  cookies.set(cookieName, _ch, { expires: 365 });
+
+  // support special query param clabId
+  const clabId = getQueryParam('clabId');
+
+  if (clabId) {
+    customer({ id: clabId });
   }
 };
 
