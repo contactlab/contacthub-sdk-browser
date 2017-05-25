@@ -205,20 +205,23 @@ const computeHash = (data: CustomerData): string => {
   return shaObj.getHash('HEX');
 };
 
+const resetCookie = () => {
+  cookies.set(cookieName, Object.assign(getCookie(), {
+    sid: newSessionId(),
+    customerId: undefined,
+    hash: undefined
+  }));
+};
+
 const customer = (options: CustomerData): void => {
-  if (!options) {
-    // Remove user data from cookie (e.g. when a customer logs out)
-    cookies.set(cookieName, Object.assign(getCookie(), {
-      sid: newSessionId(),
-      customerId: undefined,
-      hash: undefined
-    }));
+  if (!options) { // an empty object is a request for a session reset
+    resetCookie();
 
     return;
   }
 
   const { workspaceId, nodeId, token, customerId, hash } = getCookie();
-  const { externalId, base, extended, extra, tags } = options;
+  const { id, externalId, base, extended, extra, tags } = options;
   const newHash = computeHash({ base, extended, extra, tags, externalId });
 
   const update = (customerId: string): Promise<string> => updateCustomer({
@@ -246,13 +249,32 @@ const customer = (options: CustomerData): void => {
   });
 
   const store = (customerId: string): string => {
-    cookies.set(cookieName, Object.assign(getCookie(), { customerId, hash: newHash }));
+    cookies.set(cookieName, Object.assign(getCookie(), {
+      customerId, hash: newHash
+    }));
     return customerId;
   };
 
   if (hash === newHash) { return; }
 
-  if (customerId) {
+  if (id && customerId) {
+
+    if (id === customerId) {
+      update(id).then(store);
+    } else {
+      resetCookie();
+      reconcile(id)
+        .then(() => update(id))
+        .then(store);
+    }
+
+  } else if (id) {
+
+    reconcile(id)
+      .then(() => update(id))
+      .then(store);
+
+  } else if (customerId) {
 
     update(customerId).then(store);
 

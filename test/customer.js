@@ -38,7 +38,7 @@ let xhr;
 // race conditions. 0 ms works fine on all browsers except IE 10 which requires
 // at least 2 ms.
 // TODO: find a more elegant way to mock Ajax calls
-const whenDone = (f) => {
+const whenDone = f => {
   setTimeout(() => f(), 2);
 };
 
@@ -64,86 +64,246 @@ describe('Customer API:', () => {
     expect(requests.length).to.equal(0);
   });
 
-  describe('when customerId is unknown and externalId is not provided,', () => {
-    beforeEach(() => {
-      setConfig();
-      _ch('customer', mario);
-    });
+  describe('when a customerId is not provided', () => {
+    describe('and no customerId is stored in the cookie', () => {
+      beforeEach(() => {
+        setConfig();
+        _ch('customer', mario);
+      });
 
-    it('creates a new customer', (done) => {
-      whenDone(() => {
-        expect(requests.length).to.equal(1);
-        const req = requests[0];
-        expect(req.method).to.equal('POST');
-        expect(req.url).to.equal(
-          `${apiUrl}/workspaces/${config.workspaceId}/customers`
-        );
-        expect(JSON.parse(req.requestBody)).to.eql({
-          nodeId: config.nodeId,
-          externalId: mario.externalId,
-          base: mario.base
+      it('creates a new customer', (done) => {
+        whenDone(() => {
+          expect(requests.length).to.equal(1);
+          const req = requests[0];
+          expect(req.method).to.equal('POST');
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            nodeId: config.nodeId,
+            externalId: mario.externalId,
+            base: mario.base
+          });
+          expect(req.requestHeaders.Authorization).to.equal(
+            `Bearer ${config.token}`
+          );
+          done();
         });
-        expect(req.requestHeaders.Authorization).to.equal(
-          `Bearer ${config.token}`
-        );
-        done();
+      });
+
+      it('handles 409 conflicts and updates the existing customer', (done) => {
+        whenDone(() => {
+          requests[0].respond(409, {}, JSON.stringify({
+            data: {
+              customer: {
+                id: 'existing-cid'
+              }
+            }
+          }));
+          whenDone(() => {
+            expect(requests.length).to.equal(2);
+            const req = requests[1];
+            expect(req.method).to.equal('PATCH');
+            expect(req.url).to.equal(
+              `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
+            );
+            expect(JSON.parse(req.requestBody)).to.eql({
+              externalId: mario.externalId,
+              base: mario.base
+            });
+            done();
+          });
+        });
+      });
+
+      it('stores the customerId for future calls', (done) => {
+        whenDone(() => {
+          requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+          whenDone(() => {
+            expect(getCookie().customerId).to.equal('new-cid');
+            done();
+          });
+        });
+      });
+
+      it('stores a hash of the customer data for future calls', (done) => {
+        whenDone(() => {
+          requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+          whenDone(() => {
+            expect(getCookie().hash).not.to.be.undefined;
+            done();
+          });
+        });
+      });
+
+      it('reconciles the sessionId with the customerId', (done) => {
+        const sid = getCookie().sid;
+        whenDone(() => {
+          requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+          whenDone(() => {
+            expect(requests.length).to.equal(2);
+            const req = requests[1];
+            expect(req.url).to.equal(
+              `${apiUrl}/workspaces/${config.workspaceId}/customers/new-cid/sessions`
+            );
+            expect(JSON.parse(req.requestBody)).to.eql({
+              value: sid
+            });
+            done();
+          });
+        });
       });
     });
 
-    it('handles 409 conflicts and updates the existing customer', (done) => {
-      whenDone(() => {
-        requests[0].respond(409, {}, JSON.stringify({
-          data: {
-            customer: {
-              id: 'existing-cid'
-            }
-          }
+    describe('and a customerId is stored in the cookie', () => {
+      beforeEach(() => {
+        setConfig();
+        cookies.set(cookieName, Object.assign(getCookie(), {
+          customerId: 'my-cid'
         }));
+        _ch('customer', mario);
+      });
+
+      it('updates the customer', () => {
+        expect(requests.length).to.equal(1);
+        const req = requests[0];
+        expect(req.method).to.equal('PATCH');
+        expect(req.url).to.equal(
+          `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
+        );
+        expect(JSON.parse(req.requestBody)).to.eql({
+          externalId: mario.externalId,
+          base: mario.base
+        });
+      });
+
+      it('does not update the customer if the same data is sent', (done) => {
+        requests[0].respond(200);
+        whenDone(() => {
+          _ch('customer', mario);
+          expect(requests.length).to.equal(1);
+          done();
+        });
+      });
+
+      it('does update the customer if updated data is sent', (done) => {
+        requests[0].respond(200);
+        whenDone(() => {
+          mario.base.lastName = 'Rossini';
+          _ch('customer', mario);
+          expect(requests.length).to.equal(2);
+          done();
+        });
+      });
+
+      it('does update the customer if only the externalId has changed', (done) => {
+        requests[0].respond(200);
+        whenDone(() => {
+          mario.externalId = 'supermario';
+          _ch('customer', mario);
+          expect(requests.length).to.equal(2);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('when a customerId is provided', () => {
+    describe('and the same customerId is stored in the cookie', () => {
+      beforeEach(() => {
+        setConfig();
+        cookies.set(cookieName, Object.assign(getCookie(), {
+          customerId: 'my-cid'
+        }));
+        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+      });
+
+      it('updates the customer', () => {
+        expect(requests.length).to.equal(1);
+        const req = requests[0];
+        expect(req.method).to.equal('PATCH');
+        expect(req.url).to.equal(
+          `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
+        );
+        expect(JSON.parse(req.requestBody)).to.eql({
+          externalId: mario.externalId,
+          base: mario.base
+        });
+      });
+    });
+
+    describe('and a different customerId is stored in the cookie', () => {
+      beforeEach(() => {
+        setConfig();
+        cookies.set(cookieName, Object.assign(getCookie(), {
+          customerId: 'different-cid'
+        }));
+      });
+
+      it('resets the sessionId', () => {
+        const { sid } = getCookie();
+        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+
+        expect(getCookie().sid).not.to.eql(sid);
+      });
+
+      it('reconciles the new sessionId with the customerId', (done) => {
+        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+        const { sid: newSid } = getCookie();
+
+        whenDone(() => {
+          expect(requests.length).to.equal(1);
+          const req = requests[0];
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            value: newSid
+          });
+          done();
+        });
+      });
+
+      it('updates the customer', () => {
+        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+
+        requests[0].respond(200);
         whenDone(() => {
           expect(requests.length).to.equal(2);
           const req = requests[1];
           expect(req.method).to.equal('PATCH');
           expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
             externalId: mario.externalId,
             base: mario.base
           });
-          done();
         });
       });
     });
 
-    it('stores the customerId for future calls', (done) => {
-      whenDone(() => {
-        requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
-        whenDone(() => {
-          expect(getCookie().customerId).to.equal('new-cid');
-          done();
-        });
+    describe('and no customerId is stored in the cookie', () => {
+      beforeEach(() => {
+        setConfig();
       });
-    });
 
-    it('stores a hash of the customer data for future calls', (done) => {
-      whenDone(() => {
-        requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
-        whenDone(() => {
-          expect(getCookie().hash).not.to.be.undefined;
-          done();
-        });
+      it('does not reset the sessionId', () => {
+        const { sid } = getCookie();
+        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+
+        expect(getCookie().sid).to.eql(sid);
       });
-    });
 
-    it('reconciles the sessionId with the customerId', (done) => {
-      const sid = getCookie().sid;
-      whenDone(() => {
-        requests[0].respond(200, {}, JSON.stringify({ id: 'new-cid' }));
+      it('reconciles the sessionId with the customerId', (done) => {
+        const { sid } = getCookie();
+        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+
         whenDone(() => {
-          expect(requests.length).to.equal(2);
-          const req = requests[1];
+          expect(requests.length).to.equal(1);
+          const req = requests[0];
           expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers/new-cid/sessions`
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
             value: sid
@@ -151,58 +311,23 @@ describe('Customer API:', () => {
           done();
         });
       });
-    });
-  });
 
+      it('updates the customer', () => {
+        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
 
-  describe('when customerId is already known', () => {
-    beforeEach(() => {
-      setConfig();
-      cookies.set(cookieName, Object.assign(getCookie(), {
-        customerId: 'my-cid'
-      }));
-      _ch('customer', mario);
-    });
-
-    it('updates the customer', () => {
-      expect(requests.length).to.equal(1);
-      const req = requests[0];
-      expect(req.method).to.equal('PATCH');
-      expect(req.url).to.equal(
-        `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
-      );
-      expect(JSON.parse(req.requestBody)).to.eql({
-        externalId: mario.externalId,
-        base: mario.base
-      });
-    });
-
-    it('does not update the customer if the same data is sent', (done) => {
-      requests[0].respond(200);
-      whenDone(() => {
-        _ch('customer', mario);
-        expect(requests.length).to.equal(1);
-        done();
-      });
-    });
-
-    it('does update the customer if updated data is sent', (done) => {
-      requests[0].respond(200);
-      whenDone(() => {
-        mario.base.lastName = 'Rossini';
-        _ch('customer', mario);
-        expect(requests.length).to.equal(2);
-        done();
-      });
-    });
-
-    it('does update the customer if only the externalId has changed', (done) => {
-      requests[0].respond(200);
-      whenDone(() => {
-        mario.externalId = 'supermario';
-        _ch('customer', mario);
-        expect(requests.length).to.equal(2);
-        done();
+        requests[0].respond(200);
+        whenDone(() => {
+          expect(requests.length).to.equal(2);
+          const req = requests[1];
+          expect(req.method).to.equal('PATCH');
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            externalId: mario.externalId,
+            base: mario.base
+          });
+        });
       });
     });
   });
