@@ -168,7 +168,6 @@ chub('event', { ... });
 <script async src='https://www.contactlab.com/contacthub.js'></script>
 ```
 
-
 #### Renaming the ContactHub cookie
 
 In the same way, you can set a custom name for the ContactHub cookie using:
@@ -184,6 +183,34 @@ For testing or debugging purposes, you might want to use a different API server:
 ```js
 window.ContactHubAPI = 'https://test-api/hub/v2';
 ```
+
+#### ContactHub ID
+
+Every Customer is assigned an id in ContactHub. In general, you don't have to
+think about it as the library will take care of it and avoid generating multiple
+IDs for the same Customer.
+
+If you store ContactHub ids on your database and you want to make sure that
+events sent via the library are associated to the same id, you can specify the
+ID when you use the `ch('customer', {...})` method:
+
+```js
+ch('customer', {
+  id: 'A_VALID_CONTACTHUB_ID',
+  ...other customer properties...
+});
+```
+
+#### The clabId query parameter
+
+You can also send a ContactHub id using the `clabId` parameter in the query
+string (`?clabId=A_VALID_CONTACTHUB_ID`). This is transformed by the library in
+the following call:
+
+```js
+ch('customer', { id: clabId });
+```
+
 
 ## Contributing to this library
 
