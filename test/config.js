@@ -61,6 +61,19 @@ describe('Config API', () => {
     expect(getCookie().context).to.equal('foo');
   });
 
+  it('allows to specify optional contextInfo', () => {
+    _ch('config', {
+      workspaceId: 'workspace_id',
+      nodeId: 'node_id',
+      token: 'ABC123',
+      context: 'foo',
+      contextInfo: {
+        foo: 'bar'
+      }
+    });
+    expect(getCookie().contextInfo).to.eql({ foo: 'bar' });
+  });
+
   it('allows to override a single required param', () => {
     _ch('config', {
       nodeId: 'another_node'

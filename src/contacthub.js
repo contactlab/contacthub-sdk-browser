@@ -62,7 +62,7 @@ const inferProperties = (type: string, customProperties?: Object): Object => {
 
 const event = (options: EventOptions): void => {
   const {
-    workspaceId, nodeId, token, context, sid, customerId, ga
+    workspaceId, nodeId, token, context, contextInfo, sid, customerId, ga
   } = getCookie();
   const { type, properties: customProperties } = options;
 
@@ -86,6 +86,7 @@ const event = (options: EventOptions): void => {
     data: {
       type,
       context,
+      contextInfo,
       properties,
       tracking,
       customerId,
@@ -260,7 +261,9 @@ const customer = (options: CustomerData): void => {
   }
 };
 
-const allowedOptions = ['token', 'workspaceId', 'nodeId', 'context'];
+const allowedConfigOptions = [
+  'token', 'workspaceId', 'nodeId', 'context', 'contextInfo'
+];
 const config = (options: ConfigOptions): void => {
   // get current ch cookie, if any
   const _ch = cookies.getJSON(cookieName) || {};
@@ -284,17 +287,16 @@ const config = (options: ConfigOptions): void => {
 
   // set all valid option params, keeping current value (if any)
   const filteredOptions = Object.keys(options)
-    .filter(key => allowedOptions.indexOf(key) !== -1)
+    .filter(key => allowedConfigOptions.indexOf(key) !== -1)
     .reduce((obj, key) => {
       obj[key] = options[key];
       return obj;
     }, {});
   Object.assign(_ch, filteredOptions);
 
-  // default context to 'WEB', respecting cookie and options
-  if (!_ch.hasOwnProperty('context')) {
-    _ch.context = 'WEB';
-  }
+  // default values for context and contextInfo
+  _ch.context = _ch.context || 'WEB';
+  _ch.contextInfo = _ch.contextInfo || {};
 
   // set updated cookie
   cookies.set(cookieName, _ch, { expires: 365 });
