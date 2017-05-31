@@ -211,6 +211,14 @@ the following call:
 ch('customer', { id: clabId });
 ```
 
+An example use case is if you send a newsletter to your customers and you want
+to make sure that if they reach your website from a link contained in the email,
+they are immediately recognised even if they are not logged in.
+
+Please note that if a different user is logged in, the Contacthub id for the
+currently logged in user is stored in the Contacthub cookie. The id contained in
+the Contacthub cookie always takes precedence over an id specified using the
+`clabId` query string parameter.
 
 ## Contributing to this library
 

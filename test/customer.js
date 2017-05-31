@@ -208,7 +208,73 @@ describe('Customer API:', () => {
     });
   });
 
-  describe('when a customerId is provided', () => {
+  describe('when a customerId is provided but no customer data', () => {
+    describe('and the same customerId is stored in the cookie', () => {
+      beforeEach(() => {
+        setConfig();
+        cookies.set(cookieName, Object.assign(getCookie(), {
+          customerId: 'my-cid'
+        }));
+        _ch('customer', { id: 'my-cid' });
+      });
+
+      it('does not make any API call', () => {
+        expect(requests.length).to.equal(0);
+      });
+    });
+
+    describe('and a different customerId is stored in the cookie', () => {
+      beforeEach(() => {
+        setConfig();
+        cookies.set(cookieName, Object.assign(getCookie(), {
+          customerId: 'different-cid'
+        }));
+        _ch('customer', { id: 'my-cid' });
+      });
+
+      it('does not make any API call', () => {
+        expect(requests.length).to.equal(0);
+      });
+    });
+
+    describe('and no customerId is stored in the cookie', () => {
+      beforeEach(() => {
+        setConfig();
+      });
+
+      it('does not reset the sessionId', () => {
+        const { sid } = getCookie();
+        _ch('customer', { id: 'my-cid' });
+
+        expect(getCookie().sid).to.eql(sid);
+      });
+
+      it('reconciles the sessionId with the customerId', (done) => {
+        const { sid } = getCookie();
+        _ch('customer', { id: 'my-cid' });
+
+        whenDone(() => {
+          expect(requests.length).to.equal(1);
+          const req = requests[0];
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            value: sid
+          });
+          done();
+        });
+      });
+
+      it('does not make additional API requests', () => {
+        _ch('customer', { id: 'my-cid' });
+
+        expect(requests.length).to.equal(1);
+      });
+    });
+  });
+
+  describe('when a customerId is provided along with some customer data', () => {
     describe('and the same customerId is stored in the cookie', () => {
       beforeEach(() => {
         setConfig();
@@ -218,16 +284,19 @@ describe('Customer API:', () => {
         _ch('customer', Object.assign(mario, { id: 'my-cid' }));
       });
 
-      it('updates the customer', () => {
-        expect(requests.length).to.equal(1);
-        const req = requests[0];
-        expect(req.method).to.equal('PATCH');
-        expect(req.url).to.equal(
-          `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
-        );
-        expect(JSON.parse(req.requestBody)).to.eql({
-          externalId: mario.externalId,
-          base: mario.base
+      it('updates the customer', (done) => {
+        whenDone(() => {
+          expect(requests.length).to.equal(1);
+          const req = requests[0];
+          expect(req.method).to.equal('PATCH');
+          expect(req.url).to.equal(
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
+          );
+          expect(JSON.parse(req.requestBody)).to.eql({
+            externalId: mario.externalId,
+            base: mario.base
+          });
+          done();
         });
       });
     });
@@ -264,7 +333,7 @@ describe('Customer API:', () => {
         });
       });
 
-      it('updates the customer', () => {
+      it('updates the customer', (done) => {
         _ch('customer', Object.assign(mario, { id: 'my-cid' }));
 
         requests[0].respond(200);
@@ -279,6 +348,7 @@ describe('Customer API:', () => {
             externalId: mario.externalId,
             base: mario.base
           });
+          done();
         });
       });
     });
@@ -312,7 +382,7 @@ describe('Customer API:', () => {
         });
       });
 
-      it('updates the customer', () => {
+      it('updates the customer', (done) => {
         _ch('customer', Object.assign(mario, { id: 'my-cid' }));
 
         requests[0].respond(200);
@@ -327,6 +397,7 @@ describe('Customer API:', () => {
             externalId: mario.externalId,
             base: mario.base
           });
+          done();
         });
       });
     });

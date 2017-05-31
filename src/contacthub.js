@@ -184,9 +184,15 @@ const customer = (options: CustomerData): void => {
   const { id, externalId, base, extended, extra, tags } = options;
   const newHash = computeHash({ base, extended, extra, tags, externalId });
 
-  const update = (customerId: string): Promise<string> => updateCustomer({
-    customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
-  });
+  const update = (customerId: string): Promise<string> => {
+    if (externalId || base || extended || extra || tags) {
+      return updateCustomer({
+        customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
+      });
+    } else {
+      return Promise.resolve(customerId);
+    }
+  };
 
   const create = (): Promise<string> => createCustomer({
     workspaceId, nodeId, token, externalId, base, extended, extra, tags
@@ -215,24 +221,30 @@ const customer = (options: CustomerData): void => {
     return customerId;
   };
 
+  const resolveIdConflict = (id: string, cookieId: string): Promise<string> => {
+    if (id === cookieId) {
+      return Promise.resolve(id);
+    } else {
+      if (externalId || base || extended || extra || tags) {
+        resetCookie();
+        return reconcile(id);
+      } else {
+        return Promise.reject(
+          'The provided id conflicts with the id stored in the cookie'
+        );
+      }
+    }
+  };
+
   if (hash === newHash) { return; }
 
   if (id && customerId) {
 
-    if (id === customerId) {
-      update(id).then(store);
-    } else {
-      resetCookie();
-      reconcile(id)
-        .then(() => update(id))
-        .then(store);
-    }
+    resolveIdConflict(id, customerId).then(update).then(store);
 
   } else if (id) {
 
-    reconcile(id)
-      .then(() => update(id))
-      .then(store);
+    reconcile(id).then(update).then(store);
 
   } else if (customerId) {
 
