@@ -46,7 +46,7 @@ describe('Event API', () => {
     setConfig();
     _ch('event', { type: 'viewedPage' });
     const req = requests[0];
-    const res = JSON.parse(req.requestBody);
+    const reqBody = JSON.parse(req.requestBody);
 
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
@@ -54,9 +54,8 @@ describe('Event API', () => {
     expect(req.requestHeaders.Authorization).to.equal(
       `Bearer ${config.token}`
     );
-    expect(res.type).to.equal('viewedPage');
-    expect(res.context).to.equal('WEB');
-    expect(res.bringBackProperties).to.eql({
+    expect(reqBody.type).to.equal('viewedPage');
+    expect(reqBody.bringBackProperties).to.eql({
       type: 'SESSION_ID',
       value: getCookie().sid,
       nodeId: config.nodeId
@@ -125,5 +124,31 @@ describe('Event API', () => {
     expect(props.url).to.be.undefined;
     expect(props.path).to.be.undefined;
     expect(props.referer).to.be.undefined;
+  });
+
+  it('gets the "context" from the cookie', () => {
+    setConfig();
+    cookies.set(cookieName, Object.assign(getCookie(), {
+      context: 'FOO'
+    }));
+
+    _ch('event', { type: 'viewedPage' });
+    const req = requests[0];
+    const reqBody = JSON.parse(req.requestBody);
+
+    expect(reqBody.context).to.equal('FOO');
+  });
+
+  it('gets the "contextInfo" from the cookie', () => {
+    setConfig();
+    cookies.set(cookieName, Object.assign(getCookie(), {
+      contextInfo: { foo: 'bar' }
+    }));
+
+    _ch('event', { type: 'viewedPage' });
+    const req = requests[0];
+    const reqBody = JSON.parse(req.requestBody);
+
+    expect(reqBody.contextInfo).to.eql({ foo: 'bar' });
   });
 });
