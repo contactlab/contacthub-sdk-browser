@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Contacthub Tracking Script",
   "main": "src/contacthub.js",
+  "files": ["dist"],
   "scripts": {
     "test": "karma start --single-run",
     "test-watch": "karma start",
