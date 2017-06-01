@@ -2,6 +2,17 @@
 
 
 
+## [v1.1.0](https://github.com/contactlab/contacthub-sdk-browser/tree/v1.1.0) (2017-06-01)
+[Full Changelog](https://github.com/contactlab/contacthub-sdk-browser/compare/v1.0.0...v1.1.0)
+
+#### Fixes (bugs & defects):
+
+- contextInfo cannot be set [#32](https://github.com/contactlab/contacthub-sdk-browser/issues/32)
+
+#### New features:
+
+- Allow using an existing customerId [#30](https://github.com/contactlab/contacthub-sdk-browser/issues/30)
+
 ## [v1.0.0](https://github.com/contactlab/contacthub-sdk-browser/tree/v1.0.0) (2017-03-17)
 [Full Changelog](https://github.com/contactlab/contacthub-sdk-browser/compare/v0.4.1...v1.0.0)
 
