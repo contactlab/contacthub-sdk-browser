@@ -12,4 +12,8 @@ describe('When contacthub.js is loaded', () => {
     expect(getCookie().token).to.equal('ABC123_QUEUED');
   });
 
+  it('does not touch the window.Promise object', () => {
+    expect(window.Promise).to.be.undefined;
+  });
+
 });

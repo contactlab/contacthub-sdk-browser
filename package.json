@@ -68,7 +68,7 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
-    "es6-promise": "^3.2.1",
+    "es6-promise": "^4.1.0",
     "js-cookie": "^2.1.2",
     "jssha": "^2.2.0",
     "uuid": "^2.0.2",
