@@ -2,6 +2,13 @@
 
 
 
+## [v1.1.1](https://github.com/contactlab/contacthub-sdk-browser/tree/v1.1.1) (2017-08-30)
+[Full Changelog](https://github.com/contactlab/contacthub-sdk-browser/compare/v1.1.0...v1.1.1)
+
+#### Fixes (bugs & defects):
+
+- window.Promise should not be modified [#34](https://github.com/contactlab/contacthub-sdk-browser/issues/34)
+
 ## [v1.1.0](https://github.com/contactlab/contacthub-sdk-browser/tree/v1.1.0) (2017-06-01)
 [Full Changelog](https://github.com/contactlab/contacthub-sdk-browser/compare/v1.0.0...v1.1.0)
 
