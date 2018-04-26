@@ -102,7 +102,7 @@ const event = (options: EventOptions): void => {
 
 const createCustomer = ({
   workspaceId, nodeId, token, externalId, base, extended, extra, tags
-}: Auth & CustomerData): Promise<string> => xr({
+}: {|...Auth, ...CustomerData|}): Promise<string> => xr({
   method: 'POST',
   url: `${apiUrl}/workspaces/${workspaceId}/customers`,
   headers: {
@@ -124,7 +124,7 @@ const createCustomer = ({
 
 const updateCustomer = ({
   customerId, workspaceId, token, externalId, base, extended, extra, tags
-}: Auth & CustomerData & CustomerId): Promise<string> => xr({
+}: {|...Auth, ...CustomerData, ...CustomerId|}): Promise<string> => xr({
   method: 'PATCH',
   url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}`,
   headers: {
@@ -145,7 +145,7 @@ const updateCustomer = ({
 
 const reconcileCustomer = ({
   customerId, workspaceId, token
-}: Auth & CustomerId): Promise<string> => xr({
+}: {|...Auth, ...CustomerId|}): Promise<string> => xr({
   method: 'POST',
   url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}/sessions`,
   headers: {

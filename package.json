@@ -51,7 +51,7 @@
     "eslint": "^3.5.0",
     "eslint-config-buildo": "github:buildo/eslint-config",
     "eslint-plugin-flowtype": "^2.16.1",
-    "flow-bin": "^0.32.0",
+    "flow-bin": "^0.70.0",
     "http-server": "^0.9.0",
     "karma": "^1.1.2",
     "karma-browserstack-launcher": "^1.1.1",

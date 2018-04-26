@@ -1,8 +1,13 @@
+// @flow
+
+import { describe, it, beforeEach, afterEach } from 'mocha';
 import { expect } from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-/* global describe, it, beforeEach, afterEach */
+import type {
+  CustomerData
+} from '../lib/types';
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -13,7 +18,7 @@ const config = {
   token: 'ABC123'
 };
 
-const mario = {
+const mario: CustomerData = {
   externalId: 'mario.rossi',
   base: {
     firstName: 'mario',
@@ -189,7 +194,9 @@ describe('Customer API:', () => {
       it('does update the customer if updated data is sent', (done) => {
         requests[0].respond(200);
         whenDone(() => {
-          mario.base.lastName = 'Rossini';
+          if (mario.base) {
+            mario.base.lastName = 'Rossini';
+          }
           _ch('customer', mario);
           expect(requests.length).to.equal(2);
           done();
