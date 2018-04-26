@@ -1,6 +1,5 @@
 // @flow
 
-import { describe, it, beforeEach, afterEach } from 'mocha';
 import { expect } from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
@@ -8,6 +7,8 @@ import sinon from 'sinon';
 import type {
   CustomerData
 } from '../lib/types';
+
+/* global describe, it, beforeEach, afterEach */
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
