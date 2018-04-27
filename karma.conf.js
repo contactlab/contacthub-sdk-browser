@@ -46,31 +46,47 @@ module.exports = function(config) {
     },
 
     customLaunchers: {
-      bs_mac_firefox: {
-        base: 'BrowserStack',
-        browser: 'Firefox',
-        browser_version: '48',
-        os: 'OS X',
-        os_version: 'El Capitan'
-      },
-      bs_win7_ie10: {
+      bs_win_ie10: {
         base: 'BrowserStack',
         browser: 'IE',
         browser_version: '10',
         os: 'Windows',
         os_version: '7'
       },
-      bs_android_galaxys5: {
+      bs_win_firefox: {
         base: 'BrowserStack',
-        device: 'Samsung Galaxy S5',
-        os: 'Android',
-        os_version: '4.4'
+        browser: 'Firefox',
+        browser_version: '59',
+        os: 'Windows',
+        os_version: '8.1'
       },
-      bs_ios_iphone6: {
+      bs_win_edge: {
         base: 'BrowserStack',
-        device: 'iPhone 6',
+        browser: 'Edge',
+        browser_version: '16.0',
+        os: 'Windows',
+        os_version: '10'
+      },
+      bs_android_galaxys8: {
+        base: 'BrowserStack',
+        device: 'Samsung Galaxy S8',
+        real_mobile: true,
+        os: 'Android',
+        os_version: '7.0'
+      },
+      bs_android_pixel: {
+        base: 'BrowserStack',
+        device: 'Google Pixel',
+        real_mobile: true,
+        os: 'android',
+        os_version: '8.0'
+      },
+      bs_ios_iphone8: {
+        base: 'BrowserStack',
+        device: 'iPhone 8',
+        real_mobile: true,
         os: 'iOS',
-        os_version: '8.3'
+        os_version: '11.0'
       }
     }
   });
