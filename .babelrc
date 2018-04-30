@@ -1,7 +1,6 @@
 {
-  presets: [ 'es2015-loose' ],
+  presets: ['env'],
   plugins: [
-    'babel-plugin-syntax-flow',
     'babel-plugin-transform-flow-strip-types',
     'transform-object-assign',
     'transform-es3-member-expression-literals',
