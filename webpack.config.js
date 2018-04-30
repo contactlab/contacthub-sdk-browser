@@ -1,15 +1,29 @@
+const path = require('path');
+const webpack = require('webpack');
+
 module.exports = {
+  mode: 'none',
   entry: './src/contacthub.js',
   output: {
-    path: './dist',
+    path: path.resolve(__dirname, 'dist'),
     filename: 'contacthub.js'
   },
   module: {
-    loaders: [{
-      test: /\.js$/,
-      exclude: /node_modules/,
-      loader: 'babel-loader'
-    }]
+    rules: [
+      {
+        test: /\.js$/,
+        include: [
+          path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, 'test'),
+          path.resolve(__dirname, 'node_modules/es6-promise')
+        ],
+        loader: 'babel-loader'
+      }
+    ]
   },
+  plugins: [
+    new webpack.optimize.ModuleConcatenationPlugin(),
+    new webpack.NoEmitOnErrorsPlugin()
+  ],
   devtool: 'inline-source-map'
 };
