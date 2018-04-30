@@ -4,9 +4,7 @@ import { expect } from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-import type {
-  CustomerData
-} from '../lib/types';
+import type { ContactHubFunction } from '../lib/types';
 
 /* global describe, it, beforeEach, afterEach */
 
@@ -19,7 +17,7 @@ const config = {
   token: 'ABC123'
 };
 
-const mario: CustomerData = {
+const mario = {
   externalId: 'mario.rossi',
   base: {
     firstName: 'mario',
@@ -31,7 +29,7 @@ const mario: CustomerData = {
   }
 };
 
-const _ch = window[varName];
+const _ch:ContactHubFunction = window[varName];
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
@@ -289,7 +287,7 @@ describe('Customer API:', () => {
         cookies.set(cookieName, Object.assign(getCookie(), {
           customerId: 'my-cid'
         }));
-        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+        _ch('customer', Object.assign({}, mario, { id: 'my-cid' }));
       });
 
       it('updates the customer', (done) => {
@@ -319,13 +317,13 @@ describe('Customer API:', () => {
 
       it('resets the sessionId', () => {
         const { sid } = getCookie();
-        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+        _ch('customer', Object.assign({}, mario, { id: 'my-cid' }));
 
         expect(getCookie().sid).not.to.eql(sid);
       });
 
       it('reconciles the new sessionId with the customerId', (done) => {
-        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+        _ch('customer', Object.assign({}, mario, { id: 'my-cid' }));
         const { sid: newSid } = getCookie();
 
         whenDone(() => {
@@ -342,7 +340,7 @@ describe('Customer API:', () => {
       });
 
       it('updates the customer', (done) => {
-        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+        _ch('customer', Object.assign({}, mario, { id: 'my-cid' }));
 
         requests[0].respond(200);
         whenDone(() => {
@@ -368,14 +366,14 @@ describe('Customer API:', () => {
 
       it('does not reset the sessionId', () => {
         const { sid } = getCookie();
-        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+        _ch('customer', Object.assign({}, mario, { id: 'my-cid' }));
 
         expect(getCookie().sid).to.eql(sid);
       });
 
       it('reconciles the sessionId with the customerId', (done) => {
         const { sid } = getCookie();
-        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+        _ch('customer', Object.assign({}, mario, { id: 'my-cid' }));
 
         whenDone(() => {
           expect(requests.length).to.equal(1);
@@ -391,7 +389,7 @@ describe('Customer API:', () => {
       });
 
       it('updates the customer', (done) => {
-        _ch('customer', Object.assign(mario, { id: 'my-cid' }));
+        _ch('customer', Object.assign({}, mario, { id: 'my-cid' }));
 
         requests[0].respond(200);
         whenDone(() => {
