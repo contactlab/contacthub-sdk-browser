@@ -312,7 +312,7 @@ const config = (options: ConfigOptions): void => {
 };
 
 const ContactHub:ContactHubFunction = (method, options) => {
-  if (typeof JSON === 'undefined') {
+  if (!Array.prototype.map) {
     // No country for old IEs
     return;
   }
@@ -326,8 +326,10 @@ const ContactHub:ContactHubFunction = (method, options) => {
 
 // Process queued commands
 if (window[varName] && window[varName].q) {
-  const q = window[varName].q;
-  q.map(command => ContactHub(command[0], command[1]));
+  if (Array.prototype.map) {
+    const q = window[varName].q;
+    q.map(command => ContactHub(command[0], command[1]));
+  }
 }
 
 // Replace queue with CH object
