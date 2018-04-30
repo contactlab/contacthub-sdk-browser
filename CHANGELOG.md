@@ -2,6 +2,13 @@
 
 
 
+## [v1.2.0](https://github.com/contactlab/contacthub-sdk-browser/tree/v1.2.0) (2018-04-30)
+[Full Changelog](https://github.com/contactlab/contacthub-sdk-browser/compare/v1.1.1...v1.2.0)
+
+#### New features:
+
+- Support new "consents" object for Customers [#36](https://github.com/contactlab/contacthub-sdk-browser/issues/36)
+
 ## [v1.1.1](https://github.com/contactlab/contacthub-sdk-browser/tree/v1.1.1) (2017-08-30)
 [Full Changelog](https://github.com/contactlab/contacthub-sdk-browser/compare/v1.1.0...v1.1.1)
 
