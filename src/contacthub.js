@@ -101,8 +101,8 @@ const event = (options: EventOptions): void => {
 };
 
 const createCustomer = ({
-  workspaceId, nodeId, token, externalId, base, extended, extra, tags
-}: Auth & CustomerData): Promise<string> => xr({
+  workspaceId, nodeId, token, externalId, base, extended, consents, extra, tags
+}: {|...Auth, ...CustomerData|}): Promise<string> => xr({
   method: 'POST',
   url: `${apiUrl}/workspaces/${workspaceId}/customers`,
   headers: {
@@ -115,6 +115,7 @@ const createCustomer = ({
     externalId,
     base,
     extended,
+    consents,
     extra,
     tags
   }
@@ -123,8 +124,8 @@ const createCustomer = ({
 });
 
 const updateCustomer = ({
-  customerId, workspaceId, token, externalId, base, extended, extra, tags
-}: Auth & CustomerData & CustomerId): Promise<string> => xr({
+  customerId, workspaceId, token, externalId, base, extended, consents, extra, tags
+}: {|...Auth, ...CustomerData, ...CustomerId|}): Promise<string> => xr({
   method: 'PATCH',
   url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}`,
   headers: {
@@ -136,6 +137,7 @@ const updateCustomer = ({
     externalId,
     base,
     extended,
+    consents,
     extra,
     tags
   }
@@ -145,7 +147,7 @@ const updateCustomer = ({
 
 const reconcileCustomer = ({
   customerId, workspaceId, token
-}: Auth & CustomerId): Promise<string> => xr({
+}: {|...Auth, ...CustomerId|}): Promise<string> => xr({
   method: 'POST',
   url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}/sessions`,
   headers: {
@@ -182,13 +184,13 @@ const customer = (options: CustomerData): void => {
   }
 
   const { workspaceId, nodeId, token, customerId, hash } = getCookie();
-  const { id, externalId, base, extended, extra, tags } = options;
-  const newHash = computeHash({ base, extended, extra, tags, externalId });
+  const { id, externalId, base, extended, consents, extra, tags } = options;
+  const newHash = computeHash({ base, extended, consents, extra, tags, externalId });
 
   const update = (customerId: string): Promise<string> => {
-    if (externalId || base || extended || extra || tags) {
+    if (externalId || base || extended || consents || extra || tags) {
       return updateCustomer({
-        customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
+        customerId, workspaceId, nodeId, token, externalId, base, extended, consents, extra, tags
       });
     } else {
       return Promise.resolve(customerId);
@@ -196,7 +198,7 @@ const customer = (options: CustomerData): void => {
   };
 
   const create = (): Promise<string> => createCustomer({
-    workspaceId, nodeId, token, externalId, base, extended, extra, tags
+    workspaceId, nodeId, token, externalId, base, extended, consents, extra, tags
   });
 
   const merge = (err: Object): Promise<string> => {
@@ -204,7 +206,7 @@ const customer = (options: CustomerData): void => {
       const res = JSON.parse(err.response);
       const customerId = res.data.customer.id;
       return updateCustomer({
-        customerId, workspaceId, nodeId, token, externalId, base, extended, extra, tags
+        customerId, workspaceId, nodeId, token, externalId, base, extended, consents, extra, tags
       });
     } else {
       return Promise.reject(err);
@@ -226,7 +228,7 @@ const customer = (options: CustomerData): void => {
     if (id === cookieId) {
       return Promise.resolve(id);
     } else {
-      if (externalId || base || extended || extra || tags) {
+      if (externalId || base || extended || consents || extra || tags) {
         resetCookie();
         return reconcile(id);
       } else {

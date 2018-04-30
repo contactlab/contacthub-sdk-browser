@@ -1,7 +1,7 @@
 {
   "name": "contacthub",
   "version": "1.1.1",
-  "description": "Contacthub Tracking Script",
+  "description": "ContactHub Browser SDK",
   "main": "src/contacthub.js",
   "files": [
     "dist"
@@ -9,7 +9,7 @@
   "scripts": {
     "test": "karma start --single-run",
     "test-watch": "karma start",
-    "test-bs": "karma start --single-run --browsers bs_mac_firefox,bs_win7_ie10,bs_android_galaxys5,bs_ios_iphone6",
+    "test-bs": "karma start --single-run --browsers bs_win_ie10,bs_win_firefox,bs_win_edge,bs_android_galaxys8,bs_android_pixel,bs_ios_iphone8",
     "build": "npm run lint && npm run flow && npm run test && npm run webpack && npm run uglify",
     "lint": "eslint src && eslint test && eslint lib",
     "flow": "flow",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/buildo/contacthub.git"
+    "url": "git+https://github.com/contactlab/contacthub-sdk-browser.git"
   },
   "keywords": [
     "contactlab",
@@ -30,13 +30,13 @@
   "author": "",
   "license": "",
   "bugs": {
-    "url": "https://github.com/buildo/contacthub/issues"
+    "url": "https://github.com/contactlab/contacthub-sdk-browser/issues"
   },
-  "homepage": "https://github.com/buildo/contacthub#readme",
+  "homepage": "http://developer.contactlab.com/",
   "devDependencies": {
     "babel-cli": "^6.11.4",
     "babel-core": "^6.11.4",
-    "babel-eslint": "^6.1.2",
+    "babel-eslint": "^8.2.3",
     "babel-loader": "^6.2.4",
     "babel-plugin-syntax-flow": "^6.13.0",
     "babel-plugin-transform-es3-member-expression-literals": "^6.8.0",
@@ -48,19 +48,19 @@
     "babel-preset-es2015-loose": "^7.0.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
-    "eslint": "^3.5.0",
-    "eslint-config-buildo": "github:buildo/eslint-config",
-    "eslint-plugin-flowtype": "^2.16.1",
-    "flow-bin": "^0.32.0",
+    "eslint": "^4.19.1",
+    "eslint-config-buildo": "^0.2.2",
+    "eslint-plugin-flowtype": "^2.46.3",
+    "flow-bin": "^0.70.0",
     "http-server": "^0.9.0",
-    "karma": "^1.1.2",
-    "karma-browserstack-launcher": "^1.1.1",
-    "karma-chrome-launcher": "^1.0.1",
-    "karma-mocha": "^1.1.1",
-    "karma-phantomjs-launcher": "^1.0.1",
+    "karma": "^2.0.2",
+    "karma-browserstack-launcher": "^1.3.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-mocha": "^1.3.0",
+    "karma-phantomjs-launcher": "^1.0.4",
     "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^1.7.0",
-    "mocha": "^3.0.0",
+    "karma-webpack": "^3.0.0",
+    "mocha": "^5.1.1",
     "opn-cli": "^3.1.0",
     "sinon": "^2.0.0-pre.2",
     "uglify-js": "^2.7.0",

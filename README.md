@@ -64,11 +64,14 @@ ch('config', {
 ### The customer API
 
 Include this call only if you have details about the current user (e.g. the user
-is logged in).
+is logged in). All properties are optional.
+
+The full schemas for all Customer properties can be found at
+http://developer.contactlab.com/documentation/contacthub/schemas/
 
 ```js
 ch('customer', {
-  externalId: '456', // optional
+  externalId: '456',
   base: {
     firstName: 'Mario',
     lastName: 'Rossi',
@@ -76,18 +79,23 @@ ch('customer', {
       email: 'mario.rossi@example.com'
     }
   },
-  extended: {}, // optional
-  extra: '', // optional
-  tags: { //optional
+  consents: {
+  },
+  extended: {},
+  extra: '',
+  tags: {
     auto: [],
     manual: []
   }
 });
 ```
 
-If you have defined a matching policy in the ContactHub web interface, and the
-data you're providing matches the data of an existing customer, the existing
-customer will be updated instead.
+If you have defined a "matching policy" in your workspace (using the ContactHub
+web interface), and the data you're providing matches the data of an existing
+customer, the existing customer will be updated instead.
+
+If you have defined required properties in your workspace (using the ContactHub
+web interface), and they are not present in the JS object, the call will fail.
 
 #### Resending identical data
 
@@ -116,6 +124,26 @@ ch('customer', {
   }
 });
 ```
+
+#### Removing properties
+
+Because properties are always merged, if you want to _remove_ a property that
+was previously set on a Customer, you have to explictly assign a `null` value to
+it, for example:
+
+```js
+ch('customer', {
+  base: {
+    contacts: {
+      email: 'something@example.com',
+      mobilePhone: null
+    }
+  }
+});
+```
+
+If you omit the property, or set it to `undefined`, ContactHub will assume
+you want to keep the current value for that property.
 
 #### Logging out
 
