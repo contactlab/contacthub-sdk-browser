@@ -5,6 +5,7 @@ import sinon from 'sinon';
 /* global describe, it, beforeEach */
 
 const cookieName = '_ch';
+const utmCookieName = '_chutm';
 const varName = 'ch';
 const config = {
   workspaceId: 'workspace_id',
@@ -13,6 +14,7 @@ const config = {
 };
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
+const getUtmCookie = () => cookies.getJSON(utmCookieName) || {};
 
 const _ch = window[varName];
 
@@ -33,13 +35,20 @@ describe('Google Analytics automatic handling', () => {
     _ch('config', config);
   };
 
-  it('stores utm_* vars in the ch cookie', () => {
-    window.location.href = `${window.location.href}#?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz`;
+  it('does not store utm_* vars in the main _ch cookie', () => {
+    window.location.hash = '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
 
     setConfig();
-    _ch('event', { type: 'viewedPage' });
 
-    expect(getCookie().ga).to.eql({
+    expect(getCookie().ga).to.be.undefined;
+  });
+
+  it('stores utm_* vars in a separate _chutm cookie', () => {
+    window.location.hash = '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
+
+    setConfig();
+
+    expect(getUtmCookie()).to.eql({
       utm_source: 'foo',
       utm_medium: 'bar',
       utm_term: 'baz',
@@ -51,16 +60,16 @@ describe('Google Analytics automatic handling', () => {
   it('sends utm_* vars in the event payload', () => {
     setConfig();
 
-    const ga = {
+    const utm = {
       utm_source: 'foo',
       utm_medium: 'bar',
       utm_term: 'baz',
       utm_content: 'foobar',
       utm_campaign: 'foobarbaz'
     };
-    cookies.set(cookieName, Object.assign(getCookie(), { ga }));
+    cookies.set(utmCookieName, Object.assign(getUtmCookie(), utm));
     _ch('event', { type: 'viewedPage' });
     const req = requests[0];
-    expect(JSON.parse(req.requestBody).tracking).to.eql({ ga });
+    expect(JSON.parse(req.requestBody).tracking).to.eql({ utm });
   });
 });

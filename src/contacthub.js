@@ -8,6 +8,7 @@ import { Promise } from 'es6-promise';
 import type {
   ContactHubFunction,
   ContactHubCookie,
+  ContactHubUtmCookie,
   Auth,
   ConfigOptions,
   EventOptions,
@@ -21,6 +22,7 @@ xr.configure({
 
 const varName: string = window.ContactHubObject || 'ch';
 const cookieName: string = window.ContactHubCookie || '_ch';
+const utmCookieName: string = window.ContactHubUtmCookie || '_chutm';
 const apiUrl: string = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
 const getQueryParam = (name) => {
@@ -45,6 +47,12 @@ const getCookie = (): ContactHubCookie => {
   return cookie;
 };
 
+const getUtmCookie = (): ?ContactHubUtmCookie => {
+  const utmCookie: ?ContactHubUtmCookie = cookies.getJSON(utmCookieName);
+
+  return utmCookie;
+};
+
 const inferProperties = (type: string, customProperties?: Object): Object => {
   if (type === 'viewedPage') {
     const inferredProperties = {
@@ -62,8 +70,9 @@ const inferProperties = (type: string, customProperties?: Object): Object => {
 
 const event = (options: EventOptions): void => {
   const {
-    workspaceId, nodeId, token, context, contextInfo, sid, customerId, ga
+    workspaceId, nodeId, token, context, contextInfo, sid, customerId
   } = getCookie();
+  const utm = getUtmCookie();
   const { type, properties: customProperties } = options;
 
   if (!type) {
@@ -72,7 +81,7 @@ const event = (options: EventOptions): void => {
 
   const properties = inferProperties(type, customProperties);
 
-  const tracking = ga ? { ga } : undefined;
+  const tracking = utm ? { utm } : undefined;
 
   const bringBackProperties = customerId ? undefined : {
     type: 'SESSION_ID',
@@ -267,21 +276,22 @@ const allowedConfigOptions = [
   'token', 'workspaceId', 'nodeId', 'context', 'contextInfo'
 ];
 const config = (options: ConfigOptions): void => {
-  // get current ch cookie, if any
+  // get current _ch cookie, if any
   const _ch = cookies.getJSON(cookieName) || {};
 
-  // read Google Analytics query params if present
+  // get current _chutm cookie, if any
+  const _chutm = cookies.getJSON(utmCookieName) || {};
+
+  // read Google Analytics UTM query params if present
   const utm_source = getQueryParam('utm_source');
 
   if (utm_source) {
-    // Store ga values in the ch cookie, overwriting any previous ga value.
-    _ch.ga = {
-      utm_source,
-      utm_medium: getQueryParam('utm_medium'),
-      utm_term: getQueryParam('utm_term'),
-      utm_content: getQueryParam('utm_content'),
-      utm_campaign: getQueryParam('utm_campaign')
-    };
+    // Store UTM values in the ch cookie, overwriting any previous UTM value.
+    _chutm.utm_source = getQueryParam('utm_source');
+    _chutm.utm_medium = getQueryParam('utm_medium');
+    _chutm.utm_term = getQueryParam('utm_term');
+    _chutm.utm_content = getQueryParam('utm_content');
+    _chutm.utm_campaign = getQueryParam('utm_campaign');
   }
 
   // generate sid if not already present
@@ -301,7 +311,10 @@ const config = (options: ConfigOptions): void => {
   _ch.contextInfo = _ch.contextInfo || {};
 
   // set updated cookie
-  cookies.set(cookieName, _ch, { expires: 365 });
+  cookies.set(cookieName, _ch, { expires: 365 }); // expires in 1 year
+
+  // set updated utm cookie
+  cookies.set(utmCookieName, _chutm, { expires: 1 / 48 }); // expires in 30 mins
 
   // support special query param clabId
   const clabId = getQueryParam('clabId');
