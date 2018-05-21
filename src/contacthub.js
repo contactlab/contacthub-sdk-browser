@@ -24,7 +24,7 @@ const cookieName: string = window.ContactHubCookie || '_ch';
 const apiUrl: string = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
 const getQueryParam = (name) => {
-  const match = RegExp(`[?&]${name}=([^&]*)`).exec(window.location.search);
+  const match = RegExp(`[?&]${name}=([^&]*)`).exec(window.location.href);
   const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
   return val || undefined;
 };

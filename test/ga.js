@@ -34,7 +34,18 @@ describe('Google Analytics automatic handling', () => {
   };
 
   it('stores utm_* vars in the ch cookie', () => {
-    // FIXME: find a good way to mock window.location.search
+    window.location.href = `${window.location.href}#?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz`;
+
+    setConfig();
+    _ch('event', { type: 'viewedPage' });
+
+    expect(getCookie().ga).to.eql({
+      utm_source: 'foo',
+      utm_medium: 'bar',
+      utm_term: 'baz',
+      utm_content: 'foobar',
+      utm_campaign: 'foobarbaz'
+    });
   });
 
   it('sends utm_* vars in the event payload', () => {
