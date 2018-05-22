@@ -81,7 +81,7 @@ const event = (options: EventOptions): void => {
 
   const properties = inferProperties(type, customProperties);
 
-  const tracking = utm ? { utm } : undefined;
+  const tracking = utm && utm.utm_source ? { ga: utm } : undefined;
 
   const bringBackProperties = customerId ? undefined : {
     type: 'SESSION_ID',
@@ -286,7 +286,7 @@ const config = (options: ConfigOptions): void => {
   const utm_source = getQueryParam('utm_source');
 
   if (utm_source) {
-    // Store UTM values in the ch cookie, overwriting any previous UTM value.
+    // Store UTM values in the _chutm cookie, overwriting any previous UTM value.
     _chutm.utm_source = getQueryParam('utm_source');
     _chutm.utm_medium = getQueryParam('utm_medium');
     _chutm.utm_term = getQueryParam('utm_term');

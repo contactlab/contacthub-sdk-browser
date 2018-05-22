@@ -21,7 +21,7 @@ const _ch = window[varName];
 let requests;
 let xhr;
 
-describe('Google Analytics automatic handling', () => {
+describe('UTM automatic handling', () => {
   beforeEach(() => {
     cookies.remove(cookieName);
     requests = [];
@@ -70,6 +70,6 @@ describe('Google Analytics automatic handling', () => {
     cookies.set(utmCookieName, Object.assign(getUtmCookie(), utm));
     _ch('event', { type: 'viewedPage' });
     const req = requests[0];
-    expect(JSON.parse(req.requestBody).tracking).to.eql({ utm });
+    expect(JSON.parse(req.requestBody).tracking).to.eql({ ga: utm });
   });
 });
