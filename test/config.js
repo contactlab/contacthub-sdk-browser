@@ -82,4 +82,21 @@ describe('Config API', () => {
     expect(getCookie().workspaceId).to.equal('workspace_id');
     expect(getCookie().token).to.equal('ABC123');
   });
+
+  it('removes user data from cookie if the token changes', () => {
+    cookies.set(cookieName, Object.assign(getCookie(), {
+      customerId: 'customer-id',
+      token: 'ABC123'
+    }));
+
+    _ch('config', {
+      workspaceId: 'workspace_id',
+      nodeId: 'node_id',
+      token: 'CDE456'
+    });
+
+    expect(getCookie().token).to.equal('CDE456');
+    expect(getCookie().customerId).to.be.undefined;
+    expect(getCookie().hash).to.be.undefined;
+  });
 });

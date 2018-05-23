@@ -277,7 +277,10 @@ const allowedConfigOptions = [
 ];
 const config = (options: ConfigOptions): void => {
   // get current _ch cookie, if any
-  const _ch = cookies.getJSON(cookieName) || {};
+  const currentCookie = cookies.getJSON(cookieName) || {};
+
+  // reset cookie if token has changed
+  const _ch = (options.token && options.token !== currentCookie.token) ? {} : currentCookie;
 
   // get current _chutm cookie, if any
   const _chutm = cookies.getJSON(utmCookieName) || {};
