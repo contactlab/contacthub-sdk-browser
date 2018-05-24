@@ -57,16 +57,20 @@ ch('config', {
   workspaceId: 'w_id', // required, found in the ContactHub admin area
   nodeId: 'node_id', // required, found in the ContactHub admin area
   token: 'UYTF546FUTF636JH', // required, found in the ContactHub admin area
-  context: 'CTX' // optional, defaults to 'WEB'
+  context: 'CTX', // optional, defaults to 'WEB'
+  contextInfo: {} // optional, defaults to an empty object
 });
 ```
+
+The JSON schemas for the `contextInfo` property can be found at
+http://developer.contactlab.com/documentation/contacthub/schemas/
 
 ### The customer API
 
 Include this call only if you have details about the current user (e.g. the user
 is logged in). All properties are optional.
 
-The full schemas for all Customer properties can be found at
+The JSON schemas for all Customer properties can be found at
 http://developer.contactlab.com/documentation/contacthub/schemas/
 
 ```js
