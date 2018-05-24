@@ -284,7 +284,7 @@ const config = (options: ConfigOptions): void => {
   const currentCookie = cookies.getJSON(cookieName) || {};
 
   // check if the auth token has changed
-  const hasTokenChanged = options.token && options.token !== currentCookie.token;
+  const hasTokenChanged = options.token !== currentCookie.token;
 
   const _ch = hasTokenChanged ? {} : currentCookie;
 
