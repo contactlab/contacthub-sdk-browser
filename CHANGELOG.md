@@ -2,6 +2,14 @@
 
 
 
+## [v1.3.0](https://github.com/contactlab/contacthub-sdk-browser/tree/v1.3.0) (2018-05-25)
+[Full Changelog](https://github.com/contactlab/contacthub-sdk-browser/compare/v1.2.0...v1.3.0)
+
+#### New features:
+
+- Reset cookie if token changes [#40](https://github.com/contactlab/contacthub-sdk-browser/issues/40)
+- Expire utm information after 30 minutes [#39](https://github.com/contactlab/contacthub-sdk-browser/issues/39)
+
 ## [v1.2.0](https://github.com/contactlab/contacthub-sdk-browser/tree/v1.2.0) (2018-04-30)
 [Full Changelog](https://github.com/contactlab/contacthub-sdk-browser/compare/v1.1.1...v1.2.0)
 
