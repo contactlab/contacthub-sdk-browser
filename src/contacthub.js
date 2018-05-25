@@ -276,8 +276,17 @@ const allowedConfigOptions = [
   'token', 'workspaceId', 'nodeId', 'context', 'contextInfo'
 ];
 const config = (options: ConfigOptions): void => {
+  if (!(options.workspaceId && options.nodeId && options.token)) {
+    throw new Error('Invalid ContactHub configuration');
+  }
+
   // get current _ch cookie, if any
-  const _ch = cookies.getJSON(cookieName) || {};
+  const currentCookie = cookies.getJSON(cookieName) || {};
+
+  // check if the auth token has changed
+  const hasTokenChanged = options.token !== currentCookie.token;
+
+  const _ch = hasTokenChanged ? {} : currentCookie;
 
   // get current _chutm cookie, if any
   const _chutm = cookies.getJSON(utmCookieName) || {};

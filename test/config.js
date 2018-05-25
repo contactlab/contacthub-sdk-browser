@@ -1,5 +1,8 @@
+// @flow
 import { expect } from 'chai';
 import cookies from 'js-cookie';
+
+import type { ContactHubFunction } from '../lib/types';
 
 /* global describe, it, beforeEach */
 
@@ -8,7 +11,7 @@ const varName = 'ch';
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-const _ch = window[varName];
+const _ch:ContactHubFunction = window[varName];
 
 describe('Config API', () => {
 
@@ -36,7 +39,11 @@ describe('Config API', () => {
 
   it('does not regenerate sessionId if already present', () => {
     const sid = getCookie().sid;
-    _ch('config', {});
+    _ch('config', {
+      workspaceId: 'workspace_id',
+      nodeId: 'node_id',
+      token: 'ABC123'
+    });
     expect(getCookie().sid).to.equal(sid);
   });
 
@@ -74,12 +81,20 @@ describe('Config API', () => {
     expect(getCookie().contextInfo).to.eql({ foo: 'bar' });
   });
 
-  it('allows to override a single required param', () => {
+  it('removes user data from cookie if the token changes', () => {
+    cookies.set(cookieName, Object.assign(getCookie(), {
+      customerId: 'customer-id',
+      token: 'ABC123'
+    }));
+
     _ch('config', {
-      nodeId: 'another_node'
+      workspaceId: 'workspace_id',
+      nodeId: 'node_id',
+      token: 'CDE456'
     });
-    expect(getCookie().nodeId).to.equal('another_node');
-    expect(getCookie().workspaceId).to.equal('workspace_id');
-    expect(getCookie().token).to.equal('ABC123');
+
+    expect(getCookie().token).to.equal('CDE456');
+    expect(getCookie().customerId).to.be.undefined;
+    expect(getCookie().hash).to.be.undefined;
   });
 });
