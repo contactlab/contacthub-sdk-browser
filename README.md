@@ -63,7 +63,7 @@ ch('config', {
 ```
 
 The JSON schemas for the `contextInfo` property can be found at
-http://developer.contactlab.com/documentation/contacthub/schemas/
+http://developer.contactlab.com/hub-json-schemas/
 
 ### The customer API
 
@@ -71,7 +71,7 @@ Include this call only if you have details about the current user (e.g. the user
 is logged in). All properties are optional.
 
 The JSON schemas for all Customer properties can be found at
-http://developer.contactlab.com/documentation/contacthub/schemas/
+http://developer.contactlab.com/hub-json-schemas/
 
 ```js
 ch('customer', {
