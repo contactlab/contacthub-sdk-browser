@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
@@ -26,7 +26,7 @@ describe('UTM automatic handling', () => {
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = (xhr) => {
+    xhr.onCreate = xhr => {
       requests.push(xhr);
     };
   });
@@ -36,7 +36,8 @@ describe('UTM automatic handling', () => {
   };
 
   it('does not store utm_* vars in the main _ch cookie', () => {
-    window.location.hash = '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
+    window.location.hash =
+      '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
 
     setConfig();
 
@@ -44,7 +45,8 @@ describe('UTM automatic handling', () => {
   });
 
   it('stores utm_* vars in a separate _chutm cookie', () => {
-    window.location.hash = '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
+    window.location.hash =
+      '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
 
     setConfig();
 
@@ -68,8 +70,8 @@ describe('UTM automatic handling', () => {
       utm_campaign: 'foobarbaz'
     };
     cookies.set(utmCookieName, Object.assign(getUtmCookie(), utm));
-    _ch('event', { type: 'viewedPage' });
+    _ch('event', {type: 'viewedPage'});
     const req = requests[0];
-    expect(JSON.parse(req.requestBody).tracking).to.eql({ ga: utm });
+    expect(JSON.parse(req.requestBody).tracking).to.eql({ga: utm});
   });
 });

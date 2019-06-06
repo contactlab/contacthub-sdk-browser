@@ -1,8 +1,8 @@
 // @flow
-import { expect } from 'chai';
+import {expect} from 'chai';
 import cookies from 'js-cookie';
 
-import type { ContactHubFunction } from '../lib/types';
+import type {ContactHubFunction} from '../lib/types';
 
 /* global describe, it, beforeEach */
 
@@ -11,10 +11,9 @@ const varName = 'ch';
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-const _ch:ContactHubFunction = window[varName];
+const _ch: ContactHubFunction = window[varName];
 
 describe('Config API', () => {
-
   beforeEach(() => {
     cookies.remove(cookieName);
   });
@@ -78,14 +77,17 @@ describe('Config API', () => {
         foo: 'bar'
       }
     });
-    expect(getCookie().contextInfo).to.eql({ foo: 'bar' });
+    expect(getCookie().contextInfo).to.eql({foo: 'bar'});
   });
 
   it('removes user data from cookie if the token changes', () => {
-    cookies.set(cookieName, Object.assign(getCookie(), {
-      customerId: 'customer-id',
-      token: 'ABC123'
-    }));
+    cookies.set(
+      cookieName,
+      Object.assign(getCookie(), {
+        customerId: 'customer-id',
+        token: 'ABC123'
+      })
+    );
 
     _ch('config', {
       workspaceId: 'workspace_id',

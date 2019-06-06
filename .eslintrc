@@ -1,5 +1,5 @@
 {
-  "extends": "buildo",
+  "extends": ["buildo", "prettier"],
   "plugins": ["flowtype"],
   "rules": {
     "flowtype/delimiter-dangle": [2, "never"],

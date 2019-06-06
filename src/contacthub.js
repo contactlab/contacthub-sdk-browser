@@ -3,7 +3,7 @@ import xr from 'xr';
 import uuid from 'uuid';
 import sha256 from 'jssha/src/sha256';
 import cookies from 'js-cookie';
-import { Promise } from 'es6-promise';
+import {Promise} from 'es6-promise';
 
 import type {
   ContactHubFunction,
@@ -23,9 +23,10 @@ xr.configure({
 const varName: string = window.ContactHubObject || 'ch';
 const cookieName: string = window.ContactHubCookie || '_ch';
 const utmCookieName: string = window.ContactHubUtmCookie || '_chutm';
-const apiUrl: string = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
+const apiUrl: string =
+  window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
-const getQueryParam = (name) => {
+const getQueryParam = name => {
   const match = RegExp(`[?&]${name}=([^&]*)`).exec(window.location.href);
   const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
   return val || undefined;
@@ -70,10 +71,16 @@ const inferProperties = (type: string, customProperties?: Object): Object => {
 
 const event = (options: EventOptions): void => {
   const {
-    workspaceId, nodeId, token, context, contextInfo, sid, customerId
+    workspaceId,
+    nodeId,
+    token,
+    context,
+    contextInfo,
+    sid,
+    customerId
   } = getCookie();
   const utm = getUtmCookie();
-  const { type, properties: customProperties } = options;
+  const {type, properties: customProperties} = options;
 
   if (!type) {
     throw new Error('Missing required event type');
@@ -81,13 +88,15 @@ const event = (options: EventOptions): void => {
 
   const properties = inferProperties(type, customProperties);
 
-  const tracking = utm && utm.utm_source ? { ga: utm } : undefined;
+  const tracking = utm && utm.utm_source ? {ga: utm} : undefined;
 
-  const bringBackProperties = customerId ? undefined : {
-    type: 'SESSION_ID',
-    value: sid,
-    nodeId
-  };
+  const bringBackProperties = customerId
+    ? undefined
+    : {
+        type: 'SESSION_ID',
+        value: sid,
+        nodeId
+      };
 
   xr({
     method: 'POST',
@@ -110,66 +119,97 @@ const event = (options: EventOptions): void => {
 };
 
 const createCustomer = ({
-  workspaceId, nodeId, token, externalId, base, extended, consents, extra, tags
-}: {|...Auth, ...CustomerData|}): Promise<string> => xr({
-  method: 'POST',
-  url: `${apiUrl}/workspaces/${workspaceId}/customers`,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`
-  },
-  data: {
-    nodeId,
-    externalId,
-    base,
-    extended,
-    consents,
-    extra,
-    tags
-  }
-}).then((response) => {
-  return response.data.id;
-});
+  workspaceId,
+  nodeId,
+  token,
+  externalId,
+  base,
+  extended,
+  consents,
+  extra,
+  tags
+}: {|
+  ...Auth,
+  ...CustomerData
+|}): Promise<string> =>
+  xr({
+    method: 'POST',
+    url: `${apiUrl}/workspaces/${workspaceId}/customers`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    data: {
+      nodeId,
+      externalId,
+      base,
+      extended,
+      consents,
+      extra,
+      tags
+    }
+  }).then(response => {
+    return response.data.id;
+  });
 
 const updateCustomer = ({
-  customerId, workspaceId, token, externalId, base, extended, consents, extra, tags
-}: {|...Auth, ...CustomerData, ...CustomerId|}): Promise<string> => xr({
-  method: 'PATCH',
-  url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}`,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`
-  },
-  data: {
-    externalId,
-    base,
-    extended,
-    consents,
-    extra,
-    tags
-  }
-}).then(() => {
-  return customerId;
-});
+  customerId,
+  workspaceId,
+  token,
+  externalId,
+  base,
+  extended,
+  consents,
+  extra,
+  tags
+}: {|
+  ...Auth,
+  ...CustomerData,
+  ...CustomerId
+|}): Promise<string> =>
+  xr({
+    method: 'PATCH',
+    url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    data: {
+      externalId,
+      base,
+      extended,
+      consents,
+      extra,
+      tags
+    }
+  }).then(() => {
+    return customerId;
+  });
 
 const reconcileCustomer = ({
-  customerId, workspaceId, token
-}: {|...Auth, ...CustomerId|}): Promise<string> => xr({
-  method: 'POST',
-  url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}/sessions`,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`
-  },
-  data: {
-    value: getCookie().sid
-  }
-}).then(() => {
-  return customerId;
-});
+  customerId,
+  workspaceId,
+  token
+}: {|
+  ...Auth,
+  ...CustomerId
+|}): Promise<string> =>
+  xr({
+    method: 'POST',
+    url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}/sessions`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    data: {
+      value: getCookie().sid
+    }
+  }).then(() => {
+    return customerId;
+  });
 
 const computeHash = (data: CustomerData): string => {
   const shaObj = new sha256('SHA-256', 'TEXT');
@@ -178,58 +218,104 @@ const computeHash = (data: CustomerData): string => {
 };
 
 const resetCookie = () => {
-  cookies.set(cookieName, Object.assign(getCookie(), {
-    sid: newSessionId(),
-    customerId: undefined,
-    hash: undefined
-  }));
+  cookies.set(
+    cookieName,
+    Object.assign(getCookie(), {
+      sid: newSessionId(),
+      customerId: undefined,
+      hash: undefined
+    })
+  );
 };
 
 const customer = (options: CustomerData): void => {
-  if (!options) { // an empty object is a request for a session reset
+  if (!options) {
+    // an empty object is a request for a session reset
     resetCookie();
 
     return;
   }
 
-  const { workspaceId, nodeId, token, customerId, hash } = getCookie();
-  const { id, externalId, base, extended, consents, extra, tags } = options;
-  const newHash = computeHash({ base, extended, consents, extra, tags, externalId });
+  const {workspaceId, nodeId, token, customerId, hash} = getCookie();
+  const {id, externalId, base, extended, consents, extra, tags} = options;
+  const newHash = computeHash({
+    base,
+    extended,
+    consents,
+    extra,
+    tags,
+    externalId
+  });
 
   const update = (customerId: string): Promise<string> => {
     if (externalId || base || extended || consents || extra || tags) {
       return updateCustomer({
-        customerId, workspaceId, nodeId, token, externalId, base, extended, consents, extra, tags
+        customerId,
+        workspaceId,
+        nodeId,
+        token,
+        externalId,
+        base,
+        extended,
+        consents,
+        extra,
+        tags
       });
     } else {
       return Promise.resolve(customerId);
     }
   };
 
-  const create = (): Promise<string> => createCustomer({
-    workspaceId, nodeId, token, externalId, base, extended, consents, extra, tags
-  });
+  const create = (): Promise<string> =>
+    createCustomer({
+      workspaceId,
+      nodeId,
+      token,
+      externalId,
+      base,
+      extended,
+      consents,
+      extra,
+      tags
+    });
 
   const merge = (err: Object): Promise<string> => {
     if (err.status === 409) {
       const res = JSON.parse(err.response);
       const customerId = res.data.customer.id;
       return updateCustomer({
-        customerId, workspaceId, nodeId, token, externalId, base, extended, consents, extra, tags
+        customerId,
+        workspaceId,
+        nodeId,
+        token,
+        externalId,
+        base,
+        extended,
+        consents,
+        extra,
+        tags
       });
     } else {
       return Promise.reject(err);
     }
   };
 
-  const reconcile = (customerId: string): Promise<string> => reconcileCustomer({
-    customerId, workspaceId, token, nodeId
-  });
+  const reconcile = (customerId: string): Promise<string> =>
+    reconcileCustomer({
+      customerId,
+      workspaceId,
+      token,
+      nodeId
+    });
 
   const store = (customerId: string): string => {
-    cookies.set(cookieName, Object.assign(getCookie(), {
-      customerId, hash: newHash
-    }));
+    cookies.set(
+      cookieName,
+      Object.assign(getCookie(), {
+        customerId,
+        hash: newHash
+      })
+    );
     return customerId;
   };
 
@@ -248,32 +334,34 @@ const customer = (options: CustomerData): void => {
     }
   };
 
-  if (hash === newHash) { return; }
+  if (hash === newHash) {
+    return;
+  }
 
   if (id && customerId) {
-
-    resolveIdConflict(id, customerId).then(update).then(store);
-
+    resolveIdConflict(id, customerId)
+      .then(update)
+      .then(store);
   } else if (id) {
-
-    reconcile(id).then(update).then(store);
-
+    reconcile(id)
+      .then(update)
+      .then(store);
   } else if (customerId) {
-
     update(customerId).then(store);
-
   } else {
-
     create()
       .catch(merge)
       .then(store)
       .then(reconcile);
-
   }
 };
 
 const allowedConfigOptions = [
-  'token', 'workspaceId', 'nodeId', 'context', 'contextInfo'
+  'token',
+  'workspaceId',
+  'nodeId',
+  'context',
+  'contextInfo'
 ];
 const config = (options: ConfigOptions): void => {
   if (!(options.workspaceId && options.nodeId && options.token)) {
@@ -320,26 +408,26 @@ const config = (options: ConfigOptions): void => {
   _ch.contextInfo = _ch.contextInfo || {};
 
   // set updated cookie
-  cookies.set(cookieName, _ch, { expires: 365 }); // expires in 1 year
+  cookies.set(cookieName, _ch, {expires: 365}); // expires in 1 year
 
   // set updated utm cookie
-  cookies.set(utmCookieName, _chutm, { expires: 1 / 48 }); // expires in 30 mins
+  cookies.set(utmCookieName, _chutm, {expires: 1 / 48}); // expires in 30 mins
 
   // support special query param clabId
   const clabId = getQueryParam('clabId');
 
   if (clabId) {
-    customer({ id: clabId });
+    customer({id: clabId});
   }
 };
 
-const ContactHub:ContactHubFunction = (method, options) => {
+const ContactHub: ContactHubFunction = (method, options) => {
   if (!Array.prototype.map) {
     // No country for old IEs
     return;
   }
 
-  const methods = { config, customer, event };
+  const methods = {config, customer, event};
 
   if (method in methods) {
     methods[method].call(undefined, (options: any));

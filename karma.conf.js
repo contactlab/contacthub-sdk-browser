@@ -2,7 +2,6 @@ const webpackConfig = require('./webpack.config.js');
 
 module.exports = function(config) {
   config.set({
-
     basePath: '',
 
     frameworks: ['mocha'],
@@ -14,14 +13,9 @@ module.exports = function(config) {
 
     webpack: webpackConfig,
 
-    files: [
-      'test/queue.js',
-      'src/contacthub.js',
-      'test/contacthub.js'
-    ],
+    files: ['test/queue.js', 'src/contacthub.js', 'test/contacthub.js'],
 
-    exclude: [
-    ],
+    exclude: [],
 
     reporters: ['progress'],
 

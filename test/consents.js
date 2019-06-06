@@ -1,12 +1,10 @@
 // @flow
 
-import { expect } from 'chai';
+import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-import type {
-  CustomerData
-} from '../lib/types';
+import type {CustomerData} from '../lib/types';
 
 /* global describe, it, beforeEach, afterEach */
 
@@ -49,7 +47,9 @@ const _ch = window[varName];
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-const setConfig = () => { _ch('config', config); };
+const setConfig = () => {
+  _ch('config', config);
+};
 
 let requests = [];
 let xhr;
@@ -67,13 +67,13 @@ describe('Consents', () => {
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = (xhr) => {
+    xhr.onCreate = xhr => {
       requests.push(xhr);
     };
     setConfig();
   });
 
-  afterEach((done) => {
+  afterEach(done => {
     whenDone(() => done());
   });
 
@@ -86,20 +86,21 @@ describe('Consents', () => {
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/customers`
     );
-    expect(JSON.parse(req.requestBody).consents)
-      .to.eql(mario.consents);
+    expect(JSON.parse(req.requestBody).consents).to.eql(mario.consents);
   });
 
-  it('can be updated', (done) => {
-    cookies.set(cookieName, Object.assign(getCookie(), {
-      customerId: 'my-cid'
-    }));
+  it('can be updated', done => {
+    cookies.set(
+      cookieName,
+      Object.assign(getCookie(), {
+        customerId: 'my-cid'
+      })
+    );
 
     _ch('customer', mario);
     requests[0].respond(200);
 
     whenDone(() => {
-
       const newConsents = {
         softSpam: {
           email: {
@@ -108,7 +109,7 @@ describe('Consents', () => {
         }
       };
 
-      _ch('customer', Object.assign(mario, { consents: newConsents }));
+      _ch('customer', Object.assign(mario, {consents: newConsents}));
       expect(requests.length).to.equal(2);
 
       whenDone(() => {
@@ -118,8 +119,7 @@ describe('Consents', () => {
         expect(req.url).to.equal(
           `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
         );
-        expect(JSON.parse(req.requestBody).consents)
-          .to.eql(newConsents);
+        expect(JSON.parse(req.requestBody).consents).to.eql(newConsents);
 
         done();
       });
