@@ -57,6 +57,14 @@ describe('Config API', () => {
     expect(getCookie().context).to.equal('WEB');
   });
 
+  it('sets `{}` if contextInfo not provided', () => {
+    expect(getCookie().contextInfo).to.eql({});
+  });
+
+  it('sets `false` if debug not provided', () => {
+    expect(getCookie().debug).to.equal(false);
+  });
+
   it('allows to specify optional context', () => {
     _ch('config', {
       workspaceId: 'workspace_id',
@@ -73,11 +81,21 @@ describe('Config API', () => {
       nodeId: 'node_id',
       token: 'ABC123',
       context: 'foo',
-      contextInfo: {
-        foo: 'bar'
-      }
+      contextInfo: {foo: 'bar'}
     });
     expect(getCookie().contextInfo).to.eql({foo: 'bar'});
+  });
+
+  it('allows to specify optional debug', () => {
+    _ch('config', {
+      workspaceId: 'workspace_id',
+      nodeId: 'node_id',
+      token: 'ABC123',
+      context: 'foo',
+      contextInfo: {foo: 'bar'},
+      debug: true
+    });
+    expect(getCookie().debug).to.equal(true);
   });
 
   it('removes user data from cookie if the token changes', () => {
@@ -98,5 +116,10 @@ describe('Config API', () => {
     expect(getCookie().token).to.equal('CDE456');
     expect(getCookie().customerId).to.be.undefined;
     expect(getCookie().hash).to.be.undefined;
+  });
+
+  it('thrown if required option are not specified', () => {
+    // $FlowFixMe
+    expect(() => _ch('config', {})).to.throw;
   });
 });

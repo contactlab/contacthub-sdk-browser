@@ -26,6 +26,12 @@ const utmCookieName: string = window.ContactHubUtmCookie || '_chutm';
 const apiUrl: string =
   window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
+const log = (debug: boolean, error: any): void => {
+  if (debug) {
+    return window.console.error('[DEBUG] contacthub-sdk-browser', error); // eslint-disable-line no-console
+  }
+};
+
 const getQueryParam = name => {
   const match = RegExp(`[?&]${name}=([^&]*)`).exec(window.location.href);
   const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
@@ -361,11 +367,17 @@ const allowedConfigOptions = [
   'workspaceId',
   'nodeId',
   'context',
-  'contextInfo'
+  'contextInfo',
+  'debug'
 ];
+
 const config = (options: ConfigOptions): void => {
   if (!(options.workspaceId && options.nodeId && options.token)) {
-    throw new Error('Invalid ContactHub configuration');
+    const err = new Error('Invalid ContactHub configuration');
+    window.console.log('saasdasd');
+    log(options.debug || false, err);
+
+    throw err;
   }
 
   // get current _ch cookie, if any
@@ -406,6 +418,7 @@ const config = (options: ConfigOptions): void => {
   // default values for context and contextInfo
   _ch.context = _ch.context || 'WEB';
   _ch.contextInfo = _ch.contextInfo || {};
+  _ch.debug = _ch.debug || false;
 
   // set updated cookie
   cookies.set(cookieName, _ch, {expires: 365}); // expires in 1 year
