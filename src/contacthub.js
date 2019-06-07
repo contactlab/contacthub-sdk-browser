@@ -89,13 +89,16 @@ const event = (options: EventOptions): void => {
     context,
     contextInfo,
     sid,
-    customerId
+    customerId,
+    debug
   } = getCookie();
   const utm = getUtmCookie();
   const {type, properties: customProperties} = options;
 
   if (!type) {
-    throw new Error('Missing required event type');
+    const error = 'Missing required event type';
+    log(debug, error);
+    throw new Error(error);
   }
 
   const properties = inferProperties(type, customProperties);
@@ -384,11 +387,11 @@ const allowedConfigOptions = [
 
 const config = (options: ConfigOptions): void => {
   if (!(options.workspaceId && options.nodeId && options.token)) {
-    const err = new Error('Invalid ContactHub configuration');
+    const err = 'Invalid ContactHub configuration';
 
-    log(options.debug || false, err.message);
+    log(options.debug || false, err);
 
-    throw err;
+    throw new Error(err);
   }
 
   // get current _ch cookie, if any

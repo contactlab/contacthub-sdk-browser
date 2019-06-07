@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-/* global describe, it, beforeEach */
+/* global describe, it, beforeEach, afterEach */
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -13,15 +13,25 @@ const config = {
   token: 'ABC123'
 };
 
-const getCookie = () => cookies.getJSON(cookieName) || {};
-
 const _ch = window[varName];
 
+const getCookie = () => cookies.getJSON(cookieName) || {};
+
+const setConfig = d => {
+  const debug = d || false;
+  _ch('config', Object.assign({}, config, {debug}));
+};
+
+let spyError;
 let requests;
 let xhr;
 
+const debugMsg = msg =>
+  spyError.calledWith('[DEBUG] contacthub-sdk-browser', msg);
+
 describe('Event API', () => {
   beforeEach(() => {
+    spyError = sinon.stub(console, 'error').callsFake(() => undefined);
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
@@ -30,9 +40,9 @@ describe('Event API', () => {
     };
   });
 
-  const setConfig = () => {
-    _ch('config', config);
-  };
+  afterEach(() => {
+    spyError.restore();
+  });
 
   it('checks if required config is set', () => {
     expect(() => {
@@ -163,5 +173,28 @@ describe('Event API', () => {
     const reqBody = JSON.parse(req.requestBody);
 
     expect(reqBody.contextInfo).to.eql({foo: 'bar'});
+  });
+
+  // --- Rejects
+  it('should throw and log error when event type is not defined', () => {
+    setConfig(true);
+    expect(() => {
+      _ch('event', {});
+    }).to.throw(Error);
+
+    expect(debugMsg('Missing required event type')).to.be.true;
+  });
+
+  it('should log api call rejections', done => {
+    setConfig(true);
+
+    _ch('event', {type: 'viewedPage'});
+
+    requests[0].respond(500, {}, 'KO');
+
+    setTimeout(() => {
+      expect(debugMsg('KO')).to.be.true;
+      done();
+    }, 2);
   });
 });
