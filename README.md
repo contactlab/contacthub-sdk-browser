@@ -21,8 +21,11 @@ window.ch=function(){(ch.q=ch.q||[]).push(arguments)};
 <script async src='https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js'></script>
 ```
 
-Compressed and uncompressed copies of Contacthub Analytics JS files are available. The uncompressed file is best used during development or debugging; the compressed file saves bandwidth and improves performance in production.
-Use CDNs can offer a performance benefit by hosting Contacthub Analytics JS on servers spread across the globe. This also offers an advantage that if the visitor to your webpage has already downloaded a copy of Contacthub Analytics JS from the same CDN, it won't have to be re-downloaded.
+Compressed and uncompressed copies of Contacthub SDK files are available.
+The uncompressed file is best used during development or debugging; the compressed file saves bandwidth and improves performance in production.
+
+Use CDNs can offer a performance benefit by hosting Contacthub SDK on servers spread across the globe.
+This also offers an advantage that if the visitor to your webpage has already downloaded a copy of Contacthub SDK from the same CDN, it won't have to be re-downloaded.
 
 To load a hosted library, copy and paste the HTML snippet for that library (shown below) in your web page.
 
@@ -52,9 +55,9 @@ We recommend that you load libraries from the CDN via HTTPS, even if your own we
 
 ```js
 ch('config', {
-  workspaceId: 'w_id', // required, found in the ContactHub admin area
-  nodeId: 'node_id', // required, found in the ContactHub admin area
-  token: 'UYTF546FUTF636JH', // required, found in the ContactHub admin area
+  workspaceId: 'w_id', // required, found in the Contacthub admin area
+  nodeId: 'node_id', // required, found in the Contacthub admin area
+  token: 'UYTF546FUTF636JH', // required, found in the Contacthub admin area
   context: 'CTX', // optional, defaults to 'WEB'
   contextInfo: {}, // optional, defaults to an empty object,
   debug: true // optional, defaults to false
@@ -63,7 +66,7 @@ ch('config', {
 
 The JSON schemas for the `contextInfo` property can be found [here](http://developer.contactlab.com/hub-swagger/).
 
-If the `debug` property is set to `true`, the SDK will log errors to the browser's console.
+If the `debug` property is set to `true`, the Contacthub SDK will log errors to the browser's console.
 
 ### The customer API
 
@@ -92,13 +95,13 @@ ch('customer', {
 });
 ```
 
-If you have defined a "matching policy" in your workspace (using the ContactHub web interface), and the data you're providing matches the data of an existing customer, the existing customer will be updated instead.
+If you have defined a "matching policy" in your workspace (using the Contacthub web interface), and the data you're providing matches the data of an existing customer, the existing customer will be updated instead.
 
-If you have defined required properties in your workspace (using the ContactHub web interface), and they are not present in the JS object, the call will fail.
+If you have defined required properties in your workspace (using the Contacthub web interface), and they are not present in the javascript object, the call will fail.
 
 #### Resending identical data
 
-It's safe to call this function multiple times with the same data (e.g. in the HEAD section of all of your pages) as an encrypted hash of this data is stored in a cookie and won't be resent to the API if no value has changed.
+It's safe to call this function multiple times with the same data (e.g. in the `HEAD` section of all of your pages) as an encrypted hash of this data is stored in a cookie and won't be resent to the API if no value has changed.
 
 #### Single Page Apps
 
@@ -106,7 +109,7 @@ You can also call this function the moment a user succesfully logs in, if the lo
 
 #### Updating the current user
 
-If a user adds some personal information to his/her profile, you don't need to send his full profile again, as the new data you send will be automatically merged with the data that is already available on the ContactHub database.
+If a user adds some personal information to his/her profile, you don't need to send his full profile again, as the new data you send will be automatically merged with the data that is already available on the Contacthub database.
 
 ```js
 // Add the mobile phone to the existing customer data
@@ -121,7 +124,7 @@ ch('customer', {
 
 #### Removing properties
 
-Because properties are always merged, if you want to _remove_ a property that was previously set on a Customer, you have to explictly assign a `null` value to it, for example:
+Because properties are always merged, if you want to actually _remove_ a property that was previously set on a Customer, you have to explictly assign a `null` value to it, for example:
 
 ```js
 ch('customer', {
@@ -134,11 +137,11 @@ ch('customer', {
 });
 ```
 
-If you omit the property, or set it to `undefined`, ContactHub will assume you want to keep the current value for that property.
+If you omit the property, or set it to `undefined`, Contacthub will assume you want to keep the current value for that property.
 
 #### Logging out
 
-If a user logs out, you might want to stop linking events to his/her session. You can call `ch('customer')` without the second parameter and a new ContactHub session id will be generated.
+If a user logs out, you might want to stop linking events to his/her session. You can call `ch('customer')` without the second parameter and a new Contacthub session id will be generated.
 All the events from this point will be associated to the new session id and will not be linked to the previous user.
 
 ### The event API
@@ -150,19 +153,19 @@ ch('event', {
 });
 ```
 
-Please note we will infer some standard properties automically (url, title, referrer, path).
+Please note we will infer some standard properties automatically (`url`, `title`, `referrer`, `path`).
 If you want, you can override those in your custom `properties` object.
 
-Since v1.0.0 of this library, `utm_` tags from Google Analytics are also automatically detected from the query string, stored in the ContactHub cookie and attached automatically to all ContactHub Events.
+Since v1.0.0 of this library, `utm_` tags from Google Analytics are also automatically detected from the query string, stored in the ContactHub cookie and attached automatically to all Contacthub Events.
 
 ## Advanced usage
 
-#### Renaming the global ContactHub object
+#### Renaming the global Contacthub object
 
 This script will register a global variable in your `window` object called `ch`.
 This is similar for example to the `ga` global variable used by Google Analytics.
-If for any reason you already have a global variable called `ch` in your website, you can ask ContactHub to use a different name.
-Simply add this line _before_ the standard ContactHub snippet:
+If for any reason you already have a global variable called `ch` in your website, you can ask Contacthub to use a different name.
+Simply add this line _before_ the standard Contacthub snippet:
 
 ```js
 window.ContactHubObject = 'chub';
@@ -180,9 +183,9 @@ You also have to replace all occurrences of `ch` in the snippet:
 <script async src='https://www.contactlab.com/contacthub.js'></script>
 ```
 
-#### Renaming the ContactHub cookie
+#### Renaming the Contacthub cookie
 
-In the same way, you can set a custom name for the ContactHub cookie using:
+In the same way, you can set a custom name for the Contacthub cookie using:
 
 ```js
 window.ContactHubCookie = '__chub';
@@ -196,11 +199,11 @@ For testing or debugging purposes, you might want to use a different API server:
 window.ContactHubAPI = 'https://test-api/hub/v2';
 ```
 
-#### ContactHub ID
+#### Contacthub ID
 
-Every Customer is assigned an id in ContactHub. In general, you don't have to think about it as the library will take care of it and avoid generating multiple IDs for the same Customer.
+Every Customer is assigned an id in Contacthub. In general, you don't have to think about it as the library will take care of it and avoid generating multiple IDs for the same Customer.
 
-If you store ContactHub ids on your database and you want to make sure that events sent via the library are associated to the same id, you can specify the ID when you use the `ch('customer', {...})` method:
+If you store Contacthub ids on your database and you want to make sure that events sent via the library are associated to the same id, you can specify the ID when you use the `ch('customer', {...})` method:
 
 ```js
 ch('customer', {
@@ -211,7 +214,7 @@ ch('customer', {
 
 #### The clabId query parameter
 
-You can also send a ContactHub id using the `clabId` parameter in the query string (`?clabId=A_VALID_CONTACTHUB_ID`). This is transformed by the library in the following call:
+You can also send a Contacthub id using the `clabId` parameter in the query string (`?clabId=A_VALID_CONTACTHUB_ID`). This is transformed by the library in the following call:
 
 ```js
 ch('customer', { id: clabId });
@@ -230,13 +233,13 @@ Please note that if a different user is logged in, the Contacthub id for the cur
 
 ### How to run tests
 
-`npm test` will run all tests once using PhantomJS.
+`npm test` will run all tests once using Chrome in headless mode.
 
-`npm test-watch` will automatically re-run tests using PhantomJS on every change.
+`npm test-watch` will automatically re-run tests using Chrome in headless mode on every change.
 
 `BROWSERSTACK_USER=<user> BROWSERSTACK_KEY=<key> npm run test-bs` will run tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.js`
 
 ### How to open the example page in your browser
 
-`npm run example` will start a local HTTP server and open the example page in your local browser. Replace the placeholders in the query string with your authorization token and ids. Remember also to add `http://127.0.0.1.xip.io` to the allowed URLs for your Source in the ContactHub web interface (under Settings, Sources, {source name}, Settings).
+`npm run example` will start a local HTTP server and open the example page in your local browser. Replace the placeholders in the query string with your authorization token and ids. Remember also to add `http://127.0.0.1.xip.io` to the allowed URLs for your Source in the Contacthub web interface (under `Settings > Sources > {source name} > Settings`).
 
