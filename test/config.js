@@ -1,6 +1,7 @@
 // @flow
 import {expect} from 'chai';
 import cookies from 'js-cookie';
+import sinon from 'sinon';
 
 import type {ContactHubFunction} from '../lib/types';
 
@@ -118,8 +119,27 @@ describe('Config API', () => {
     expect(getCookie().hash).to.be.undefined;
   });
 
-  it('thrown if required option are not specified', () => {
-    // $FlowFixMe
-    expect(() => _ch('config', {})).to.throw;
+  it('throws if required option are not specified', () => {
+    expect(() => {
+      // $FlowFixMe
+      _ch('config', {});
+    }).to.throw();
+  });
+
+  it('throws if required option are not specified - debug', () => {
+    const spy = sinon.stub(console, 'error').callsFake(() => undefined);
+
+    expect(() => {
+      // $FlowFixMe
+      _ch('config', {debug: true});
+    }).to.throw();
+
+    expect(
+      spy.calledWith(
+        '[DEBUG] contacthub-sdk-browser',
+        'Invalid ContactHub configuration'
+      )
+    ).to.be.true;
+    spy.restore();
   });
 });
