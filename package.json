@@ -1,7 +1,7 @@
 {
   "name": "contacthub",
   "version": "1.4.0",
-  "description": "ContactHub Browser SDK",
+  "description": "Contacthub Browser SDK",
   "main": "src/contacthub.js",
   "files": [
     "dist"
