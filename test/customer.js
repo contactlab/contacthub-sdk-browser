@@ -33,10 +33,12 @@ const _ch: ContactHubFunction = window[varName];
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-const setConfig = () => {
-  _ch('config', config);
+const setConfig = d => {
+  const debug = d || false;
+  _ch('config', Object.assign({}, config, {debug}));
 };
 
+let spyError;
 let requests = [];
 let xhr;
 
@@ -48,8 +50,12 @@ const whenDone = f => {
   setTimeout(() => f(), 2);
 };
 
+const debugMsg = msg =>
+  spyError.calledWith('[DEBUG] contacthub-sdk-browser', msg);
+
 describe('Customer API:', () => {
   beforeEach(() => {
+    spyError = sinon.stub(console, 'error').callsFake(() => undefined);
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
@@ -59,6 +65,7 @@ describe('Customer API:', () => {
   });
 
   afterEach(done => {
+    spyError.restore();
     whenDone(() => done());
   });
 
@@ -463,6 +470,156 @@ describe('Customer API:', () => {
       expect(getCookie().sid).to.match(
         /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
       );
+    });
+  });
+
+  // --- Rejections
+  describe('when id and customerId are provided it should logs catched promise rejection', () => {
+    beforeEach(() => {
+      setConfig(true);
+      cookies.set(
+        cookieName,
+        Object.assign(getCookie(), {
+          customerId: 'TEST'
+        })
+      );
+    });
+
+    it('when id != customerId and no other customer data provided', done => {
+      _ch('customer', {id: 'NO_TEST'});
+
+      whenDone(() => {
+        expect(
+          debugMsg('The provided id conflicts with the id stored in the cookie')
+        ).to.be.true;
+        done();
+      });
+    });
+
+    it('when sessions api respond with error', done => {
+      _ch('customer', {id: 'NO_TEST', externalId: 'ANOTHER_ID'});
+
+      requests[0].respond(500, {}, 'KO');
+
+      whenDone(() => {
+        expect(debugMsg('KO')).to.be.true;
+        done();
+      });
+    });
+
+    it('when customers api respond with error', done => {
+      _ch('customer', {id: 'TEST', externalId: 'ANOTHER_ID'});
+
+      whenDone(() => {
+        requests[0].respond(500, {}, 'KO');
+
+        whenDone(() => {
+          expect(debugMsg('KO')).to.be.true;
+          done();
+        });
+      });
+    });
+  });
+
+  describe('when customerId is NOT provided it should logs catched promise rejection', () => {
+    beforeEach(() => {
+      setConfig(true);
+    });
+
+    it('when sessions api respond with error', done => {
+      _ch('customer', {id: 'TEST'});
+
+      requests[0].respond(500, {}, 'KO');
+
+      whenDone(() => {
+        expect(debugMsg('KO')).to.be.true;
+        done();
+      });
+    });
+
+    it('when customers api respond with error', done => {
+      _ch('customer', {id: 'TEST'});
+
+      whenDone(() => {
+        requests[0].respond(500, {}, 'KO');
+
+        whenDone(() => {
+          expect(debugMsg('KO')).to.be.true;
+          done();
+        });
+      });
+    });
+  });
+
+  describe('when customerId is provided and id is not provided it should logs catched promise rejection', () => {
+    beforeEach(() => {
+      setConfig(true);
+      cookies.set(
+        cookieName,
+        Object.assign(getCookie(), {
+          customerId: 'TEST'
+        })
+      );
+    });
+
+    it('when customers api respond with error', done => {
+      _ch('customer', {externalId: 'ANOTHER_ID'});
+
+      requests[0].respond(500, {}, 'KO');
+
+      whenDone(() => {
+        whenDone(() => {
+          expect(debugMsg('KO')).to.be.true;
+          done();
+        });
+      });
+    });
+  });
+
+  describe('when customerId and id are not provided it should logs catched promise rejection', () => {
+    beforeEach(() => {
+      setConfig(true);
+    });
+
+    it('when customers api respond with error', done => {
+      _ch('customer', {});
+
+      requests[0].respond(500, {}, 'KO');
+
+      whenDone(() => {
+        whenDone(() => {
+          expect(debugMsg('KO')).to.be.true;
+          done();
+        });
+      });
+    });
+
+    it('when customer api respond with error (on merge)', done => {
+      _ch('customer', {});
+
+      whenDone(() => {
+        requests[0].respond(500, {}, 'KO');
+
+        whenDone(() => {
+          expect(debugMsg('KO')).to.be.true;
+          done();
+        });
+      });
+    });
+
+    it('when sessions api respond with error', done => {
+      _ch('customer', {});
+
+      whenDone(() => {
+        whenDone(() => {
+          requests[0].respond(500, {}, 'KO');
+
+          whenDone(() => {
+            expect(debugMsg('KO')).to.be.true;
+            done();
+          });
+        });
+      });
     });
   });
 });

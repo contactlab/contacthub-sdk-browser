@@ -27,9 +27,15 @@ const apiUrl: string =
   window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
 const log = (debug: boolean, error: any): void => {
-  if (debug) {
-    return window.console.error('[DEBUG] contacthub-sdk-browser', error); // eslint-disable-line no-console
+  if (!debug || !window.console) {
+    return;
   }
+
+  const msg =
+    typeof error.status !== 'undefined' && typeof error.response !== 'undefined'
+      ? error.response
+      : error;
+  return window.console.error('[DEBUG] contacthub-sdk-browser', msg); // eslint-disable-line no-console
 };
 
 const getQueryParam = name => {
@@ -121,7 +127,7 @@ const event = (options: EventOptions): void => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`
     }
-  });
+  }).catch(e => log(getCookie().debug, e));
 };
 
 const createCustomer = ({
@@ -347,18 +353,23 @@ const customer = (options: CustomerData): void => {
   if (id && customerId) {
     resolveIdConflict(id, customerId)
       .then(update)
-      .then(store);
+      .then(store)
+      .catch(e => log(getCookie().debug, e));
   } else if (id) {
     reconcile(id)
       .then(update)
-      .then(store);
+      .then(store)
+      .catch(e => log(getCookie().debug, e));
   } else if (customerId) {
-    update(customerId).then(store);
+    update(customerId)
+      .then(store)
+      .catch(e => log(getCookie().debug, e));
   } else {
     create()
       .catch(merge)
       .then(store)
-      .then(reconcile);
+      .then(reconcile)
+      .catch(e => log(getCookie().debug, e));
   }
 };
 
@@ -374,8 +385,8 @@ const allowedConfigOptions = [
 const config = (options: ConfigOptions): void => {
   if (!(options.workspaceId && options.nodeId && options.token)) {
     const err = new Error('Invalid ContactHub configuration');
-    window.console.log('saasdasd');
-    log(options.debug || false, err);
+
+    log(options.debug || false, err.message);
 
     throw err;
   }
