@@ -1,90 +1,98 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <title>ContactHub Example Page</title>
-  <script>
-    // Read ContactHub auth values from query string
-    var qs = document.location.search;
-    workspaceId = qs.match(/workspaceId=([a-z0-9-]*)/)[1];
-    nodeId = qs.match(/nodeId=([a-z0-9-]*)/)[1];
-    token = qs.match(/token=([a-z0-9-]*)/)[1];
-  </script>
+  <head>
+    <title>ContactHub Example Page</title>
+    <script>
+      // Read ContactHub auth values from query string
+      var qs = document.location.search;
+      workspaceId = qs.match(/workspaceId=([a-z0-9-]*)/)[1];
+      nodeId = qs.match(/nodeId=([a-z0-9-]*)/)[1];
+      token = qs.match(/token=([a-z0-9-]*)/)[1];
+    </script>
 
-  <script>
-    window.ch=window.ch||function(){(ch.q=ch.q||[]).push(arguments)};ch.l=+new Date;
+    <script>
+      window.ch =
+        window.ch ||
+        function() {
+          (ch.q = ch.q || []).push(arguments);
+        };
+      ch.l = +new Date();
 
-    ch('config', {
-      workspaceId: workspaceId,
-      nodeId: nodeId,
-      token: token
-    });
-    ch('event', { type: 'viewedPage' });
-  </script>
-  <script async src='../dist/contacthub.js'></script>
-</head>
-<body>
+      ch('config', {
+        workspaceId: workspaceId,
+        nodeId: nodeId,
+        token: token
+      });
+      ch('event', {type: 'viewedPage'});
+    </script>
+    <script async src="../dist/contacthub.js"></script>
+  </head>
 
-  <h1>Your awesome website</h1>
+  <body>
+    <h1>Your awesome website</h1>
 
-  <script>
-    function randomEmail() {
-      return Math.random().toString(36).substr(2, 8) + '@example.com';
-    }
+    <script>
+      function randomEmail() {
+        return (
+          Math.random()
+            .toString(36)
+            .substr(2, 8) + '@example.com'
+        );
+      }
 
-    var initialEmail = randomEmail();
+      var initialEmail = randomEmail();
 
-    function login() {
-      ch('customer', {
-        base: {
-          firstName: 'Mario',
-          lastName: 'Rossi',
-          contacts: {
-            email: initialEmail
-          }
-        },
-        consents: {
-          marketing: {
-            traditional: {
-              telephonic: {
-                status: true
+      function login() {
+        ch('customer', {
+          base: {
+            firstName: 'Mario',
+            lastName: 'Rossi',
+            contacts: {
+              email: initialEmail
+            }
+          },
+          consents: {
+            marketing: {
+              traditional: {
+                telephonic: {
+                  status: true
+                }
               }
             }
           }
-        }
-      });
-    }
+        });
+      }
 
-    function update() {
-      ch('customer', {
-        base: {
-          contacts: {
-            email: randomEmail()
+      function update() {
+        ch('customer', {
+          base: {
+            contacts: {
+              email: randomEmail()
+            }
           }
-        }
-      });
-    }
+        });
+      }
 
-    function logout() {
-      ch('customer');
-    }
+      function logout() {
+        ch('customer');
+      }
 
-    function sendEvent() {
-      ch('event', { type: 'addedProduct' });
-    }
-  </script>
+      function sendEvent() {
+        ch('event', {type: 'addedProduct'});
+      }
+    </script>
 
-  <p>
-  <button onclick="javascript:login();">LOGIN</button>
-  <button onclick="javascript:logout();">LOGOUT</button>
-  </p>
+    <p>
+      <button onclick="javascript:login();">LOGIN</button>
+      <button onclick="javascript:logout();">LOGOUT</button>
+    </p>
 
-  <p>
-  <button onclick="javascript:update();">UPDATE</button>
-  </p>
+    <p>
+      <button onclick="javascript:update();">UPDATE</button>
+    </p>
 
-  <p>
-  <button onclick="javascript:sendEvent();">EVENT</button>
-  </p>
-
-</body>
+    <p>
+      <button onclick="javascript:sendEvent();">EVENT</button>
+    </p>
+  </body>
 </html>

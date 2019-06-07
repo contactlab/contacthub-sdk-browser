@@ -1,8 +1,10 @@
 const webpackConfig = require('./webpack.config.js');
+const puppeteer = require('puppeteer');
+
+process.env.CHROME_BIN = puppeteer.executablePath();
 
 module.exports = function(config) {
   config.set({
-
     basePath: '',
 
     frameworks: ['mocha'],
@@ -14,14 +16,9 @@ module.exports = function(config) {
 
     webpack: webpackConfig,
 
-    files: [
-      'test/queue.js',
-      'src/contacthub.js',
-      'test/contacthub.js'
-    ],
+    files: ['test/queue.js', 'src/contacthub.js', 'test/contacthub.js'],
 
-    exclude: [
-    ],
+    exclude: [],
 
     reporters: ['progress'],
 
@@ -33,7 +30,16 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['PhantomJS'],
+    browsers: ['ChromeHeadlessNoSandbox'],
+
+    client: {
+      captureConsole: true
+    },
+
+    browserConsoleLogOptions: {
+      level: '',
+      terminal: true
+    },
 
     singleRun: false,
 
@@ -45,6 +51,25 @@ module.exports = function(config) {
     },
 
     customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--enable-logging',
+          '--no-default-browser-check',
+          '--no-first-run',
+          '--disable-default-apps',
+          '--disable-popup-blocking',
+          '--disable-translate',
+          '--disable-background-timer-throttling',
+          '--disable-renderer-backgrounding',
+          '--disable-device-discovery-notifications',
+          '--remote-debugging-port=9222',
+          '--disable-web-security'
+        ]
+      },
+
       bs_win_ie10: {
         base: 'BrowserStack',
         browser: 'IE',

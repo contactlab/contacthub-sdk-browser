@@ -1,8 +1,8 @@
-import { expect } from 'chai';
+import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-/* global describe, it, beforeEach */
+/* global describe, it, beforeEach, afterEach */
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -13,30 +13,40 @@ const config = {
   token: 'ABC123'
 };
 
-const getCookie = () => cookies.getJSON(cookieName) || {};
-
 const _ch = window[varName];
 
+const getCookie = () => cookies.getJSON(cookieName) || {};
+
+const setConfig = d => {
+  const debug = d || false;
+  _ch('config', Object.assign({}, config, {debug}));
+};
+
+let spyError;
 let requests;
 let xhr;
 
+const debugMsg = msg =>
+  spyError.calledWith('[DEBUG] contacthub-sdk-browser', msg);
+
 describe('Event API', () => {
   beforeEach(() => {
+    spyError = sinon.stub(console, 'error').callsFake(() => undefined);
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = (xhr) => {
+    xhr.onCreate = xhr => {
       requests.push(xhr);
     };
   });
 
-  const setConfig = () => {
-    _ch('config', config);
-  };
+  afterEach(() => {
+    spyError.restore();
+  });
 
   it('checks if required config is set', () => {
     expect(() => {
-      _ch('event', { type: 'viewedPage' });
+      _ch('event', {type: 'viewedPage'});
     }).to.throw(Error);
 
     expect(requests.length).to.equal(0);
@@ -44,16 +54,14 @@ describe('Event API', () => {
 
   it('sends the event to the API', () => {
     setConfig();
-    _ch('event', { type: 'viewedPage' });
+    _ch('event', {type: 'viewedPage'});
     const req = requests[0];
     const reqBody = JSON.parse(req.requestBody);
 
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
     );
-    expect(req.requestHeaders.Authorization).to.equal(
-      `Bearer ${config.token}`
-    );
+    expect(req.requestHeaders.Authorization).to.equal(`Bearer ${config.token}`);
     expect(reqBody.type).to.equal('viewedPage');
     expect(reqBody.bringBackProperties).to.eql({
       type: 'SESSION_ID',
@@ -64,10 +72,13 @@ describe('Event API', () => {
 
   it('sends customerId when available in cookie', () => {
     setConfig();
-    cookies.set(cookieName, Object.assign(getCookie(), {
-      customerId: 'my-cid'
-    }));
-    _ch('event', { type: 'viewedPage' });
+    cookies.set(
+      cookieName,
+      Object.assign(getCookie(), {
+        customerId: 'my-cid'
+      })
+    );
+    _ch('event', {type: 'viewedPage'});
     const req = requests[0];
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
@@ -77,10 +88,13 @@ describe('Event API', () => {
 
   it('omits bringBackProperties when customerId is available', () => {
     setConfig();
-    cookies.set(cookieName, Object.assign(getCookie(), {
-      customerId: 'my-cid'
-    }));
-    _ch('event', { type: 'viewedPage' });
+    cookies.set(
+      cookieName,
+      Object.assign(getCookie(), {
+        customerId: 'my-cid'
+      })
+    );
+    _ch('event', {type: 'viewedPage'});
     const req = requests[0];
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
@@ -91,7 +105,7 @@ describe('Event API', () => {
   it('infers common "viewedPage" event properties', () => {
     document.title = 'Hello world';
     setConfig();
-    _ch('event', { type: 'viewedPage' });
+    _ch('event', {type: 'viewedPage'});
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
 
@@ -103,8 +117,11 @@ describe('Event API', () => {
 
   it('allows to override inferred properties', () => {
     setConfig();
-    _ch('event', { type: 'viewedPage', properties: {
-      title: 'Custom title' }
+    _ch('event', {
+      type: 'viewedPage',
+      properties: {
+        title: 'Custom title'
+      }
     });
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
@@ -116,7 +133,7 @@ describe('Event API', () => {
   it('does not infer properties on other event types', () => {
     document.title = 'Hello world';
     setConfig();
-    _ch('event', { type: 'something' });
+    _ch('event', {type: 'something'});
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
 
@@ -128,11 +145,14 @@ describe('Event API', () => {
 
   it('gets the "context" from the cookie', () => {
     setConfig();
-    cookies.set(cookieName, Object.assign(getCookie(), {
-      context: 'FOO'
-    }));
+    cookies.set(
+      cookieName,
+      Object.assign(getCookie(), {
+        context: 'FOO'
+      })
+    );
 
-    _ch('event', { type: 'viewedPage' });
+    _ch('event', {type: 'viewedPage'});
     const req = requests[0];
     const reqBody = JSON.parse(req.requestBody);
 
@@ -141,14 +161,40 @@ describe('Event API', () => {
 
   it('gets the "contextInfo" from the cookie', () => {
     setConfig();
-    cookies.set(cookieName, Object.assign(getCookie(), {
-      contextInfo: { foo: 'bar' }
-    }));
+    cookies.set(
+      cookieName,
+      Object.assign(getCookie(), {
+        contextInfo: {foo: 'bar'}
+      })
+    );
 
-    _ch('event', { type: 'viewedPage' });
+    _ch('event', {type: 'viewedPage'});
     const req = requests[0];
     const reqBody = JSON.parse(req.requestBody);
 
-    expect(reqBody.contextInfo).to.eql({ foo: 'bar' });
+    expect(reqBody.contextInfo).to.eql({foo: 'bar'});
+  });
+
+  // --- Rejects
+  it('should throw and log error when event type is not defined', () => {
+    setConfig(true);
+    expect(() => {
+      _ch('event', {});
+    }).to.throw(Error);
+
+    expect(debugMsg('Missing required event type')).to.be.true;
+  });
+
+  it('should log api call rejections', done => {
+    setConfig(true);
+
+    _ch('event', {type: 'viewedPage'});
+
+    requests[0].respond(500, {}, 'KO');
+
+    setTimeout(() => {
+      expect(debugMsg('KO')).to.be.true;
+      done();
+    }, 2);
   });
 });
