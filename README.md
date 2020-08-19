@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/contactlab/contacthub-sdk-browser.svg?branch=master)](https://travis-ci.org/contactlab/contacthub-sdk-browser)
-[![GitHub release](https://img.shields.io/github/release/contactlab/contacthub-sdk-browser.svg)](https://github.com/contactlab/contacthub-sdk-browser/releases)
+![Node CI](https://github.com/contactlab/contacthub-sdk-browser/workflows/Node%20CI/badge.svg?branch=master) [![GitHub release](https://img.shields.io/github/release/contactlab/contacthub-sdk-browser.svg)](https://github.com/contactlab/contacthub-sdk-browser/releases)
 
 # contacthub-sdk-browser
 
