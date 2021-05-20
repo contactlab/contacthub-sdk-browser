@@ -12,12 +12,23 @@ Insert this snippet in your website (preferably in the `<HEAD>` section):
 
 ```html
 <script>
-window.ch=function(){(ch.q=ch.q||[]).push(arguments)};
-  ch('config', {/* see below */});
-  ch('customer', {/* see below */});
-  ch('event', {/* see below */});
+  window.ch = function () {
+    (ch.q = ch.q || []).push(arguments);
+  };
+  ch('config', {
+    /* see below */
+  });
+  ch('customer', {
+    /* see below */
+  });
+  ch('event', {
+    /* see below */
+  });
 </script>
-<script async src='https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js'></script>
+<script
+  async
+  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js"
+></script>
 ```
 
 Compressed and uncompressed copies of Contacthub SDK files are available.
@@ -29,23 +40,39 @@ This also offers an advantage that if the visitor to your webpage has already do
 To load a hosted library, copy and paste the HTML snippet for that library (shown below) in your web page.
 
 #### Latest version minified
+
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js"></script>
+<script
+  async
+  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js"
+></script>
 ```
 
 #### Latest version uncompressed
+
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.js"></script>
+<script
+  async
+  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.js"
+></script>
 ```
 
 #### Specific version minified
+
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.min.js"></script>
+<script
+  async
+  src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.min.js"
+></script>
 ```
 
 #### Specific version uncompressed
+
 ```html
-<script async src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.js"></script>
+<script
+  async
+  src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.js"
+></script>
 ```
 
 We recommend that you load libraries from the CDN via HTTPS, even if your own website only uses HTTP
@@ -83,8 +110,7 @@ ch('customer', {
       email: 'john.smith@example.com'
     }
   },
-  consents: {
-  },
+  consents: {},
   extended: {},
   extra: '',
   tags: {
@@ -179,7 +205,7 @@ You also have to replace all occurrences of `ch` in the snippet:
   chub('customer', { ... });
   chub('event', { ... });
 </script>
-<script async src='https://www.contactlab.com/contacthub.js'></script>
+<script async src="https://www.contactlab.com/contacthub.js"></script>
 ```
 
 #### Renaming the Contacthub cookie
@@ -206,7 +232,7 @@ If you store Contacthub ids on your database and you want to make sure that even
 
 ```js
 ch('customer', {
-  id: 'A_VALID_CONTACTHUB_ID',
+  id: 'A_VALID_CONTACTHUB_ID'
   // ... other customer properties
 });
 ```
@@ -216,7 +242,7 @@ ch('customer', {
 You can also send a Contacthub id using the `clabId` parameter in the query string (`?clabId=A_VALID_CONTACTHUB_ID`). This is transformed by the library in the following call:
 
 ```js
-ch('customer', { id: clabId });
+ch('customer', {id: clabId});
 ```
 
 An example use case is if you send a newsletter to your customers and you want to make sure that if they reach your website from a link contained in the email, they are immediately recognised even if they are not logged in.
@@ -241,4 +267,3 @@ Please note that if a different user is logged in, the Contacthub id for the cur
 ### How to open the example page in your browser
 
 `npm run example` will start a local HTTP server and open the example page in your local browser. Replace the placeholders in the query string with your authorization token and ids. Remember also to add `http://127.0.0.1:8080` to the allowed URLs for your Source in the Contacthub web interface (under `Settings > Sources > {source name} > Settings`).
-
