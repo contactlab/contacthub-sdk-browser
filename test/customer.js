@@ -1,12 +1,10 @@
-// @flow
+/* global describe, it, beforeEach, afterEach */
 
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-import type {ContactHubFunction} from '../lib/types';
-
-/* global describe, it, beforeEach, afterEach */
+// import type {ContactHubFunction} from '../lib/types';
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -29,7 +27,8 @@ const mario = {
   }
 };
 
-const _ch: ContactHubFunction = window[varName];
+// const _ch: ContactHubFunction = window[varName];
+const _ch = window[varName];
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 

@@ -1,18 +1,18 @@
-// @flow
+/* global describe, it, beforeEach */
+
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-import type {ContactHubFunction} from '../lib/types';
-
-/* global describe, it, beforeEach */
+// import type {ContactHubFunction} from '../lib/types';
 
 const cookieName = '_ch';
 const varName = 'ch';
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-const _ch: ContactHubFunction = window[varName];
+// const _ch: ContactHubFunction = window[varName];
+const _ch = window[varName];
 
 describe('Config API', () => {
   beforeEach(() => {

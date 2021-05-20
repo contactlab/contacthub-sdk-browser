@@ -1,32 +1,35 @@
-// @flow
 import xr from 'xr';
 import uuid from 'uuid';
 import sha256 from 'jssha/src/sha256';
 import cookies from 'js-cookie';
 import {Promise} from 'es6-promise';
 
-import type {
-  ContactHubFunction,
-  ContactHubCookie,
-  ContactHubUtmCookie,
-  Auth,
-  ConfigOptions,
-  EventOptions,
-  CustomerData,
-  CustomerId
-} from '../lib/types';
+// import type {
+//   ContactHubFunction,
+//   ContactHubCookie,
+//   ContactHubUtmCookie,
+//   Auth,
+//   ConfigOptions,
+//   EventOptions,
+//   CustomerData,
+//   CustomerId
+// } from '../lib/types';
 
 xr.configure({
   promise: fn => new Promise(fn)
 });
 
-const varName: string = window.ContactHubObject || 'ch';
-const cookieName: string = window.ContactHubCookie || '_ch';
-const utmCookieName: string = window.ContactHubUtmCookie || '_chutm';
-const apiUrl: string =
-  window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
+// const varName: string = window.ContactHubObject || 'ch';
+const varName = window.ContactHubObject || 'ch';
+// const cookieName: string = window.ContactHubCookie || '_ch';
+const cookieName = window.ContactHubCookie || '_ch';
+// const utmCookieName: string = window.ContactHubUtmCookie || '_chutm';
+const utmCookieName = window.ContactHubUtmCookie || '_chutm';
+// const apiUrl: string =
+const apiUrl = window.ContactHubAPI || 'https://api.contactlab.it/hub/v1';
 
-const log = (debug: boolean, error: any): void => {
+// const log = (debug: boolean, error: any): void => {
+const log = (debug, error) => {
   if (!debug || !window.console) {
     return;
   }
@@ -44,10 +47,13 @@ const getQueryParam = name => {
   return val || undefined;
 };
 
-const newSessionId = (): string => uuid.v4();
+// const newSessionId = (): string => uuid.v4();
+const newSessionId = () => uuid.v4();
 
-const getCookie = (): ContactHubCookie => {
-  const cookie: ?ContactHubCookie = cookies.getJSON(cookieName);
+// const getCookie = (): ContactHubCookie => {
+const getCookie = () => {
+  // const cookie: ?ContactHubCookie = cookies.getJSON(cookieName);
+  const cookie = cookies.getJSON(cookieName);
 
   if (!cookie) {
     throw new Error('Missing required ContactHub configuration.');
@@ -60,13 +66,16 @@ const getCookie = (): ContactHubCookie => {
   return cookie;
 };
 
-const getUtmCookie = (): ?ContactHubUtmCookie => {
-  const utmCookie: ?ContactHubUtmCookie = cookies.getJSON(utmCookieName);
+// const getUtmCookie = (): ?ContactHubUtmCookie => {
+const getUtmCookie = () => {
+  // const utmCookie: ?ContactHubUtmCookie = cookies.getJSON(utmCookieName);
+  const utmCookie = cookies.getJSON(utmCookieName);
 
   return utmCookie;
 };
 
-const inferProperties = (type: string, customProperties?: Object): Object => {
+// const inferProperties = (type: string, customProperties?: Object): Object => {
+const inferProperties = (type, customProperties) => {
   if (type === 'viewedPage') {
     const inferredProperties = {
       title: document.title,
@@ -81,7 +90,8 @@ const inferProperties = (type: string, customProperties?: Object): Object => {
   }
 };
 
-const event = (options: EventOptions): void => {
+// const event = (options: EventOptions): void => {
+const event = options => {
   const {
     workspaceId,
     nodeId,
@@ -133,6 +143,20 @@ const event = (options: EventOptions): void => {
   }).catch(e => log(getCookie().debug, e));
 };
 
+// const createCustomer = ({
+//   workspaceId,
+//   nodeId,
+//   token,
+//   externalId,
+//   base,
+//   extended,
+//   consents,
+//   extra,
+//   tags
+// }: {|
+//   ...Auth,
+//   ...CustomerData
+// |}): Promise<string> =>
 const createCustomer = ({
   workspaceId,
   nodeId,
@@ -143,10 +167,7 @@ const createCustomer = ({
   consents,
   extra,
   tags
-}: {|
-  ...Auth,
-  ...CustomerData
-|}): Promise<string> =>
+}) =>
   xr({
     method: 'POST',
     url: `${apiUrl}/workspaces/${workspaceId}/customers`,
@@ -168,6 +189,21 @@ const createCustomer = ({
     return response.data.id;
   });
 
+// const updateCustomer = ({
+//   customerId,
+//   workspaceId,
+//   token,
+//   externalId,
+//   base,
+//   extended,
+//   consents,
+//   extra,
+//   tags
+// }: {|
+//   ...Auth,
+//   ...CustomerData,
+//   ...CustomerId
+// |}): Promise<string> =>
 const updateCustomer = ({
   customerId,
   workspaceId,
@@ -178,11 +214,7 @@ const updateCustomer = ({
   consents,
   extra,
   tags
-}: {|
-  ...Auth,
-  ...CustomerData,
-  ...CustomerId
-|}): Promise<string> =>
+}) =>
   xr({
     method: 'PATCH',
     url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}`,
@@ -203,14 +235,15 @@ const updateCustomer = ({
     return customerId;
   });
 
-const reconcileCustomer = ({
-  customerId,
-  workspaceId,
-  token
-}: {|
-  ...Auth,
-  ...CustomerId
-|}): Promise<string> =>
+// const reconcileCustomer = ({
+//   customerId,
+//   workspaceId,
+//   token
+// }: {|
+//   ...Auth,
+//   ...CustomerId
+// |}): Promise<string> =>
+const reconcileCustomer = ({customerId, workspaceId, token}) =>
   xr({
     method: 'POST',
     url: `${apiUrl}/workspaces/${workspaceId}/customers/${customerId}/sessions`,
@@ -226,7 +259,8 @@ const reconcileCustomer = ({
     return customerId;
   });
 
-const computeHash = (data: CustomerData): string => {
+// const computeHash = (data: CustomerData): string => {
+const computeHash = data => {
   const shaObj = new sha256('SHA-256', 'TEXT');
   shaObj.update(JSON.stringify(data));
   return shaObj.getHash('HEX');
@@ -243,7 +277,8 @@ const resetCookie = () => {
   );
 };
 
-const customer = (options: CustomerData): void => {
+// const customer = (options: CustomerData): void => {
+const customer = options => {
   if (!options) {
     // an empty object is a request for a session reset
     resetCookie();
@@ -262,7 +297,8 @@ const customer = (options: CustomerData): void => {
     externalId
   });
 
-  const update = (customerId: string): Promise<string> => {
+  // const update = (customerId: string): Promise<string> => {
+  const update = customerId => {
     if (externalId || base || extended || consents || extra || tags) {
       return updateCustomer({
         customerId,
@@ -281,7 +317,8 @@ const customer = (options: CustomerData): void => {
     }
   };
 
-  const create = (): Promise<string> =>
+  // const create = (): Promise<string> =>
+  const create = () =>
     createCustomer({
       workspaceId,
       nodeId,
@@ -294,7 +331,8 @@ const customer = (options: CustomerData): void => {
       tags
     });
 
-  const merge = (err: Object): Promise<string> => {
+  // const merge = (err: Object): Promise<string> => {
+  const merge = err => {
     if (err.status === 409) {
       const res = JSON.parse(err.response);
       const customerId = res.data.customer.id;
@@ -315,7 +353,8 @@ const customer = (options: CustomerData): void => {
     }
   };
 
-  const reconcile = (customerId: string): Promise<string> =>
+  // const reconcile = (customerId: string): Promise<string> =>
+  const reconcile = customerId =>
     reconcileCustomer({
       customerId,
       workspaceId,
@@ -323,7 +362,8 @@ const customer = (options: CustomerData): void => {
       nodeId
     });
 
-  const store = (customerId: string): string => {
+  // const store = (customerId: string): string => {
+  const store = customerId => {
     cookies.set(
       cookieName,
       Object.assign(getCookie(), {
@@ -334,7 +374,8 @@ const customer = (options: CustomerData): void => {
     return customerId;
   };
 
-  const resolveIdConflict = (id: string, cookieId: string): Promise<string> => {
+  // const resolveIdConflict = (id: string, cookieId: string): Promise<string> => {
+  const resolveIdConflict = (id, cookieId) => {
     if (id === cookieId) {
       return Promise.resolve(id);
     } else {
@@ -385,7 +426,8 @@ const allowedConfigOptions = [
   'debug'
 ];
 
-const config = (options: ConfigOptions): void => {
+// const config = (options: ConfigOptions): void => {
+const config = options => {
   if (!(options.workspaceId && options.nodeId && options.token)) {
     const err = 'Invalid ContactHub configuration';
 
@@ -448,7 +490,8 @@ const config = (options: ConfigOptions): void => {
   }
 };
 
-const ContactHub: ContactHubFunction = (method, options) => {
+// const ContactHub: ContactHubFunction = (method, options) => {
+const ContactHub = (method, options) => {
   if (!Array.prototype.map) {
     // No country for old IEs
     return;
@@ -457,7 +500,8 @@ const ContactHub: ContactHubFunction = (method, options) => {
   const methods = {config, customer, event};
 
   if (method in methods) {
-    methods[method].call(undefined, (options: any));
+    // methods[method].call(undefined, (options: any));
+    methods[method].call(undefined, options);
   }
 };
 
