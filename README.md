@@ -2,7 +2,7 @@
 
 # @contactlab/sdk-browser
 
-Browser SDK for the Contactlab Customers (a.k.a. _Hub_) API.
+Browser SDK for the Contactlab Customer Hub API.
 
 The easiest way to send pageviews, events and customer information from your website to the [Contacthub API](http://developer.contactlab.com/hub-swagger/).
 
@@ -263,10 +263,10 @@ Please note that if a different user is logged in, the Contacthub id for the cur
 
 `npm test` will run all tests once using Chrome in headless mode.
 
-`npm test-watch` will automatically re-run tests using Chrome in headless mode on every change.
+`npm test:watch` will automatically re-run tests using Chrome in headless mode on every change.
 
-`BROWSERSTACK_USER=<user> BROWSERSTACK_KEY=<key> npm run test-bs` will run tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.js`
+`BROWSERSTACK_USER=<user> BROWSERSTACK_KEY=<key> npm run test:bs` will run tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.js`
 
 ### How to open the example page in your browser
 
-`npm run example` will start a local HTTP server and open the example page in your local browser. Replace the placeholders in the query string with your authorization token and ids. Remember also to add `http://127.0.0.1:8080` to the allowed URLs for your Source in the Contacthub web interface (under `Settings > Sources > {source name} > Settings`).
+`npm run example` will start a local HTTP server and open the example page in your local browser. Replace the placeholders in the query string with your authorization token and ids. Remember also to add `http://127.0.0.1:8080` to the allowed URLs for your Source in the Contactlab Customer Hub web interface (under `Settings > Sources > {source name} > Settings`).
