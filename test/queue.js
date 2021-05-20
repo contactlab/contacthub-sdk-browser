@@ -2,7 +2,8 @@
 document.cookie = '_ch=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
 /* global ch */
-window.ch = function() {
+window.ch = function () {
+  // eslint-disable-next-line prefer-rest-params
   (ch.q = ch.q || []).push(arguments);
 };
 

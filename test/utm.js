@@ -26,8 +26,8 @@ describe('UTM automatic handling', () => {
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = xhr => {
-      requests.push(xhr);
+    xhr.onCreate = r => {
+      requests.push(r);
     };
   });
 
@@ -41,6 +41,7 @@ describe('UTM automatic handling', () => {
 
     setConfig();
 
+    // eslint-disable-next-line no-unused-expressions
     expect(getCookie().ga).to.be.undefined;
   });
 

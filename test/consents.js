@@ -66,8 +66,8 @@ describe('Consents', () => {
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = xhr => {
-      requests.push(xhr);
+    xhr.onCreate = r => {
+      requests.push(r);
     };
     setConfig();
   });

@@ -1,8 +1,8 @@
-import xr from 'xr';
-import uuid from 'uuid';
-import sha256 from 'jssha/src/sha256';
-import cookies from 'js-cookie';
 import {Promise} from 'es6-promise';
+import cookies from 'js-cookie';
+import sha256 from 'jssha/src/sha256';
+import uuid from 'uuid';
+import xr from 'xr';
 
 // import type {
 //   ContactHubFunction,
@@ -185,9 +185,7 @@ const createCustomer = ({
       extra,
       tags
     }
-  }).then(response => {
-    return response.data.id;
-  });
+  }).then(response => response.data.id);
 
 // const updateCustomer = ({
 //   customerId,
@@ -231,9 +229,7 @@ const updateCustomer = ({
       extra,
       tags
     }
-  }).then(() => {
-    return customerId;
-  });
+  }).then(() => customerId);
 
 // const reconcileCustomer = ({
 //   customerId,
@@ -255,12 +251,11 @@ const reconcileCustomer = ({customerId, workspaceId, token}) =>
     data: {
       value: getCookie().sid
     }
-  }).then(() => {
-    return customerId;
-  });
+  }).then(() => customerId);
 
 // const computeHash = (data: CustomerData): string => {
 const computeHash = data => {
+  // eslint-disable-next-line new-cap
   const shaObj = new sha256('SHA-256', 'TEXT');
   shaObj.update(JSON.stringify(data));
   return shaObj.getHash('HEX');
@@ -298,10 +293,10 @@ const customer = options => {
   });
 
   // const update = (customerId: string): Promise<string> => {
-  const update = customerId => {
+  const update = cid => {
     if (externalId || base || extended || consents || extra || tags) {
       return updateCustomer({
-        customerId,
+        customerId: cid,
         workspaceId,
         nodeId,
         token,
@@ -313,7 +308,7 @@ const customer = options => {
         tags
       });
     } else {
-      return Promise.resolve(customerId);
+      return Promise.resolve(cid);
     }
   };
 
@@ -335,9 +330,9 @@ const customer = options => {
   const merge = err => {
     if (err.status === 409) {
       const res = JSON.parse(err.response);
-      const customerId = res.data.customer.id;
+      const cid = res.data.customer.id;
       return updateCustomer({
-        customerId,
+        customerId: cid,
         workspaceId,
         nodeId,
         token,
@@ -354,34 +349,34 @@ const customer = options => {
   };
 
   // const reconcile = (customerId: string): Promise<string> =>
-  const reconcile = customerId =>
+  const reconcile = cid =>
     reconcileCustomer({
-      customerId,
+      customerId: cid,
       workspaceId,
       token,
       nodeId
     });
 
   // const store = (customerId: string): string => {
-  const store = customerId => {
+  const store = cid => {
     cookies.set(
       cookieName,
       Object.assign(getCookie(), {
-        customerId,
+        customerId: cid,
         hash: newHash
       })
     );
-    return customerId;
+    return cid;
   };
 
   // const resolveIdConflict = (id: string, cookieId: string): Promise<string> => {
-  const resolveIdConflict = (id, cookieId) => {
-    if (id === cookieId) {
-      return Promise.resolve(id);
+  const resolveIdConflict = (cid, cookieId) => {
+    if (cid === cookieId) {
+      return Promise.resolve(cid);
     } else {
       if (externalId || base || extended || consents || extra || tags) {
         resetCookie();
-        return reconcile(id);
+        return reconcile(cid);
       } else {
         return Promise.reject(
           'The provided id conflicts with the id stored in the cookie'
@@ -448,9 +443,9 @@ const config = options => {
   const _chutm = cookies.getJSON(utmCookieName) || {};
 
   // read Google Analytics UTM query params if present
-  const utm_source = getQueryParam('utm_source');
+  const utmSource = getQueryParam('utm_source');
 
-  if (utm_source) {
+  if (utmSource) {
     // Store UTM values in the _chutm cookie, overwriting any previous UTM value.
     _chutm.utm_source = getQueryParam('utm_source');
     _chutm.utm_medium = getQueryParam('utm_medium');

@@ -1,3 +1,16 @@
 {
-  "extends": ["buildo", "prettier"]
+  "extends": ["contactlab", "prettier"],
+  "rules": {
+    "no-underscore-dangle": 0
+  },
+  "overrides": [
+    // Disable typescript rules for tests and js files
+    {
+      "files": ["*.test.ts*", "*.js"],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ]
 }

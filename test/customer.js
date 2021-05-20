@@ -58,8 +58,8 @@ describe('Customer API:', () => {
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = xhr => {
-      requests.push(xhr);
+    xhr.onCreate = r => {
+      requests.push(r);
     };
   });
 
@@ -146,6 +146,7 @@ describe('Customer API:', () => {
         whenDone(() => {
           requests[0].respond(200, {}, JSON.stringify({id: 'new-cid'}));
           whenDone(() => {
+            // eslint-disable-next-line no-unused-expressions
             expect(getCookie().hash).not.to.be.undefined;
             done();
           });
@@ -452,6 +453,7 @@ describe('Customer API:', () => {
     });
 
     it('removes user data from cookie', () => {
+      // eslint-disable-next-line no-unused-expressions
       expect(getCookie().customerId).to.be.undefined;
     });
 
@@ -478,6 +480,7 @@ describe('Customer API:', () => {
       _ch('customer', {id: 'NO_TEST'});
 
       whenDone(() => {
+        // eslint-disable-next-line no-unused-expressions
         expect(
           debugMsg('The provided id conflicts with the id stored in the cookie')
         ).to.be.true;
@@ -491,6 +494,7 @@ describe('Customer API:', () => {
       requests[0].respond(500, {}, 'KO');
 
       whenDone(() => {
+        // eslint-disable-next-line no-unused-expressions
         expect(debugMsg('KO')).to.be.true;
         done();
       });
@@ -503,6 +507,7 @@ describe('Customer API:', () => {
         requests[0].respond(500, {}, 'KO');
 
         whenDone(() => {
+          // eslint-disable-next-line no-unused-expressions
           expect(debugMsg('KO')).to.be.true;
           done();
         });
@@ -521,6 +526,7 @@ describe('Customer API:', () => {
       requests[0].respond(500, {}, 'KO');
 
       whenDone(() => {
+        // eslint-disable-next-line no-unused-expressions
         expect(debugMsg('KO')).to.be.true;
         done();
       });
@@ -533,6 +539,7 @@ describe('Customer API:', () => {
         requests[0].respond(500, {}, 'KO');
 
         whenDone(() => {
+          // eslint-disable-next-line no-unused-expressions
           expect(debugMsg('KO')).to.be.true;
           done();
         });
@@ -558,6 +565,7 @@ describe('Customer API:', () => {
 
       whenDone(() => {
         whenDone(() => {
+          // eslint-disable-next-line no-unused-expressions
           expect(debugMsg('KO')).to.be.true;
           done();
         });
@@ -577,6 +585,7 @@ describe('Customer API:', () => {
 
       whenDone(() => {
         whenDone(() => {
+          // eslint-disable-next-line no-unused-expressions
           expect(debugMsg('KO')).to.be.true;
           done();
         });
@@ -590,6 +599,7 @@ describe('Customer API:', () => {
         requests[0].respond(500, {}, 'KO');
 
         whenDone(() => {
+          // eslint-disable-next-line no-unused-expressions
           expect(debugMsg('KO')).to.be.true;
           done();
         });
@@ -604,6 +614,7 @@ describe('Customer API:', () => {
           requests[0].respond(500, {}, 'KO');
 
           whenDone(() => {
+            // eslint-disable-next-line no-unused-expressions
             expect(debugMsg('KO')).to.be.true;
             done();
           });

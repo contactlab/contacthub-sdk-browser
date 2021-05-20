@@ -28,6 +28,7 @@ describe('Config API', () => {
   });
 
   it('sets a cookie', () => {
+    // eslint-disable-next-line no-unused-expressions
     expect(cookies.get(cookieName)).to.be.ok;
   });
 
@@ -115,13 +116,14 @@ describe('Config API', () => {
     });
 
     expect(getCookie().token).to.equal('CDE456');
+    // eslint-disable-next-line no-unused-expressions
     expect(getCookie().customerId).to.be.undefined;
+    // eslint-disable-next-line no-unused-expressions
     expect(getCookie().hash).to.be.undefined;
   });
 
   it('throws if required option are not specified', () => {
     expect(() => {
-      // $FlowFixMe
       _ch('config', {});
     }).to.throw();
   });
@@ -130,10 +132,10 @@ describe('Config API', () => {
     const spy = sinon.stub(console, 'error').callsFake(() => undefined);
 
     expect(() => {
-      // $FlowFixMe
       _ch('config', {debug: true});
     }).to.throw();
 
+    // eslint-disable-next-line no-unused-expressions
     expect(
       spy.calledWith(
         '[DEBUG] @contactlab/sdk-browser',

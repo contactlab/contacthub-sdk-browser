@@ -35,8 +35,8 @@ describe('Event API', () => {
     cookies.remove(cookieName);
     requests = [];
     xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = xhr => {
-      requests.push(xhr);
+    xhr.onCreate = r => {
+      requests.push(r);
     };
   });
 
@@ -99,6 +99,7 @@ describe('Event API', () => {
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
     );
+    // eslint-disable-next-line no-unused-expressions
     expect(JSON.parse(req.requestBody).bringBackProperties).to.be.undefined;
   });
 
@@ -137,9 +138,13 @@ describe('Event API', () => {
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
 
+    // eslint-disable-next-line no-unused-expressions
     expect(props.title).to.be.undefined;
+    // eslint-disable-next-line no-unused-expressions
     expect(props.url).to.be.undefined;
+    // eslint-disable-next-line no-unused-expressions
     expect(props.path).to.be.undefined;
+    // eslint-disable-next-line no-unused-expressions
     expect(props.referer).to.be.undefined;
   });
 
@@ -182,6 +187,7 @@ describe('Event API', () => {
       _ch('event', {});
     }).to.throw(Error);
 
+    // eslint-disable-next-line no-unused-expressions
     expect(debugMsg('Missing required event type')).to.be.true;
   });
 
@@ -193,6 +199,7 @@ describe('Event API', () => {
     requests[0].respond(500, {}, 'KO');
 
     setTimeout(() => {
+      // eslint-disable-next-line no-unused-expressions
       expect(debugMsg('KO')).to.be.true;
       done();
     }, 2);

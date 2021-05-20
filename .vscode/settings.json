@@ -37,8 +37,6 @@
     "typescript",
     "typescriptreact"
   ],
-  "flow.runOnEdit": false,
-  "flow.useNPMPackagedFlow": true,
   "prettier.arrowParens": "avoid",
   "prettier.bracketSpacing": false,
   "prettier.jsxBracketSameLine": false,
