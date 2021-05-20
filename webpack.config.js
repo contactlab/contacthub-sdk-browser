@@ -1,14 +1,18 @@
 const path = require('path');
-const webpack = require('webpack');
+const {merge} = require('webpack-merge');
 
-module.exports = {
-  mode: 'none',
+const commons = {
+  mode: 'production',
   entry: {
     sdk: './src/index.js'
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js'
+    library: 'ContactlabSDKBrowser',
+    libraryTarget: 'umd'
+  },
+  optimization: {
+    emitOnErrors: false,
+    concatenateModules: true
   },
   module: {
     rules: [
@@ -22,10 +26,39 @@ module.exports = {
         loader: 'babel-loader'
       }
     ]
-  },
-  plugins: [
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
-  ],
-  devtool: 'inline-source-map'
+  }
 };
+
+const es6 = merge(commons, {
+  target: ['web', 'es6'],
+
+  optimization: {
+    minimize: false
+  }
+});
+
+const es6Min = merge(commons, {
+  target: ['web', 'es6'],
+
+  output: {
+    filename: '[name].min.js'
+  }
+});
+
+const legacy = merge(es6, {
+  target: ['web', 'es5'],
+
+  output: {
+    filename: '[name].legacy.js'
+  }
+});
+
+const legacyMin = merge(commons, {
+  target: ['web', 'es5'],
+
+  output: {
+    filename: '[name].legacy.min.js'
+  }
+});
+
+module.exports = [es6, es6Min, legacy, legacyMin];
