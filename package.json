@@ -1,5 +1,5 @@
 {
-  "name": "contacthub",
+  "name": "@contactlab/contacthub-sdk-browser",
   "version": "1.4.0",
   "description": "Contacthub Browser SDK",
   "main": "src/contacthub.js",
@@ -26,6 +26,7 @@
   "keywords": [
     "contactlab",
     "contacthub",
+    "sdk",
     "tracking"
   ],
   "author": "Contactlab",
@@ -33,7 +34,7 @@
   "bugs": {
     "url": "https://github.com/contactlab/contacthub-sdk-browser/issues"
   },
-  "homepage": "http://developer.contactlab.com/",
+  "homepage": "https://contactlab.github.io/contacthub-sdk-browser/",
   "dependencies": {
     "es6-promise": "4.2.4",
     "js-cookie": "2.2.0",
