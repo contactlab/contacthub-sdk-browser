@@ -12,23 +12,12 @@ Insert this snippet in your website (preferably in the `<HEAD>` section):
 
 ```html
 <script>
-  window.ch = function () {
-    (ch.q = ch.q || []).push(arguments);
-  };
-  ch('config', {
-    /* see below */
-  });
-  ch('customer', {
-    /* see below */
-  });
-  ch('event', {
-    /* see below */
-  });
+  window.ch = function() {(ch.q = ch.q || []).push(arguments);};
+  ch('config', { /* see below */ });
+  ch('customer', { /* see below */ });
+  ch('event', { /* see below */ });
 </script>
-<script
-  async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/sdk.min.js"
-></script>
+<script async src="https://unpkg.com/@contactlab/sdk-browser/sdk.min.js"></script>
 ```
 
 Compressed and uncompressed copies of Contacthub SDK files are available.
@@ -42,37 +31,25 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 #### Latest version minified
 
 ```html
-<script
-  async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/sdk.min.js"
-></script>
+<script async src="https://unpkg.com/@contactlab/sdk-browser/sdk.min.js"></script>
 ```
 
 #### Latest version uncompressed
 
 ```html
-<script
-  async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/sdk.js"
-></script>
+<script async src="https://unpkg.com/@contactlab/sdk-browser/sdk.js"></script>
 ```
 
 #### Specific version minified
 
 ```html
-<script
-  async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/sdk.min.js"
-></script>
+<script async src="https://unpkg.com/@contactlab/sdk-browser@{version}/sdk.min.js"></script>
 ```
 
 #### Specific version uncompressed
 
 ```html
-<script
-  async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/sdk.js"
-></script>
+<script async src="https://unpkg.com/@contactlab/sdk-browser@{version}/sdk.js"></script>
 ```
 
 We recommend that you load libraries from the CDN via HTTPS, even if your own website only uses HTTP
@@ -205,10 +182,7 @@ You also have to replace all occurrences of `ch` in the snippet:
   chub('customer', { ... });
   chub('event', { ... });
 </script>
-<script
-  async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/sdk.min.js"
-></script>
+<script async src="https://unpkg.com/@contactlab/sdk-browser/sdk.min.js"></script>
 ```
 
 #### Renaming the Contacthub cookie
