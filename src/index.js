@@ -35,7 +35,7 @@ const log = (debug: boolean, error: any): void => {
     typeof error.status !== 'undefined' && typeof error.response !== 'undefined'
       ? error.response
       : error;
-  return window.console.error('[DEBUG] contacthub-sdk-browser', msg); // eslint-disable-line no-console
+  return window.console.error('[DEBUG] @contactlab/sdk-browser', msg); // eslint-disable-line no-console
 };
 
 const getQueryParam = name => {

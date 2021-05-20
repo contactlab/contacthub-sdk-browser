@@ -51,7 +51,7 @@ const whenDone = f => {
 };
 
 const debugMsg = msg =>
-  spyError.calledWith('[DEBUG] contacthub-sdk-browser', msg);
+  spyError.calledWith('[DEBUG] @contactlab/sdk-browser', msg);
 
 describe('Customer API:', () => {
   beforeEach(() => {
@@ -122,9 +122,7 @@ describe('Customer API:', () => {
             const req = requests[1];
             expect(req.method).to.equal('PATCH');
             expect(req.url).to.equal(
-              `${apiUrl}/workspaces/${
-                config.workspaceId
-              }/customers/existing-cid`
+              `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
             );
             expect(JSON.parse(req.requestBody)).to.eql({
               externalId: mario.externalId,
@@ -163,9 +161,7 @@ describe('Customer API:', () => {
             expect(requests.length).to.equal(2);
             const req = requests[1];
             expect(req.url).to.equal(
-              `${apiUrl}/workspaces/${
-                config.workspaceId
-              }/customers/new-cid/sessions`
+              `${apiUrl}/workspaces/${config.workspaceId}/customers/new-cid/sessions`
             );
             expect(JSON.parse(req.requestBody)).to.eql({
               value: sid
@@ -289,9 +285,7 @@ describe('Customer API:', () => {
           expect(requests.length).to.equal(1);
           const req = requests[0];
           expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${
-              config.workspaceId
-            }/customers/my-cid/sessions`
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
             value: sid
@@ -364,9 +358,7 @@ describe('Customer API:', () => {
           expect(requests.length).to.equal(1);
           const req = requests[0];
           expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${
-              config.workspaceId
-            }/customers/my-cid/sessions`
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
             value: newSid
@@ -415,9 +407,7 @@ describe('Customer API:', () => {
           expect(requests.length).to.equal(1);
           const req = requests[0];
           expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${
-              config.workspaceId
-            }/customers/my-cid/sessions`
+            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
             value: sid

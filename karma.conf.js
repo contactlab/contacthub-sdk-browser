@@ -3,20 +3,20 @@ const puppeteer = require('puppeteer');
 
 process.env.CHROME_BIN = puppeteer.executablePath();
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
     basePath: '',
 
     frameworks: ['mocha'],
 
     preprocessors: {
-      'src/contacthub.js': ['webpack', 'sourcemap'],
-      'test/contacthub.js': ['webpack', 'sourcemap']
+      'src/index.js': ['webpack', 'sourcemap'],
+      'test/index.js': ['webpack', 'sourcemap']
     },
 
     webpack: webpackConfig,
 
-    files: ['test/queue.js', 'src/contacthub.js', 'test/contacthub.js'],
+    files: ['test/queue.js', 'src/index.js', 'test/index.js'],
 
     exclude: [],
 

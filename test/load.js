@@ -6,7 +6,7 @@ import cookies from 'js-cookie';
 const cookieName = '_ch';
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-describe('When contacthub.js is loaded', () => {
+describe('When sdk.js is loaded', () => {
   it('processes the queue', () => {
     expect(getCookie().token).to.equal('ABC123_QUEUED');
   });

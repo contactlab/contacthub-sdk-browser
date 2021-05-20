@@ -1,8 +1,23 @@
 {
-  "name": "@contactlab/contacthub-sdk-browser",
+  "name": "@contactlab/sdk-browser",
   "version": "1.4.0",
-  "description": "Contacthub Browser SDK",
-  "main": "src/contacthub.js",
+  "description": "Contactlab Browser SDK",
+  "author": "Contactlab",
+  "license": "Apache-2.0",
+  "repository": "contactlab/contacthub-sdk-browser",
+  "homepage": "https://contactlab.github.io/contacthub-sdk-browser/",
+  "bugs": "https://github.com/contactlab/contacthub-sdk-browser/issues",
+  "keywords": [
+    "contactlab",
+    "contacthub",
+    "sdk",
+    "tracking"
+  ],
+  "engines": {
+    "node": ">= 14.0",
+    "npm": ">= 6.13"
+  },
+  "main": "dist/sdk.js",
   "files": [
     "dist"
   ],
@@ -14,28 +29,12 @@
     "test": "karma start --single-run",
     "test-watch": "karma start",
     "test-bs": "karma start --single-run --browsers bs_win_ie10,bs_win_firefox,bs_win_edge,bs_android_galaxys8,bs_android_pixel,bs_ios_iphone8",
-    "uglify": "uglifyjs ./dist/contacthub.js --support-ie8 -c -m -o ./dist/contacthub.min.js",
+    "uglify": "uglifyjs ./dist/sdk.js --support-ie8 -c -m -o ./dist/sdk.min.js",
     "prebuild": "npm run test",
     "build": "webpack && npm run uglify",
-    "package": "npm run build && zip -j dist/contacthub-$(git tag | tail -n 1).zip dist/*js",
+    "package": "npm run build && zip -j dist/sdk-$(git tag | tail -n 1).zip dist/*js",
     "example": "opn 'http://127.0.0.1:8080/example/?workspaceId=WORKSPACE_ID&nodeId=NODE_ID&token=TOKEN' && http-server"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/contactlab/contacthub-sdk-browser.git"
-  },
-  "keywords": [
-    "contactlab",
-    "contacthub",
-    "sdk",
-    "tracking"
-  ],
-  "author": "Contactlab",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/contactlab/contacthub-sdk-browser/issues"
-  },
-  "homepage": "https://contactlab.github.io/contacthub-sdk-browser/",
   "dependencies": {
     "es6-promise": "4.2.4",
     "js-cookie": "2.2.0",

@@ -27,7 +27,7 @@ let requests;
 let xhr;
 
 const debugMsg = msg =>
-  spyError.calledWith('[DEBUG] contacthub-sdk-browser', msg);
+  spyError.calledWith('[DEBUG] @contactlab/sdk-browser', msg);
 
 describe('Event API', () => {
   beforeEach(() => {

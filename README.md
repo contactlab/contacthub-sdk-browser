@@ -1,8 +1,8 @@
 ![Node CI](https://github.com/contactlab/contacthub-sdk-browser/workflows/Node%20CI/badge.svg?branch=master) [![GitHub release](https://img.shields.io/github/release/contactlab/contacthub-sdk-browser.svg)](https://github.com/contactlab/contacthub-sdk-browser/releases)
 
-# contacthub-sdk-browser
+# @contactlab/sdk-browser
 
-Browser SDK for the Contacthub API.
+Browser SDK for the Contactlab Customers (a.k.a. _Hub_) API.
 
 The easiest way to send pageviews, events and customer information from your website to the [Contacthub API](http://developer.contactlab.com/hub-swagger/).
 
@@ -27,7 +27,7 @@ Insert this snippet in your website (preferably in the `<HEAD>` section):
 </script>
 <script
   async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js"
+  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/sdk.min.js"
 ></script>
 ```
 
@@ -44,7 +44,7 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 ```html
 <script
   async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.min.js"
+  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/sdk.min.js"
 ></script>
 ```
 
@@ -53,7 +53,7 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 ```html
 <script
   async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/contacthub.js"
+  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/sdk.js"
 ></script>
 ```
 
@@ -62,7 +62,7 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 ```html
 <script
   async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.min.js"
+  src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/sdk.min.js"
 ></script>
 ```
 
@@ -71,7 +71,7 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 ```html
 <script
   async
-  src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/contacthub.js"
+  src="https://assets.contactlab.it/contacthub/sdk-browser/{version}/sdk.js"
 ></script>
 ```
 
@@ -205,7 +205,10 @@ You also have to replace all occurrences of `ch` in the snippet:
   chub('customer', { ... });
   chub('event', { ... });
 </script>
-<script async src="https://www.contactlab.com/contacthub.js"></script>
+<script
+  async
+  src="https://assets.contactlab.it/contacthub/sdk-browser/latest/sdk.min.js"
+></script>
 ```
 
 #### Renaming the Contacthub cookie

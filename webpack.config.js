@@ -4,7 +4,7 @@ const webpack = require('webpack');
 module.exports = {
   mode: 'none',
   entry: {
-    contacthub: './src/contacthub.js'
+    sdk: './src/index.js'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

@@ -136,7 +136,7 @@ describe('Config API', () => {
 
     expect(
       spy.calledWith(
-        '[DEBUG] contacthub-sdk-browser',
+        '[DEBUG] @contactlab/sdk-browser',
         'Invalid ContactHub configuration'
       )
     ).to.be.true;
