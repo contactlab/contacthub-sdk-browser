@@ -240,5 +240,5 @@ Please note that if a different user is logged in, the Contacthub id for the cur
 
 ### How to open the example page in your browser
 
-`npm run example` will start a local HTTP server and open the example page in your local browser. Replace the placeholders in the query string with your authorization token and ids. Remember also to add `http://127.0.0.1.xip.io` to the allowed URLs for your Source in the Contacthub web interface (under `Settings > Sources > {source name} > Settings`).
+`npm run example` will start a local HTTP server and open the example page in your local browser. Replace the placeholders in the query string with your authorization token and ids. Remember also to add `http://127.0.0.1:8080` to the allowed URLs for your Source in the Contacthub web interface (under `Settings > Sources > {source name} > Settings`).
 
