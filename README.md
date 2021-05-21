@@ -231,7 +231,11 @@ Please note that if a different user is logged in, the Contacthub id for the cur
 
 ### How to build locally
 
-`npm run build` will generate `dist/contactlab.js` and `dist/contactlab.min.js`.
+`npm run build` will generate:
+- `dist/sdk.js` (ES6 version);
+- `dist/sdk.min.js` (ES6 version minified);
+- `dist/sdk.legacy.js` (ES5 version);
+- `dist/sdk.legacy.min.js` (ES5 version minified)
 
 ### How to run tests
 
