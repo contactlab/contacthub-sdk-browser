@@ -1,7 +1,7 @@
 import {Promise} from 'es6-promise';
 import cookies from 'js-cookie';
 import sha256 from 'jssha/sha256';
-import uuid from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 import xr from 'xr';
 
 // import type {
@@ -48,7 +48,7 @@ const getQueryParam = name => {
 };
 
 // const newSessionId = (): string => uuid.v4();
-const newSessionId = () => uuid.v4();
+const newSessionId = () => uuidv4();
 
 // const getCookie = (): ContactHubCookie => {
 const getCookie = () => {
