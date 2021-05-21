@@ -9,6 +9,15 @@
         "clear": true,
         "revealProblems": "onProblem"
       }
+    },
+    {
+      "type": "npm",
+      "script": "check",
+      "problemMatcher": ["$tsc"],
+      "presentation": {
+        "clear": true,
+        "revealProblems": "onProblem"
+      }
     }
   ]
 }

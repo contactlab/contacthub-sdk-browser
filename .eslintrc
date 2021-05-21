@@ -1,5 +1,5 @@
 {
-  "extends": ["contactlab", "prettier"],
+  "extends": ["contactlab/typescript", "prettier"],
   "rules": {
     "no-underscore-dangle": 0
   },

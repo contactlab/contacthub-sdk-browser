@@ -13,3 +13,11 @@ window.ch('config', {
   nodeId: 'node_id',
   token: 'ABC123_QUEUED'
 });
+
+// This is needed...
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const process = {
+  env: {
+    // NODE_ENV: 'production'
+  }
+};

@@ -241,7 +241,7 @@ Please note that if a different user is logged in, the Contacthub id for the cur
 
 `npm test` will run all tests once using Chrome in headless mode.
 
-`BROWSERSTACK_USER=<user> BROWSERSTACK_KEY=<key> npm run test:bs` will run tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.js`
+`BROWSERSTACK_USERNAME=<user> BROWSERSTACK_ACCESS_KEY=<key> npm run test:bs` will run tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.js`
 
 ### How to open the example page in your browser
 
