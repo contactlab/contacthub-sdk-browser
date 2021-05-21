@@ -1,6 +1,6 @@
 import {Promise} from 'es6-promise';
 import cookies from 'js-cookie';
-import sha256 from 'jssha/src/sha256';
+import sha256 from 'jssha/sha256';
 import uuid from 'uuid';
 import xr from 'xr';
 
