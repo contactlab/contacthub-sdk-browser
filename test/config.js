@@ -28,8 +28,7 @@ describe('Config API', () => {
   });
 
   it('sets a cookie', () => {
-    // eslint-disable-next-line no-unused-expressions
-    expect(cookies.get(cookieName)).to.be.ok;
+    expect(typeof cookies.get(cookieName)).not.to.equal(undefined);
   });
 
   it('generates a UUIDv4 sessionId', () => {
@@ -116,10 +115,8 @@ describe('Config API', () => {
     });
 
     expect(getCookie().token).to.equal('CDE456');
-    // eslint-disable-next-line no-unused-expressions
-    expect(getCookie().customerId).to.be.undefined;
-    // eslint-disable-next-line no-unused-expressions
-    expect(getCookie().hash).to.be.undefined;
+    expect(getCookie().customerId).to.equal(undefined);
+    expect(getCookie().hash).to.equal(undefined);
   });
 
   it('throws if required option are not specified', () => {
@@ -135,13 +132,12 @@ describe('Config API', () => {
       _ch('config', {debug: true});
     }).to.throw();
 
-    // eslint-disable-next-line no-unused-expressions
     expect(
       spy.calledWith(
         '[DEBUG] @contactlab/sdk-browser',
         'Invalid ContactHub configuration'
       )
-    ).to.be.true;
+    ).to.equal(true);
     spy.restore();
   });
 });

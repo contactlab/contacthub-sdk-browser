@@ -41,8 +41,7 @@ describe('UTM automatic handling', () => {
 
     setConfig();
 
-    // eslint-disable-next-line no-unused-expressions
-    expect(getCookie().ga).to.be.undefined;
+    expect(getCookie().ga).to.equal(undefined);
   });
 
   it('stores utm_* vars in a separate _chutm cookie', () => {
