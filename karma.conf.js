@@ -1,3 +1,4 @@
+const {merge} = require('webpack-merge');
 const webpackConfigs = require('./webpack.config.js');
 
 // --- Env vars
@@ -32,7 +33,10 @@ module.exports = config => {
       'test/index.js': ['webpack']
     },
 
-    webpack: webpackConfigs[0],
+    webpack: merge(webpackConfigs[0], {
+      // Just for sinon
+      resolve: {fallback: {util: false}}
+    }),
 
     files: ['test/queue.js', SOURCE, 'test/index.js'],
 

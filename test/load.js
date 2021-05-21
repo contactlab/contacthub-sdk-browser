@@ -1,7 +1,7 @@
+/* global describe, it */
+
 import {expect} from 'chai';
 import cookies from 'js-cookie';
-
-/* global describe, it */
 
 const cookieName = '_ch';
 const getCookie = () => cookies.getJSON(cookieName) || {};

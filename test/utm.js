@@ -1,8 +1,8 @@
+/* global describe, it, beforeEach */
+
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
-
-/* global describe, it, beforeEach */
 
 const cookieName = '_ch';
 const utmCookieName = '_chutm';
