@@ -34,8 +34,8 @@
     "example": "open-cli 'http://127.0.0.1:8080/example/?workspaceId=WORKSPACE_ID&nodeId=NODE_ID&token=TOKEN' && http-server"
   },
   "dependencies": {
-    "es6-promise": "4.2.4",
-    "js-cookie": "2.2.0",
+    "es6-promise": "4.2.8",
+    "js-cookie": "2.2.1",
     "jssha": "2.3.1",
     "uuid": "3.2.1",
     "xr": "github:dhinus/xr"
