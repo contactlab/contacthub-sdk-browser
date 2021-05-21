@@ -1,22 +1,40 @@
-const webpackConfig = require('./webpack.config.js');
-const puppeteer = require('puppeteer');
+const webpackConfigs = require('./webpack.config.js');
 
-process.env.CHROME_BIN = puppeteer.executablePath();
+// --- Env vars
+process.env.CHROME_BIN = require('puppeteer').executablePath();
 
-module.exports = function (config) {
+const BS = process.env.BS === 'true';
+const MIN = process.env.MINIMIZED === 'true';
+// ---
+
+const SOURCE = `dist/sdk${MIN ? '.min' : ''}.js`;
+
+const STD_BROWSERS = ['ChromeHeadlessNoSandbox'];
+const BS_BROWSERS = [
+  'bs_win_ie10',
+  'bs_win_firefox',
+  'bs_win_edge',
+  'bs_android_galaxys8',
+  'bs_android_pixel',
+  'bs_ios_iphone8'
+];
+
+module.exports = config => {
+  // eslint-disable-next-line no-console
+  console.log(`\n=== CURRENT SOURCE IS: ${SOURCE} ===\n`);
+
   config.set({
     basePath: '',
 
     frameworks: ['mocha'],
 
     preprocessors: {
-      'src/index.js': ['webpack', 'sourcemap'],
-      'test/index.js': ['webpack', 'sourcemap']
+      'test/index.js': ['webpack']
     },
 
-    webpack: webpackConfig,
+    webpack: webpackConfigs[0],
 
-    files: ['test/queue.js', 'src/index.js', 'test/index.js'],
+    files: ['test/queue.js', SOURCE, 'test/index.js'],
 
     exclude: [],
 
@@ -30,7 +48,7 @@ module.exports = function (config) {
 
     autoWatch: true,
 
-    browsers: ['ChromeHeadlessNoSandbox'],
+    browsers: BS ? BS_BROWSERS : STD_BROWSERS,
 
     client: {
       captureConsole: true
@@ -41,7 +59,7 @@ module.exports = function (config) {
       terminal: true
     },
 
-    singleRun: false,
+    singleRun: true,
 
     concurrency: Infinity,
 
