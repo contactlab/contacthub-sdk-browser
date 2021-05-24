@@ -3,8 +3,7 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 
-const cookieName = '_ch';
-const getCookie = () => cookies.getJSON(cookieName) || {};
+const getCookie = (): any => cookies.getJSON('_ch') || {};
 
 describe('When sdk.js is loaded', () => {
   it('processes the queue', () => {
@@ -13,6 +12,6 @@ describe('When sdk.js is loaded', () => {
 
   it('does not touch the window.Promise object', () => {
     // _asap only exists in es6-promise, not in native Promise
-    expect(window.Promise && window.Promise._asap).to.equal(undefined);
+    expect(window.Promise && (window.Promise as any)._asap).to.equal(undefined);
   });
 });

@@ -3,27 +3,25 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
-
-// import type {CustomerData} from '../lib/types';
+import {CustomerData, ConfigOptions, CustomerConsents} from '../../src/types';
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
-const varName = 'ch';
-const config = {
+
+const config: ConfigOptions = {
   workspaceId: 'workspace_id',
   nodeId: 'node_id',
   token: 'ABC123'
 };
 
-// const mario: CustomerData = {
-const mario = {
-  externalId: 'mario.rossi',
+const CUSTOMER: CustomerData = {
+  externalId: 'foo.bar',
   base: {
-    firstName: 'mario',
-    lastName: 'rossi',
+    firstName: 'foo',
+    lastName: 'bar',
     dob: '1980-03-17',
     contacts: {
-      email: 'mario.rossi@example.com'
+      email: 'foo.bar@example.com'
     }
   },
   consents: {
@@ -42,7 +40,7 @@ const mario = {
   }
 };
 
-const _ch = window[varName];
+const _ch = window.ch;
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
@@ -50,14 +48,14 @@ const setConfig = () => {
   _ch('config', config);
 };
 
-let requests = [];
-let xhr;
+let requests: sinon.SinonFakeXMLHttpRequest[] = [];
+let xhr: sinon.SinonFakeXMLHttpRequestStatic;
 
 // Mocked Ajax calls return immediately but need a short setTimeout to avoid
 // race conditions. 0 ms works fine on all browsers except IE 10 which requires
 // at least 2 ms.
 // TODO: find a more elegant way to mock Ajax calls
-const whenDone = f => {
+const whenDone = (f: () => void): void => {
   setTimeout(() => f(), 2);
 };
 
@@ -77,7 +75,7 @@ describe('Consents', () => {
   });
 
   it('can be set', () => {
-    _ch('customer', mario);
+    _ch('customer', CUSTOMER);
 
     expect(requests.length).to.equal(1);
     const req = requests[0];
@@ -85,30 +83,23 @@ describe('Consents', () => {
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/customers`
     );
-    expect(JSON.parse(req.requestBody).consents).to.eql(mario.consents);
+    expect(JSON.parse(req.requestBody).consents).to.eql(CUSTOMER.consents);
   });
 
   it('can be updated', done => {
-    cookies.set(
-      cookieName,
-      Object.assign(getCookie(), {
-        customerId: 'my-cid'
-      })
-    );
+    cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
 
-    _ch('customer', mario);
-    requests[0].respond(200);
+    _ch('customer', CUSTOMER);
+
+    requests[0].respond(200, {}, '');
 
     whenDone(() => {
-      const newConsents = {
-        softSpam: {
-          email: {
-            objection: true
-          }
-        }
+      const newConsents: CustomerConsents = {
+        softSpam: {email: {objection: true}}
       };
 
-      _ch('customer', Object.assign(mario, {consents: newConsents}));
+      _ch('customer', {...CUSTOMER, consents: newConsents});
+
       expect(requests.length).to.equal(2);
 
       whenDone(() => {

@@ -1,6 +1,7 @@
 {
   "extends": ["contactlab/typescript", "prettier"],
   "rules": {
+    "camelcase": 0,
     "no-underscore-dangle": 0
   },
   "overrides": [

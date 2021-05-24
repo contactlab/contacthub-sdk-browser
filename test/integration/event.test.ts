@@ -3,30 +3,32 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
+import {ConfigOptions} from '../../src/types';
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
-const varName = 'ch';
-const config = {
+
+const config: ConfigOptions = {
   workspaceId: 'workspace_id',
   nodeId: 'node_id',
   token: 'ABC123'
 };
 
-const _ch = window[varName];
+const _ch = window.ch;
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-const setConfig = d => {
+const setConfig = (d?: boolean): void => {
   const debug = d || false;
-  _ch('config', Object.assign({}, config, {debug}));
+
+  _ch('config', {...config, debug});
 };
 
-let spyError;
-let requests;
-let xhr;
+let spyError: sinon.SinonStub<any[], void>;
+let requests: sinon.SinonFakeXMLHttpRequest[];
+let xhr: sinon.SinonFakeXMLHttpRequestStatic;
 
-const debugMsg = msg =>
+const debugMsg = (msg: string): boolean =>
   spyError.calledWith('[DEBUG] @contactlab/sdk-browser', msg);
 
 describe('Event API', () => {
@@ -55,6 +57,7 @@ describe('Event API', () => {
   it('sends the event to the API', () => {
     setConfig();
     _ch('event', {type: 'viewedPage'});
+
     const req = requests[0];
     const reqBody = JSON.parse(req.requestBody);
 
@@ -72,13 +75,10 @@ describe('Event API', () => {
 
   it('sends customerId when available in cookie', () => {
     setConfig();
-    cookies.set(
-      cookieName,
-      Object.assign(getCookie(), {
-        customerId: 'my-cid'
-      })
-    );
+    cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
+
     _ch('event', {type: 'viewedPage'});
+
     const req = requests[0];
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
@@ -88,13 +88,10 @@ describe('Event API', () => {
 
   it('omits bringBackProperties when customerId is available', () => {
     setConfig();
-    cookies.set(
-      cookieName,
-      Object.assign(getCookie(), {
-        customerId: 'my-cid'
-      })
-    );
+    cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
+
     _ch('event', {type: 'viewedPage'});
+
     const req = requests[0];
     expect(req.url).to.equal(
       `${apiUrl}/workspaces/${config.workspaceId}/events`
@@ -105,8 +102,11 @@ describe('Event API', () => {
 
   it('infers common "viewedPage" event properties', () => {
     document.title = 'Hello world';
+
     setConfig();
+
     _ch('event', {type: 'viewedPage'});
+
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
 
@@ -118,12 +118,9 @@ describe('Event API', () => {
 
   it('allows to override inferred properties', () => {
     setConfig();
-    _ch('event', {
-      type: 'viewedPage',
-      properties: {
-        title: 'Custom title'
-      }
-    });
+
+    _ch('event', {type: 'viewedPage', properties: {title: 'Custom title'}});
+
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
 
@@ -133,30 +130,26 @@ describe('Event API', () => {
 
   it('does not infer properties on other event types', () => {
     document.title = 'Hello world';
+
     setConfig();
+
     _ch('event', {type: 'something'});
+
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
 
     expect(props.title).to.equal(undefined);
-
     expect(props.url).to.equal(undefined);
-
     expect(props.path).to.equal(undefined);
-
     expect(props.referer).to.equal(undefined);
   });
 
   it('gets the "context" from the cookie', () => {
     setConfig();
-    cookies.set(
-      cookieName,
-      Object.assign(getCookie(), {
-        context: 'FOO'
-      })
-    );
+    cookies.set(cookieName, {...getCookie(), context: 'FOO'});
 
     _ch('event', {type: 'viewedPage'});
+
     const req = requests[0];
     const reqBody = JSON.parse(req.requestBody);
 
@@ -165,14 +158,10 @@ describe('Event API', () => {
 
   it('gets the "contextInfo" from the cookie', () => {
     setConfig();
-    cookies.set(
-      cookieName,
-      Object.assign(getCookie(), {
-        contextInfo: {foo: 'bar'}
-      })
-    );
+    cookies.set(cookieName, {...getCookie(), contextInfo: {foo: 'bar'}});
 
     _ch('event', {type: 'viewedPage'});
+
     const req = requests[0];
     const reqBody = JSON.parse(req.requestBody);
 
@@ -182,8 +171,9 @@ describe('Event API', () => {
   // --- Rejects
   it('should throw and log error when event type is not defined', () => {
     setConfig(true);
+
     expect(() => {
-      _ch('event', {});
+      _ch('event', {} as any);
     }).to.throw(Error);
 
     expect(debugMsg('Missing required event type')).to.equal(true);
@@ -198,6 +188,7 @@ describe('Event API', () => {
 
     setTimeout(() => {
       expect(debugMsg('KO')).to.equal(true);
+
       done();
     }, 2);
   });

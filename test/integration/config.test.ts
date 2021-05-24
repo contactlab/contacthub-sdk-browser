@@ -4,15 +4,11 @@ import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 
-// import type {ContactHubFunction} from '../lib/types';
-
 const cookieName = '_ch';
-const varName = 'ch';
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-// const _ch: ContactHubFunction = window[varName];
-const _ch = window[varName];
+const _ch = window.ch;
 
 describe('Config API', () => {
   beforeEach(() => {
@@ -32,23 +28,27 @@ describe('Config API', () => {
   });
 
   it('generates a UUIDv4 sessionId', () => {
-    expect(getCookie().sid).to.match(
-      /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
-    );
+    const uuidV4 =
+      /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+
+    expect(uuidV4.test(getCookie().sid)).to.equal(true);
   });
 
   it('does not regenerate sessionId if already present', () => {
     const sid = getCookie().sid;
+
     _ch('config', {
       workspaceId: 'workspace_id',
       nodeId: 'node_id',
       token: 'ABC123'
     });
+
     expect(getCookie().sid).to.equal(sid);
   });
 
   it('stores all config data in the cookie', () => {
     const c = getCookie();
+
     expect(c.workspaceId).to.equal('workspace_id');
     expect(c.nodeId).to.equal('node_id');
     expect(c.token).to.equal('ABC123');
@@ -73,6 +73,7 @@ describe('Config API', () => {
       token: 'ABC123',
       context: 'foo'
     });
+
     expect(getCookie().context).to.equal('foo');
   });
 
@@ -84,6 +85,7 @@ describe('Config API', () => {
       context: 'foo',
       contextInfo: {foo: 'bar'}
     });
+
     expect(getCookie().contextInfo).to.eql({foo: 'bar'});
   });
 
@@ -96,17 +98,16 @@ describe('Config API', () => {
       contextInfo: {foo: 'bar'},
       debug: true
     });
+
     expect(getCookie().debug).to.equal(true);
   });
 
   it('removes user data from cookie if the token changes', () => {
-    cookies.set(
-      cookieName,
-      Object.assign(getCookie(), {
-        customerId: 'customer-id',
-        token: 'ABC123'
-      })
-    );
+    cookies.set(cookieName, {
+      ...getCookie(),
+      customerId: 'customer-id',
+      token: 'ABC123'
+    });
 
     _ch('config', {
       workspaceId: 'workspace_id',
@@ -121,7 +122,7 @@ describe('Config API', () => {
 
   it('throws if required option are not specified', () => {
     expect(() => {
-      _ch('config', {});
+      _ch('config', {} as any);
     }).to.throw();
   });
 
@@ -129,7 +130,7 @@ describe('Config API', () => {
     const spy = sinon.stub(console, 'error').callsFake(() => undefined);
 
     expect(() => {
-      _ch('config', {debug: true});
+      _ch('config', {debug: true} as any);
     }).to.throw();
 
     expect(
@@ -138,6 +139,7 @@ describe('Config API', () => {
         'Invalid ContactHub configuration'
       )
     ).to.equal(true);
+
     spy.restore();
   });
 });

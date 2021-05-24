@@ -3,53 +3,52 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
-
-// import type {ContactHubFunction} from '../lib/types';
+import {ConfigOptions, CustomerData} from '../../src/types';
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
-const varName = 'ch';
-const config = {
+
+const config: ConfigOptions = {
   workspaceId: 'workspace_id',
   nodeId: 'node_id',
   token: 'ABC123'
 };
 
-const mario = {
-  externalId: 'mario.rossi',
+const CUSTOMER: CustomerData = {
+  externalId: 'foo.bar',
   base: {
-    firstName: 'mario',
-    lastName: 'rossi',
+    firstName: 'foo',
+    lastName: 'bar',
     dob: '1980-03-17',
     contacts: {
-      email: 'mario.rossi@example.com'
+      email: 'foo.bar@example.com'
     }
   }
 };
 
-// const _ch: ContactHubFunction = window[varName];
-const _ch = window[varName];
+const _ch = window.ch;
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 
-const setConfig = d => {
+const setConfig = (d?: boolean): void => {
   const debug = d || false;
-  _ch('config', Object.assign({}, config, {debug}));
+
+  _ch('config', {...config, debug});
 };
 
-let spyError;
-let requests = [];
-let xhr;
+let spyError: sinon.SinonStub<any[], void>;
+let requests: sinon.SinonFakeXMLHttpRequest[] = [];
+let xhr: sinon.SinonFakeXMLHttpRequestStatic;
 
 // Mocked Ajax calls return immediately but need a short setTimeout to avoid
 // race conditions. 0 ms works fine on all browsers except IE 10 which requires
 // at least 2 ms.
 // TODO: find a more elegant way to mock Ajax calls
-const whenDone = f => {
+const whenDone = (f: () => void): void => {
   setTimeout(() => f(), 2);
 };
 
-const debugMsg = msg =>
+const debugMsg = (msg: string): boolean =>
   spyError.calledWith('[DEBUG] @contactlab/sdk-browser', msg);
 
 describe('Customer API:', () => {
@@ -70,7 +69,7 @@ describe('Customer API:', () => {
 
   it('checks if required config is set', () => {
     expect(() => {
-      _ch('customer', mario);
+      _ch('customer', CUSTOMER);
     }).to.throw(Error);
 
     expect(requests.length).to.equal(0);
@@ -80,7 +79,7 @@ describe('Customer API:', () => {
     describe('and no customerId is stored in the cookie', () => {
       beforeEach(() => {
         setConfig();
-        _ch('customer', mario);
+        _ch('customer', CUSTOMER);
       });
 
       it('creates a new customer', done => {
@@ -93,12 +92,13 @@ describe('Customer API:', () => {
           );
           expect(JSON.parse(req.requestBody)).to.eql({
             nodeId: config.nodeId,
-            externalId: mario.externalId,
-            base: mario.base
+            externalId: CUSTOMER.externalId,
+            base: CUSTOMER.base
           });
           expect(req.requestHeaders.Authorization).to.equal(
             `Bearer ${config.token}`
           );
+
           done();
         });
       });
@@ -108,14 +108,9 @@ describe('Customer API:', () => {
           requests[0].respond(
             409,
             {},
-            JSON.stringify({
-              data: {
-                customer: {
-                  id: 'existing-cid'
-                }
-              }
-            })
+            JSON.stringify({data: {customer: {id: 'existing-cid'}}})
           );
+
           whenDone(() => {
             expect(requests.length).to.equal(2);
             const req = requests[1];
@@ -124,9 +119,10 @@ describe('Customer API:', () => {
               `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
             );
             expect(JSON.parse(req.requestBody)).to.eql({
-              externalId: mario.externalId,
-              base: mario.base
+              externalId: CUSTOMER.externalId,
+              base: CUSTOMER.base
             });
+
             done();
           });
         });
@@ -135,8 +131,10 @@ describe('Customer API:', () => {
       it('stores the customerId for future calls', done => {
         whenDone(() => {
           requests[0].respond(200, {}, JSON.stringify({id: 'new-cid'}));
+
           whenDone(() => {
             expect(getCookie().customerId).to.equal('new-cid');
+
             done();
           });
         });
@@ -145,8 +143,10 @@ describe('Customer API:', () => {
       it('stores a hash of the customer data for future calls', done => {
         whenDone(() => {
           requests[0].respond(200, {}, JSON.stringify({id: 'new-cid'}));
+
           whenDone(() => {
             expect(getCookie().hash).not.to.equal(undefined);
+
             done();
           });
         });
@@ -154,8 +154,10 @@ describe('Customer API:', () => {
 
       it('reconciles the sessionId with the customerId', done => {
         const sid = getCookie().sid;
+
         whenDone(() => {
           requests[0].respond(200, {}, JSON.stringify({id: 'new-cid'}));
+
           whenDone(() => {
             expect(requests.length).to.equal(2);
             const req = requests[1];
@@ -165,6 +167,7 @@ describe('Customer API:', () => {
             expect(JSON.parse(req.requestBody)).to.eql({
               value: sid
             });
+
             done();
           });
         });
@@ -174,13 +177,10 @@ describe('Customer API:', () => {
     describe('and a customerId is stored in the cookie', () => {
       beforeEach(() => {
         setConfig();
-        cookies.set(
-          cookieName,
-          Object.assign(getCookie(), {
-            customerId: 'my-cid'
-          })
-        );
-        _ch('customer', mario);
+
+        cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
+
+        _ch('customer', CUSTOMER);
       });
 
       it('updates the customer', () => {
@@ -191,38 +191,49 @@ describe('Customer API:', () => {
           `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
         );
         expect(JSON.parse(req.requestBody)).to.eql({
-          externalId: mario.externalId,
-          base: mario.base
+          externalId: CUSTOMER.externalId,
+          base: CUSTOMER.base
         });
       });
 
       it('does not update the customer if the same data is sent', done => {
-        requests[0].respond(200);
+        requests[0].respond(200, {}, '');
+
         whenDone(() => {
-          _ch('customer', mario);
+          _ch('customer', CUSTOMER);
+
           expect(requests.length).to.equal(1);
+
           done();
         });
       });
 
       it('does update the customer if updated data is sent', done => {
-        requests[0].respond(200);
+        requests[0].respond(200, {}, '');
+
         whenDone(() => {
-          if (mario.base) {
-            mario.base.lastName = 'Rossini';
+          if (CUSTOMER.base) {
+            CUSTOMER.base.lastName = 'Baz';
           }
-          _ch('customer', mario);
+
+          _ch('customer', CUSTOMER);
+
           expect(requests.length).to.equal(2);
+
           done();
         });
       });
 
       it('does update the customer if only the externalId has changed', done => {
-        requests[0].respond(200);
+        requests[0].respond(200, {}, '');
+
         whenDone(() => {
-          mario.externalId = 'supermario';
-          _ch('customer', mario);
+          CUSTOMER.externalId = 'fuz';
+
+          _ch('customer', CUSTOMER);
+
           expect(requests.length).to.equal(2);
+
           done();
         });
       });
@@ -233,12 +244,8 @@ describe('Customer API:', () => {
     describe('and the same customerId is stored in the cookie', () => {
       beforeEach(() => {
         setConfig();
-        cookies.set(
-          cookieName,
-          Object.assign(getCookie(), {
-            customerId: 'my-cid'
-          })
-        );
+        cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
+
         _ch('customer', {id: 'my-cid'});
       });
 
@@ -250,12 +257,8 @@ describe('Customer API:', () => {
     describe('and a different customerId is stored in the cookie', () => {
       beforeEach(() => {
         setConfig();
-        cookies.set(
-          cookieName,
-          Object.assign(getCookie(), {
-            customerId: 'different-cid'
-          })
-        );
+        cookies.set(cookieName, {...getCookie(), customerId: 'different-cid'});
+
         _ch('customer', {id: 'my-cid'});
       });
 
@@ -271,6 +274,7 @@ describe('Customer API:', () => {
 
       it('does not reset the sessionId', () => {
         const {sid} = getCookie();
+
         _ch('customer', {id: 'my-cid'});
 
         expect(getCookie().sid).to.eql(sid);
@@ -289,6 +293,7 @@ describe('Customer API:', () => {
           expect(JSON.parse(req.requestBody)).to.eql({
             value: sid
           });
+
           done();
         });
       });
@@ -305,13 +310,9 @@ describe('Customer API:', () => {
     describe('and the same customerId is stored in the cookie', () => {
       beforeEach(() => {
         setConfig();
-        cookies.set(
-          cookieName,
-          Object.assign(getCookie(), {
-            customerId: 'my-cid'
-          })
-        );
-        _ch('customer', Object.assign({}, mario, {id: 'my-cid'}));
+        cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
+
+        _ch('customer', {...CUSTOMER, id: 'my-cid'});
       });
 
       it('updates the customer', done => {
@@ -323,9 +324,10 @@ describe('Customer API:', () => {
             `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
-            externalId: mario.externalId,
-            base: mario.base
+            externalId: CUSTOMER.externalId,
+            base: CUSTOMER.base
           });
+
           done();
         });
       });
@@ -334,23 +336,21 @@ describe('Customer API:', () => {
     describe('and a different customerId is stored in the cookie', () => {
       beforeEach(() => {
         setConfig();
-        cookies.set(
-          cookieName,
-          Object.assign(getCookie(), {
-            customerId: 'different-cid'
-          })
-        );
+
+        cookies.set(cookieName, {...getCookie(), customerId: 'different-cid'});
       });
 
       it('resets the sessionId', () => {
         const {sid} = getCookie();
-        _ch('customer', Object.assign({}, mario, {id: 'my-cid'}));
+
+        _ch('customer', {...CUSTOMER, id: 'my-cid'});
 
         expect(getCookie().sid).not.to.eql(sid);
       });
 
       it('reconciles the new sessionId with the customerId', done => {
-        _ch('customer', Object.assign({}, mario, {id: 'my-cid'}));
+        _ch('customer', {...CUSTOMER, id: 'my-cid'});
+
         const {sid: newSid} = getCookie();
 
         whenDone(() => {
@@ -362,14 +362,16 @@ describe('Customer API:', () => {
           expect(JSON.parse(req.requestBody)).to.eql({
             value: newSid
           });
+
           done();
         });
       });
 
       it('updates the customer', done => {
-        _ch('customer', Object.assign({}, mario, {id: 'my-cid'}));
+        _ch('customer', {...CUSTOMER, id: 'my-cid'});
 
-        requests[0].respond(200);
+        requests[0].respond(200, {}, '');
+
         whenDone(() => {
           expect(requests.length).to.equal(2);
           const req = requests[1];
@@ -378,9 +380,10 @@ describe('Customer API:', () => {
             `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
-            externalId: mario.externalId,
-            base: mario.base
+            externalId: CUSTOMER.externalId,
+            base: CUSTOMER.base
           });
+
           done();
         });
       });
@@ -393,14 +396,16 @@ describe('Customer API:', () => {
 
       it('does not reset the sessionId', () => {
         const {sid} = getCookie();
-        _ch('customer', Object.assign({}, mario, {id: 'my-cid'}));
+
+        _ch('customer', {...CUSTOMER, id: 'my-cid'});
 
         expect(getCookie().sid).to.eql(sid);
       });
 
       it('reconciles the sessionId with the customerId', done => {
         const {sid} = getCookie();
-        _ch('customer', Object.assign({}, mario, {id: 'my-cid'}));
+
+        _ch('customer', {...CUSTOMER, id: 'my-cid'});
 
         whenDone(() => {
           expect(requests.length).to.equal(1);
@@ -411,14 +416,16 @@ describe('Customer API:', () => {
           expect(JSON.parse(req.requestBody)).to.eql({
             value: sid
           });
+
           done();
         });
       });
 
       it('updates the customer', done => {
-        _ch('customer', Object.assign({}, mario, {id: 'my-cid'}));
+        _ch('customer', {...CUSTOMER, id: 'my-cid'});
 
-        requests[0].respond(200);
+        requests[0].respond(200, {}, '');
+
         whenDone(() => {
           expect(requests.length).to.equal(2);
           const req = requests[1];
@@ -427,9 +434,10 @@ describe('Customer API:', () => {
             `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
           );
           expect(JSON.parse(req.requestBody)).to.eql({
-            externalId: mario.externalId,
-            base: mario.base
+            externalId: CUSTOMER.externalId,
+            base: CUSTOMER.base
           });
+
           done();
         });
       });
@@ -440,13 +448,11 @@ describe('Customer API:', () => {
     beforeEach(() => {
       setConfig();
 
-      cookies.set(
-        cookieName,
-        Object.assign(getCookie(), {
-          customerId: 'old-customer-id',
-          sid: 'old-session-id'
-        })
-      );
+      cookies.set(cookieName, {
+        ...getCookie(),
+        customerId: 'old-customer-id',
+        sid: 'old-session-id'
+      });
 
       _ch('customer');
     });
@@ -456,9 +462,10 @@ describe('Customer API:', () => {
     });
 
     it('generates a new sessionId', () => {
-      expect(getCookie().sid).to.match(
-        /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
-      );
+      const sid =
+        /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+
+      expect(sid.test(getCookie().sid)).to.equal(true);
     });
   });
 
@@ -466,12 +473,8 @@ describe('Customer API:', () => {
   describe('when id and customerId are provided it should logs catched promise rejection', () => {
     beforeEach(() => {
       setConfig(true);
-      cookies.set(
-        cookieName,
-        Object.assign(getCookie(), {
-          customerId: 'TEST'
-        })
-      );
+
+      cookies.set(cookieName, {...getCookie(), customerId: 'TEST'});
     });
 
     it('when id != customerId and no other customer data provided', done => {
@@ -481,6 +484,7 @@ describe('Customer API:', () => {
         expect(
           debugMsg('The provided id conflicts with the id stored in the cookie')
         ).to.equal(true);
+
         done();
       });
     });
@@ -492,6 +496,7 @@ describe('Customer API:', () => {
 
       whenDone(() => {
         expect(debugMsg('KO')).to.equal(true);
+
         done();
       });
     });
@@ -504,6 +509,7 @@ describe('Customer API:', () => {
 
         whenDone(() => {
           expect(debugMsg('KO')).to.equal(true);
+
           done();
         });
       });
@@ -522,6 +528,7 @@ describe('Customer API:', () => {
 
       whenDone(() => {
         expect(debugMsg('KO')).to.equal(true);
+
         done();
       });
     });
@@ -534,6 +541,7 @@ describe('Customer API:', () => {
 
         whenDone(() => {
           expect(debugMsg('KO')).to.equal(true);
+
           done();
         });
       });
@@ -543,12 +551,8 @@ describe('Customer API:', () => {
   describe('when customerId is provided and id is not provided it should logs catched promise rejection', () => {
     beforeEach(() => {
       setConfig(true);
-      cookies.set(
-        cookieName,
-        Object.assign(getCookie(), {
-          customerId: 'TEST'
-        })
-      );
+
+      cookies.set(cookieName, {...getCookie(), customerId: 'TEST'});
     });
 
     it('when customers api respond with error', done => {
@@ -559,6 +563,7 @@ describe('Customer API:', () => {
       whenDone(() => {
         whenDone(() => {
           expect(debugMsg('KO')).to.equal(true);
+
           done();
         });
       });
@@ -578,6 +583,7 @@ describe('Customer API:', () => {
       whenDone(() => {
         whenDone(() => {
           expect(debugMsg('KO')).to.equal(true);
+
           done();
         });
       });
@@ -591,6 +597,7 @@ describe('Customer API:', () => {
 
         whenDone(() => {
           expect(debugMsg('KO')).to.equal(true);
+
           done();
         });
       });
@@ -605,6 +612,7 @@ describe('Customer API:', () => {
 
           whenDone(() => {
             expect(debugMsg('KO')).to.equal(true);
+
             done();
           });
         });

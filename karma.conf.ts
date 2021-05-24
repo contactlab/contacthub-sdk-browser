@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 import {Config, ConfigOptions, CustomLauncher} from 'karma';
 import {Configuration} from 'webpack';
 import {merge} from 'webpack-merge';
@@ -122,7 +120,7 @@ export default function (config: Config): void {
 
     colors: true,
 
-    logLevel: config.LOG_DEBUG,
+    logLevel: config.LOG_INFO,
 
     autoWatch: true,
 

@@ -3,23 +3,18 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
+import {UtmCookie} from '../../src/types';
 
 const cookieName = '_ch';
 const utmCookieName = '_chutm';
-const varName = 'ch';
-const config = {
-  workspaceId: 'workspace_id',
-  nodeId: 'node_id',
-  token: 'ABC123'
-};
 
 const getCookie = () => cookies.getJSON(cookieName) || {};
 const getUtmCookie = () => cookies.getJSON(utmCookieName) || {};
 
-const _ch = window[varName];
+const _ch = window.ch;
 
-let requests;
-let xhr;
+let requests: sinon.SinonFakeXMLHttpRequest[];
+let xhr: sinon.SinonFakeXMLHttpRequestStatic;
 
 describe('UTM automatic handling', () => {
   beforeEach(() => {
@@ -32,7 +27,11 @@ describe('UTM automatic handling', () => {
   });
 
   const setConfig = () => {
-    _ch('config', config);
+    _ch('config', {
+      workspaceId: 'workspace_id',
+      nodeId: 'node_id',
+      token: 'ABC123'
+    });
   };
 
   it('does not store utm_* vars in the main _ch cookie', () => {
@@ -62,16 +61,18 @@ describe('UTM automatic handling', () => {
   it('sends utm_* vars in the event payload', () => {
     setConfig();
 
-    const utm = {
+    const utm: UtmCookie = {
       utm_source: 'foo',
       utm_medium: 'bar',
       utm_term: 'baz',
       utm_content: 'foobar',
       utm_campaign: 'foobarbaz'
     };
-    cookies.set(utmCookieName, Object.assign(getUtmCookie(), utm));
+
+    cookies.set(utmCookieName, {...getUtmCookie(), ...utm});
+
     _ch('event', {type: 'viewedPage'});
-    const req = requests[0];
-    expect(JSON.parse(req.requestBody).tracking).to.eql({ga: utm});
+
+    expect(JSON.parse(requests[0].requestBody).tracking).to.eql({ga: utm});
   });
 });
