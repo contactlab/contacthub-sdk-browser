@@ -3,7 +3,8 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
-import {CustomerData, ConfigOptions, CustomerConsents} from '../../src/types';
+import {ConfigOptions} from '../../src/config';
+import {CustomerData, CustomerConsents} from '../../src/types';
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';

@@ -1,21 +1,8 @@
-// export type Auth = {|
-//   token: string,
-//   workspaceId: string,
-//   nodeId: string
-// |};
-
-// export type ContactHubCookie = Auth & {|
-//   debug: boolean,
-//   context: string,
-//   contextInfo: Object,
-//   sid: string,
-//   customerId?: string,
-//   hash?: string
-// |};
-
 // export type CustomerId = {|
 //   customerId: string
 // |};
+
+import {ConfigOptions} from './config';
 
 type Nullable<A> = A | null;
 
@@ -25,15 +12,6 @@ export interface SDKFunction {
   (method: 'config', options: ConfigOptions): void;
   (method: 'event', options: EventOptions): void;
   (method: 'customer', options?: CustomerData): void;
-}
-
-export interface ConfigOptions {
-  token: string;
-  workspaceId: string;
-  nodeId: string;
-  context?: string;
-  contextInfo?: unknown;
-  debug?: boolean;
 }
 
 export interface EventOptions {
