@@ -16,11 +16,7 @@ export interface UTMCookie {
 const CHUtmCookieDecoder: Decoder<CHUtmCookie> = u => {
   const o = u as CHUtmCookie;
 
-  if (!('utm_source' in o)) {
-    return E.left(toError());
-  }
-
-  return E.right(o);
+  return 'utm_source' in o ? E.right(o) : E.left(toError());
 };
 
 const toError = (): Error => new Error('Missing required UTM source.');

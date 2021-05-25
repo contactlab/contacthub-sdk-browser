@@ -56,10 +56,22 @@ export const config =
       IOE.match(e => Env.log(options.debug || false, e)(), constVoid)
     );
 
+// --- Helpers
+const checkOptions = (
+  options: ConfigOptions
+): IOE.IOEither<Error, ConfigOptions> =>
+  pipe(
+    options,
+    IOE.fromPredicate(
+      o => 'workspaceId' in o && 'nodeId' in o && 'token' in o,
+      () => new Error('Invalid ContactHub configuration')
+    )
+  );
+
 const prepareCHCookie =
   (o: ConfigOptions): Endomorphism<CHCookie> =>
   ch =>
-    o.token === ch.token
+    o.token === ch.token // check if the auth token has changed
       ? ch
       : {
           sid: newSessionId(),
@@ -91,6 +103,14 @@ const prepareUTMCookie =
     }
 
     return _chutm;
+  };
+
+const queryParam =
+  (href: string) =>
+  (name: string): string | undefined => {
+    const match = new RegExp(`[?&]${name}=([^&]*)`).exec(href);
+    const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    return val || undefined;
   };
 
 // const allowedConfigOptions = [
@@ -167,23 +187,3 @@ const prepareUTMCookie =
 //       customer({id: clabId});
 //     }
 //   };
-
-// --- Helpers
-const checkOptions = (
-  options: ConfigOptions
-): IOE.IOEither<Error, ConfigOptions> =>
-  pipe(
-    options,
-    IOE.fromPredicate(
-      o => 'workspaceId' in o && 'nodeId' in o && 'token' in o,
-      () => new Error('Invalid ContactHub configuration')
-    )
-  );
-
-const queryParam =
-  (href: string) =>
-  (name: string): string | undefined => {
-    const match = new RegExp(`[?&]${name}=([^&]*)`).exec(href);
-    const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
-    return val || undefined;
-  };
