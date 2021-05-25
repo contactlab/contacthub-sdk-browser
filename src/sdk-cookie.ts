@@ -1,5 +1,12 @@
 import * as E from 'fp-ts/Either';
 import {Cookie, Decoder, cookie} from './cookie';
+import {Global} from './global';
+
+interface SDKCookieEnv extends Global {}
+
+export interface SDKCookie {
+  cookie: Cookie<CHCookie>;
+}
 
 export interface CHCookie {
   token: string;
@@ -13,11 +20,12 @@ export interface CHCookie {
   hash?: string;
 }
 
-export interface SDKCookie {
-  cookie: Cookie<CHCookie>;
-}
+export const sdkCookie = (Env: SDKCookieEnv): SDKCookie => ({
+  cookie: cookie({decoder, name: Env.cookieName, toError})
+});
 
-const CHCookieDecoder: Decoder<CHCookie> = u => {
+// --- Helpers
+const decoder: Decoder<CHCookie> = u => {
   const o = u as CHCookie;
 
   if (!(o.workspaceId && o.nodeId && o.token && o.sid)) {
@@ -33,9 +41,3 @@ const CHCookieDecoder: Decoder<CHCookie> = u => {
 
 const toError = (): Error =>
   new Error('Missing required ContactHub configuration.');
-
-export const sdkCookie = cookie({
-  decoder: CHCookieDecoder,
-  name: 'ContactHubCookie',
-  toError
-});

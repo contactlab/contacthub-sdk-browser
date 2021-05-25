@@ -1,23 +1,19 @@
 import * as E from 'fp-ts/Either';
+import {IO} from 'fp-ts/IO';
 import * as IOE from 'fp-ts/IOEither';
 import {parse} from 'fp-ts/Json';
 import {pipe} from 'fp-ts/function';
 import Cookies from 'js-cookie';
-import {WithWindow} from './win';
 
 export interface Decoder<A> {
   (u: unknown): E.Either<Error, A>;
 }
 
-interface CookieProps<A, N extends string> {
+interface CookieProps<A> {
   decoder: Decoder<A>;
-  name: N;
+  name: IO<string>;
   toError: () => Error;
 }
-
-// This MUST be exported in order to avoid TS error #4023
-export interface CookieEnv<N extends string>
-  extends WithWindow<{[K in N]?: string}> {}
 
 export interface Cookie<A> {
   get: IOE.IOEither<Error, A>;
@@ -29,38 +25,34 @@ export interface Cookie<A> {
   ) => IOE.IOEither<Error, void>;
 }
 
-export const cookie =
-  <A, N extends string>({decoder, name, toError}: CookieProps<A, N>) =>
-  (Env: CookieEnv<N>): Cookie<A> => {
-    const cookieName: IOE.IOEither<Error, string> = IOE.rightIO(
-      () => Env.window[name] ?? '_ch'
-    );
+export const cookie = <A>({
+  decoder,
+  name,
+  toError
+}: CookieProps<A>): Cookie<A> => ({
+  get: pipe(
+    IOE.rightIO(name),
+    IOE.chainEitherK(n =>
+      pipe(
+        Cookies.get(n),
+        E.fromNullable(toError()),
+        E.chain(parse),
+        E.mapLeft(toError),
+        E.chain(decoder)
+      )
+    )
+  ),
 
-    return {
-      get: pipe(
-        cookieName,
-        IOE.chainEitherK(n =>
-          pipe(
-            Cookies.get(n),
-            E.fromNullable(toError()),
-            E.chain(parse),
-            E.mapLeft(toError),
-            E.chain(decoder)
-          )
+  set: (v, o) =>
+    pipe(
+      IOE.rightIO(name),
+      IOE.chain(n =>
+        IOE.tryCatch(
+          () => {
+            Cookies.set(n, v, o);
+          },
+          e => new Error(`Something went wrong: ${e}`)
         )
-      ),
-
-      set: (v, o) =>
-        pipe(
-          cookieName,
-          IOE.chain(n =>
-            IOE.tryCatch(
-              () => {
-                Cookies.set(n, v, o);
-              },
-              e => new Error(`Something went wrong: ${e}`)
-            )
-          )
-        )
-    };
-  };
+      )
+    )
+});

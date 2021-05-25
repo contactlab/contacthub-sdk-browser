@@ -327,6 +327,7 @@ const customer = options => {
     });
 
   // const merge = (err: Object): Promise<string> => {
+  // TODO: da rimuovere
   const merge = err => {
     if (err.status === 409) {
       const res = JSON.parse(err.response);
