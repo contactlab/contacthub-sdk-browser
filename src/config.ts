@@ -1,13 +1,13 @@
 import * as IO from 'fp-ts/IO';
 import * as IOE from 'fp-ts/IOEither';
-import {constVoid, Endomorphism, pipe} from 'fp-ts/function';
+import {Endomorphism, pipe} from 'fp-ts/function';
 import {v4 as uuidv4} from 'uuid';
+import * as C from './cookie';
+import {Global} from './global';
 import {Location} from './location';
 import {Runner} from './runner';
-import {SDKCookie, CHCookie} from './sdk-cookie';
-import {UTMCookie, CHUtmCookie} from './utm-cookie';
 
-export interface ConfigEnv extends SDKCookie, UTMCookie, Location, Runner {}
+export interface ConfigEnv extends C.CookieSvc, Location, Global, Runner {}
 
 export interface Config {
   (options: ConfigOptions): void;
@@ -31,22 +31,21 @@ export const config =
       checkOptions(options),
       IOE.chain(opts =>
         pipe(
-          Env.cookie.get,
-          IOE.alt(() => IOE.right(withDefaults(opts))),
+          Env.cookie.get(Env.cookieName(), C.CHDecoder, withDefaults(opts)),
           IOE.map(prepareCHCookie(opts)),
           IOE.chain(
-            _ch => Env.cookie.set(_ch, {expires: 365}) // expires in 1 year
+            _ch => Env.cookie.set(Env.cookieName(), _ch, {expires: 365}) // expires in 1 year
           )
         )
       ),
       IOE.chain(() =>
         pipe(
-          Env.utmCookie.get,
+          Env.cookie.get(Env.utmCookieName(), C.UTMDecoder, {}),
           IOE.map(prepareUTMCookie(Env)),
           IOE.chain(
-            _chutm => Env.utmCookie.set(_chutm, {expires: 1 / 48}) // expires in 30 mins
-          ),
-          IOE.alt(() => IOE.right(constVoid())) // `constVoid` needed to generate a `void` value
+            _chutm =>
+              Env.cookie.set(Env.utmCookieName(), _chutm, {expires: 1 / 48}) // expires in 30 mins
+          )
         )
       ),
       // TODO: CUSTOMER FUNCTION
@@ -64,7 +63,7 @@ const checkOptions = IOE.fromPredicate<Error, ConfigOptions>(
   () => new Error('Invalid ContactHub configuration')
 );
 
-const withDefaults = (o: ConfigOptions): CHCookie => ({
+const withDefaults = (o: ConfigOptions): C.CHCookie => ({
   ...o,
   sid: newSessionId(),
   debug: o.debug || false,
@@ -73,7 +72,7 @@ const withDefaults = (o: ConfigOptions): CHCookie => ({
 });
 
 const prepareCHCookie =
-  (o: ConfigOptions): Endomorphism<CHCookie> =>
+  (o: ConfigOptions): Endomorphism<C.CHCookie> =>
   ch =>
     o.token === ch.token // check if the auth token has changed
       ? ch
@@ -88,9 +87,9 @@ const prepareCHCookie =
         };
 
 const prepareUTMCookie =
-  (Env: ConfigEnv): Endomorphism<CHUtmCookie> =>
+  (Env: ConfigEnv): Endomorphism<C.UTMCookie> =>
   chutm => {
-    const _chutm: CHUtmCookie = {...chutm};
+    const _chutm = {...chutm};
 
     // read Google Analytics UTM query params if present
     const utmSource = Env.queryParam('utm_source');

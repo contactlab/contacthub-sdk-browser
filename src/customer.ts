@@ -10,13 +10,13 @@ import * as TE from 'fp-ts/TaskEither';
 import {constant, constVoid, pipe} from 'fp-ts/function';
 import sha256 from 'jssha/dist/sha256';
 import {v4 as uuidv4} from 'uuid';
+import * as C from './cookie';
 import {Global} from './global';
 import {Runner} from './runner';
-import {SDKCookie, CHCookie} from './sdk-cookie';
 
 type Nullable<A> = A | null;
 
-export interface CustomerEnv extends SDKCookie, Global, Runner {}
+export interface CustomerEnv extends C.CookieSvc, Global, Runner {}
 
 export interface Customer {
   (options?: CustomerData): void;
@@ -190,7 +190,7 @@ const prepareOperation =
   Env =>
     pipe(
       IOE.Do,
-      IOE.apS('ctx', Env.cookie.get),
+      IOE.apS('ctx', Env.cookie.get(Env.cookieName(), C.CHDecoder)),
       IOE.apS('hash', pipe(computeHash(data), IOE.fromEither)),
       TE.fromIOEither,
       TE.chain(({ctx, hash}) => {
@@ -233,7 +233,7 @@ const operation = (cid?: string | null, cookieId?: string): Operation => {
 interface Eff<R, A> extends RTE.ReaderTaskEither<R, Error, A> {}
 
 interface OperationEnv extends CustomerEnv {
-  ctx: CHCookie;
+  ctx: C.CHCookie;
   data: CustomerData;
   hash: string;
 }
@@ -260,9 +260,9 @@ const computeHash = (data: CustomerData): E.Either<Error, string> => {
 
 const resetCookie: Eff<CustomerEnv, void> = Env =>
   pipe(
-    Env.cookie.get,
+    Env.cookie.get(Env.cookieName(), C.CHDecoder),
     IOE.chain(ctx =>
-      Env.cookie.set({
+      Env.cookie.set(Env.cookieName(), {
         ...ctx,
         sid: uuidv4(),
         customerId: undefined,
@@ -348,7 +348,11 @@ const store =
   (customerId: string): Operation =>
   Env =>
     pipe(
-      Env.cookie.set({...Env.ctx, customerId, hash: Env.hash}),
+      Env.cookie.set(Env.cookieName(), {
+        ...Env.ctx,
+        customerId,
+        hash: Env.hash
+      }),
       TE.fromIOEither,
       TE.map(constant(customerId))
     );

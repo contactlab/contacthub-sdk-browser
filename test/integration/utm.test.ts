@@ -3,7 +3,7 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
-import {CHUtmCookie} from '../../src/utm-cookie';
+import {UTMCookie} from '../../src/cookie';
 
 const cookieName = '_ch';
 const utmCookieName = '_chutm';
@@ -61,7 +61,7 @@ describe('UTM automatic handling', () => {
   it('sends utm_* vars in the event payload', () => {
     setConfig();
 
-    const utm: CHUtmCookie = {
+    const utm: UTMCookie = {
       utm_source: 'foo',
       utm_medium: 'bar',
       utm_term: 'baz',

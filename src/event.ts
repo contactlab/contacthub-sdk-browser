@@ -5,18 +5,12 @@ import * as IOE from 'fp-ts/IOEither';
 import * as RTE from 'fp-ts/ReaderTaskEither';
 import * as TE from 'fp-ts/TaskEither';
 import {constVoid, pipe} from 'fp-ts/function';
+import * as C from './cookie';
 import {Global} from './global';
 import {Location} from './location';
 import {Runner} from './runner';
-import {SDKCookie} from './sdk-cookie';
-import {UTMCookie} from './utm-cookie';
 
-export interface EventEnv
-  extends SDKCookie,
-    UTMCookie,
-    Global,
-    Location,
-    Runner {}
+export interface EventEnv extends C.CookieSvc, Global, Location, Runner {}
 
 type EventProperties = Record<string, unknown>;
 
@@ -35,17 +29,16 @@ export const event =
     pipe(
       IOE.Do,
       IOE.apS('opts', checkOptions(options)),
-      IOE.apS('cookie', Env.cookie.get),
+      IOE.apS('cookie', Env.cookie.get(Env.cookieName(), C.CHDecoder)),
       IOE.apS(
-        'tracking',
+        'utm',
         pipe(
-          Env.utmCookie.get,
-          IOE.map(ga => ({ga})),
-          IOE.orElseW(() => IOE.right(undefined))
+          Env.cookie.get(Env.utmCookieName(), C.UTMDecoder),
+          IOE.altW(() => IOE.right(undefined))
         )
       ),
-      IOE.apS('apiURL', IOE.rightIO(Env.apiUrl)),
-      IOE.map(({cookie, opts, tracking, apiURL}) => {
+      TE.fromIOEither,
+      TE.chain(({cookie, opts, utm}) => {
         const {
           token,
           workspaceId,
@@ -57,14 +50,21 @@ export const event =
         } = cookie;
 
         const properties = inferProperties(Env)(opts);
+        const tracking = typeof utm === 'undefined' ? utm : {ga: utm};
 
         const bringBackProperties = customerId
           ? undefined
           : {type: 'SESSION_ID', value: sid, nodeId};
 
-        return {
-          url: `${apiURL}/workspaces/${workspaceId}/events`,
-          data: {
+        const url = `${Env.apiUrl()}/workspaces/${workspaceId}/events`;
+        const req = pipe(
+          post,
+          withHeaders({
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }),
+          withBody({
             type: opts.type,
             context,
             contextInfo,
@@ -72,37 +72,20 @@ export const event =
             tracking,
             customerId,
             bringBackProperties
-          },
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }
-        };
-      }),
-      TE.fromIOEither,
-      TE.chain(({data, headers, url}) =>
-        pipe(
-          post,
-          withHeaders(headers),
-          withBody(data),
+          }),
           RTE.bimap(e => e.error, constVoid)
-        )(url)
-      ),
+        );
+
+        return req(url);
+      }),
       Env.runAsync
     );
 
 // --- Helpers
-const checkOptions = (
-  options: EventOptions
-): IOE.IOEither<Error, EventOptions> =>
-  pipe(
-    options,
-    IOE.fromPredicate(
-      o => typeof o.type === 'string' && o.type.length > 0,
-      () => new Error('Missing required event type')
-    )
-  );
+const checkOptions = IOE.fromPredicate<Error, EventOptions>(
+  o => typeof o.type === 'string' && o.type.length > 0,
+  () => new Error('Missing required event type')
+);
 
 const inferProperties =
   (Env: EventEnv) =>

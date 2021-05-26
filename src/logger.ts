@@ -1,24 +1,21 @@
 import {IO} from 'fp-ts/IO';
 import {constVoid} from 'fp-ts/function';
-import {GlobalEnv} from './global';
 
-interface LoggerEnv extends GlobalEnv {}
-
-export interface Logger {
-  logger: {
-    error: (error: Error) => IO<void>;
-  };
+export interface LoggerSvc {
+  logger: Logger;
 }
 
-export const logger = (Env: LoggerEnv): Logger => ({
-  logger: {
-    error: e => {
-      if (!Env.window.console) {
-        return constVoid;
-      }
+export interface Logger {
+  error: (error: Error) => IO<void>;
+}
 
-      return () =>
-        Env.window.console.error('[DEBUG] @contactlab/sdk-browser', e.message);
+export const logger: Logger = {
+  error: e => {
+    if (!window.console) {
+      return constVoid;
     }
+
+    return () =>
+      window.console.error('[DEBUG] @contactlab/sdk-browser', e.message);
   }
-});
+};

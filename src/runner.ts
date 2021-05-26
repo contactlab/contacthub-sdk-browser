@@ -2,9 +2,9 @@ import * as E from 'fp-ts/Either';
 import * as IOE from 'fp-ts/IOEither';
 import * as TE from 'fp-ts/TaskEither';
 import {constVoid, pipe} from 'fp-ts/function';
-import {Logger} from './logger';
+import {LoggerSvc} from './logger';
 
-interface RunnerEnv extends Logger {}
+interface RunnerEnv extends LoggerSvc {}
 
 export interface Runner {
   run: (p: IOE.IOEither<Error, void>) => void;

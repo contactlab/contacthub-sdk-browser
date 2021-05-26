@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "allowJs": true,
     "skipLibCheck": true,
     "noEmit": true,
     "target": "es5",
