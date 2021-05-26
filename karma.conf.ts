@@ -28,10 +28,6 @@ interface BSLauncher extends CustomLauncher {
 process.env.CHROME_BIN = require('puppeteer').executablePath();
 
 const BS = process.env.BS === 'true';
-const MIN = process.env.MINIMIZED === 'true';
-
-// --- Sources and browsers driven by env vars
-const SOURCE = `dist/sdk${MIN ? '.min' : ''}.js`;
 
 const STD_BROWSERS = ['ChromeHeadlessNoSandbox'];
 const BS_BROWSERS = [
@@ -45,9 +41,6 @@ const BS_BROWSERS = [
 
 // --- Karma configurationg
 export default function (config: Config): void {
-  // eslint-disable-next-line no-console
-  console.log(`\n=== CURRENT SOURCE IS: ${SOURCE} ===\n`);
-
   const bs_win_ie10: BSLauncher = {
     base: 'BrowserStack',
     browser: 'IE',
@@ -101,9 +94,16 @@ export default function (config: Config): void {
 
     frameworks: ['mocha'],
 
-    files: ['test/integration/setup.js', SOURCE, 'test/integration/index.ts'],
+    files: [
+      'test/integration/fetch.ts',
+      'test/integration/setup.js',
+      'src/index.ts',
+      'test/integration/index.ts'
+    ],
 
     preprocessors: {
+      'test/integration/fetch.ts': ['webpack'],
+      'src/index.ts': ['webpack'],
       'test/integration/index.ts': ['webpack']
     },
 

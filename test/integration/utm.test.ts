@@ -1,38 +1,19 @@
-/* global describe, it, beforeEach */
-
 import {expect} from 'chai';
-import cookies from 'js-cookie';
-import sinon from 'sinon';
+import Cookies from 'js-cookie';
 import {UTMCookie} from '../../src/cookie';
+import {_ch, _fetchMock, whenDone} from './_helpers';
 
-const cookieName = '_ch';
-const utmCookieName = '_chutm';
-
-const getCookie = () => cookies.getJSON(cookieName) || {};
-const getUtmCookie = () => cookies.getJSON(utmCookieName) || {};
-
-const _ch = window.ch;
-
-let requests: sinon.SinonFakeXMLHttpRequest[];
-let xhr: sinon.SinonFakeXMLHttpRequestStatic;
+const CH = '_ch';
+const UTM = '_chutm';
 
 describe('UTM automatic handling', () => {
   beforeEach(() => {
-    cookies.remove(cookieName);
-    requests = [];
-    xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = r => {
-      requests.push(r);
-    };
+    Cookies.remove(CH);
   });
 
-  const setConfig = () => {
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'ABC123'
-    });
-  };
+  afterEach(() => {
+    _fetchMock.resetHistory();
+  });
 
   it('does not store utm_* vars in the main _ch cookie', () => {
     window.location.hash =
@@ -40,7 +21,7 @@ describe('UTM automatic handling', () => {
 
     setConfig();
 
-    expect(getCookie().ga).to.equal(undefined);
+    expect(Cookies.getJSON(CH).ga).to.equal(undefined);
   });
 
   it('stores utm_* vars in a separate _chutm cookie', () => {
@@ -49,7 +30,7 @@ describe('UTM automatic handling', () => {
 
     setConfig();
 
-    expect(getUtmCookie()).to.eql({
+    expect(Cookies.getJSON(UTM)).to.eql({
       utm_source: 'foo',
       utm_medium: 'bar',
       utm_term: 'baz',
@@ -58,7 +39,12 @@ describe('UTM automatic handling', () => {
     });
   });
 
-  it('sends utm_* vars in the event payload', () => {
+  it('sends utm_* vars in the event payload', done => {
+    _fetchMock.post(
+      'https://api.contactlab.it/hub/v1/workspaces/workspace_id/events',
+      ''
+    );
+
     setConfig();
 
     const utm: UTMCookie = {
@@ -69,10 +55,24 @@ describe('UTM automatic handling', () => {
       utm_campaign: 'foobarbaz'
     };
 
-    cookies.set(utmCookieName, {...getUtmCookie(), ...utm});
+    Cookies.set(UTM, {...Cookies.getJSON(UTM), ...utm});
 
     _ch('event', {type: 'viewedPage'});
 
-    expect(JSON.parse(requests[0].requestBody).tracking).to.eql({ga: utm});
+    whenDone(() => {
+      const body = _fetchMock.lastOptions()?.body as unknown as string;
+
+      expect(JSON.parse(body).tracking).to.eql({ga: utm});
+      done();
+    });
   });
+
+  // --- Helpers
+  const setConfig = () => {
+    _ch('config', {
+      workspaceId: 'workspace_id',
+      nodeId: 'node_id',
+      token: 'ABC123'
+    });
+  };
 });
