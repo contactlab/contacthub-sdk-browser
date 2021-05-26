@@ -17,11 +17,6 @@ export const logger = (Env: LoggerEnv): Logger => ({
         return constVoid;
       }
 
-      // const msg =
-      //   typeof error.status !== 'undefined' && typeof error.response !== 'undefined'
-      //     ? error.response
-      //     : error;
-
       return () =>
         Env.window.console.error('[DEBUG] @contactlab/sdk-browser', e.message);
     }

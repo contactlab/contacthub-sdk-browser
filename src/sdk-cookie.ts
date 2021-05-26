@@ -28,15 +28,9 @@ export const sdkCookie = (Env: SDKCookieEnv): SDKCookie => ({
 const decoder: Decoder<CHCookie> = u => {
   const o = u as CHCookie;
 
-  if (!(o.workspaceId && o.nodeId && o.token && o.sid)) {
-    return E.left(toError());
-  }
-
-  o.debug = o.debug || false;
-  o.context = o.context || 'WEB';
-  o.contextInfo = o.contextInfo || {};
-
-  return E.right(o);
+  return 'workspaceId' in o && 'nodeId' in o && 'token' in o && 'sid' in o
+    ? E.right(o)
+    : E.left(toError());
 };
 
 const toError = (): Error =>
