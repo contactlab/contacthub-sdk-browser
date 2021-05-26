@@ -4,7 +4,7 @@ import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
 import {ConfigOptions} from '../../src/config';
-import {CustomerData, CustomerConsents} from '../../src/types';
+import {CustomerData} from '../../src/customer';
 
 const apiUrl = 'https://api.contactlab.it/hub/v1';
 const cookieName = '_ch';
@@ -95,11 +95,12 @@ describe('Consents', () => {
     requests[0].respond(200, {}, '');
 
     whenDone(() => {
-      const newConsents: CustomerConsents = {
-        softSpam: {email: {objection: true}}
-      };
-
-      _ch('customer', {...CUSTOMER, consents: newConsents});
+      _ch('customer', {
+        ...CUSTOMER,
+        consents: {
+          softSpam: {email: {objection: true}}
+        }
+      });
 
       expect(requests.length).to.equal(2);
 
@@ -110,7 +111,9 @@ describe('Consents', () => {
         expect(req.url).to.equal(
           `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
         );
-        expect(JSON.parse(req.requestBody).consents).to.eql(newConsents);
+        expect(JSON.parse(req.requestBody).consents).to.eql({
+          softSpam: {email: {objection: true}}
+        });
 
         done();
       });
