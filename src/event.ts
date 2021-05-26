@@ -11,9 +11,14 @@ import {Runner} from './runner';
 import {SDKCookie} from './sdk-cookie';
 import {UTMCookie} from './utm-cookie';
 
-interface EventEnv extends SDKCookie, UTMCookie, Global, Location, Runner {}
+export interface EventEnv
+  extends SDKCookie,
+    UTMCookie,
+    Global,
+    Location,
+    Runner {}
 
-interface EventProperties extends Record<string, unknown> {}
+type EventProperties = Record<string, unknown>;
 
 export interface EventOptions {
   type: string;
@@ -36,7 +41,7 @@ export const event =
         pipe(
           Env.utmCookie.get,
           IOE.map(ga => ({ga})),
-          IOE.alt(() => IOE.right(undefined))
+          IOE.orElseW(() => IOE.right(undefined))
         )
       ),
       IOE.apS('apiURL', IOE.rightIO(Env.apiUrl)),
@@ -101,7 +106,7 @@ const checkOptions = (
 
 const inferProperties =
   (Env: EventEnv) =>
-  ({type, properties}: EventOptions): EventProperties => {
+  ({type, properties}: EventOptions): EventProperties | undefined => {
     if (type !== 'viewedPage') {
       return properties;
     }

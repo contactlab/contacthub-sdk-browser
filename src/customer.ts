@@ -7,7 +7,7 @@ import * as IOE from 'fp-ts/IOEither';
 import {stringify} from 'fp-ts/Json';
 import * as RTE from 'fp-ts/ReaderTaskEither';
 import * as TE from 'fp-ts/TaskEither';
-import {constant, pipe} from 'fp-ts/function';
+import {constant, constVoid, pipe} from 'fp-ts/function';
 import sha256 from 'jssha/dist/sha256';
 import {v4 as uuidv4} from 'uuid';
 import {Global} from './global';
@@ -16,7 +16,7 @@ import {SDKCookie, CHCookie} from './sdk-cookie';
 
 type Nullable<A> = A | null;
 
-interface CustomerEnv extends SDKCookie, Global, Runner {}
+export interface CustomerEnv extends SDKCookie, Global, Runner {}
 
 export interface Customer {
   (options?: CustomerData): void;
@@ -201,10 +201,11 @@ const prepareOperation =
         const result = operation(data.id, ctx.customerId);
 
         return result({...Env, ctx, data, hash});
-      })
+      }),
+      TE.map(constVoid)
     );
 
-const operation = (cid?: string, cookieId?: string): Operation => {
+const operation = (cid?: string | null, cookieId?: string): Operation => {
   if (cid && cookieId) {
     return pipe(
       resolveIdConflict(cid, cookieId),
@@ -289,7 +290,7 @@ const updateCustomer =
   (cid: string): Operation =>
   Env => {
     if (!shouldUpdate(Env.data)) {
-      return TE.right(undefined);
+      return TE.right(cid);
     }
 
     const {token, workspaceId} = Env.ctx;
