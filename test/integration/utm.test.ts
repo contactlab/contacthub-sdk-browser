@@ -1,18 +1,15 @@
 import {expect} from 'chai';
 import Cookies from 'js-cookie';
 import {UTMCookie} from '../../src/cookie';
-import {_ch, _fetchMock, whenDone} from './_helpers';
-
-const CH = '_ch';
-const UTM = '_chutm';
+import * as H from './_helpers';
 
 describe('UTM automatic handling', () => {
   beforeEach(() => {
-    Cookies.remove(CH);
+    Cookies.remove(H.CH);
   });
 
   afterEach(() => {
-    _fetchMock.resetHistory();
+    H._fetchMock.resetHistory();
   });
 
   it('does not store utm_* vars in the main _ch cookie', () => {
@@ -21,7 +18,7 @@ describe('UTM automatic handling', () => {
 
     setConfig();
 
-    expect(Cookies.getJSON(CH).ga).to.equal(undefined);
+    expect(Cookies.getJSON(H.CH).ga).to.equal(undefined);
   });
 
   it('stores utm_* vars in a separate _chutm cookie', () => {
@@ -30,7 +27,7 @@ describe('UTM automatic handling', () => {
 
     setConfig();
 
-    expect(Cookies.getJSON(UTM)).to.eql({
+    expect(Cookies.getJSON(H.UTM)).to.eql({
       utm_source: 'foo',
       utm_medium: 'bar',
       utm_term: 'baz',
@@ -40,10 +37,7 @@ describe('UTM automatic handling', () => {
   });
 
   it('sends utm_* vars in the event payload', done => {
-    _fetchMock.post(
-      'https://api.contactlab.it/hub/v1/workspaces/workspace_id/events',
-      ''
-    );
+    H._fetchMock.post(`${H.API}/workspaces/${H.WSID}/events`, 200);
 
     setConfig();
 
@@ -55,24 +49,17 @@ describe('UTM automatic handling', () => {
       utm_campaign: 'foobarbaz'
     };
 
-    Cookies.set(UTM, {...Cookies.getJSON(UTM), ...utm});
+    Cookies.set(H.UTM, {...Cookies.getJSON(H.UTM), ...utm});
 
-    _ch('event', {type: 'viewedPage'});
+    H._ch('event', {type: 'viewedPage'});
 
-    whenDone(() => {
-      const body = _fetchMock.lastOptions()?.body as unknown as string;
+    H.whenDone(() => {
+      const body = H._fetchMock.lastOptions()?.body as unknown as string;
 
       expect(JSON.parse(body).tracking).to.eql({ga: utm});
-      done();
-    });
+    }, done);
   });
-
-  // --- Helpers
-  const setConfig = () => {
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'ABC123'
-    });
-  };
 });
+
+// --- Helpers
+const setConfig = (): void => H._ch('config', H.CONFIG);
