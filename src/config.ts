@@ -3,6 +3,7 @@ import * as IOE from 'fp-ts/IOEither';
 import {Endomorphism, pipe} from 'fp-ts/function';
 import {v4 as uuidv4} from 'uuid';
 import * as C from './cookie';
+import {customer} from './customer';
 import {Global} from './global';
 import {Location} from './location';
 import {Runner} from './runner';
@@ -48,12 +49,13 @@ export const config =
           )
         )
       ),
-      // TODO: CUSTOMER FUNCTION
-      // IOE.chain(() => {
-      //     // if (clabId) {
-      //     //   customer({id: clabId});
-      //     // }
-      // })
+      IOE.chain(() =>
+        IOE.rightIO(() => {
+          const id = Env.queryParam('clabId');
+
+          return typeof id === 'undefined' ? undefined : customer(Env)({id});
+        })
+      ),
       Env.run
     );
 
