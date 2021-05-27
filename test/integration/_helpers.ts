@@ -6,6 +6,7 @@ export const API = 'https://api.contactlab.it/hub/v1';
 export const WSID = 'workspace_id';
 export const NID = 'node_id';
 export const TOKEN = 'ABC123';
+export const CID = 'abcd';
 export const CONFIG: ConfigOptions = {
   workspaceId: WSID,
   nodeId: NID,

@@ -1,137 +1,97 @@
-/* global describe, it, beforeEach */
-
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
-
-const cookieName = '_ch';
-
-const getCookie = () => cookies.getJSON(cookieName) || {};
-
-const _ch = window.ch;
+import * as H from './_helpers';
 
 describe('Config API', () => {
   beforeEach(() => {
-    cookies.remove(cookieName);
-  });
+    cookies.remove(H.CH);
 
-  beforeEach(() => {
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'ABC123'
-    });
+    H._ch('config', H.CONFIG);
   });
 
   it('sets a cookie', () => {
-    expect(typeof cookies.get(cookieName)).not.to.equal(undefined);
+    expect(typeof cookies.get(H.CH)).not.to.equal(undefined);
   });
 
   it('generates a UUIDv4 sessionId', () => {
     const uuidV4 =
       /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
-    expect(uuidV4.test(getCookie().sid)).to.equal(true);
+    expect(uuidV4.test(cookies.getJSON(H.CH).sid)).to.equal(true);
   });
 
   it('does not regenerate sessionId if already present', () => {
-    const sid = getCookie().sid;
+    const sid = cookies.getJSON(H.CH).sid;
 
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'ABC123'
-    });
+    H._ch('config', H.CONFIG);
 
-    expect(getCookie().sid).to.equal(sid);
+    expect(cookies.getJSON(H.CH).sid).to.equal(sid);
   });
 
   it('stores all config data in the cookie', () => {
-    const c = getCookie();
+    const c = cookies.getJSON(H.CH);
 
-    expect(c.workspaceId).to.equal('workspace_id');
-    expect(c.nodeId).to.equal('node_id');
-    expect(c.token).to.equal('ABC123');
+    expect(c.workspaceId).to.equal(H.WSID);
+    expect(c.nodeId).to.equal(H.NID);
+    expect(c.token).to.equal(H.TOKEN);
   });
 
   it('uses "WEB" if context not provided', () => {
-    expect(getCookie().context).to.equal('WEB');
+    expect(cookies.getJSON(H.CH).context).to.equal('WEB');
   });
 
   it('sets `{}` if contextInfo not provided', () => {
-    expect(getCookie().contextInfo).to.eql({});
+    expect(cookies.getJSON(H.CH).contextInfo).to.eql({});
   });
 
   it('sets `false` if debug not provided', () => {
-    expect(getCookie().debug).to.equal(false);
+    expect(cookies.getJSON(H.CH).debug).to.equal(false);
   });
 
   it('allows to specify optional context', () => {
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'ABC123',
-      context: 'foo'
-    });
+    H._ch('config', {...H.CONFIG, context: 'foo'});
 
-    expect(getCookie().context).to.equal('foo');
+    expect(cookies.getJSON(H.CH).context).to.equal('foo');
   });
 
   it('allows to specify optional contextInfo', () => {
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'ABC123',
-      context: 'foo',
-      contextInfo: {foo: 'bar'}
-    });
+    H._ch('config', {...H.CONFIG, context: 'foo', contextInfo: {foo: 'bar'}});
 
-    expect(getCookie().contextInfo).to.eql({foo: 'bar'});
+    expect(cookies.getJSON(H.CH).contextInfo).to.eql({foo: 'bar'});
   });
 
   it('allows to specify optional debug', () => {
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'ABC123',
+    H._ch('config', {
+      ...H.CONFIG,
       context: 'foo',
       contextInfo: {foo: 'bar'},
       debug: true
     });
 
-    expect(getCookie().debug).to.equal(true);
+    expect(cookies.getJSON(H.CH).debug).to.equal(true);
   });
 
   it('removes user data from cookie if the token changes', () => {
-    cookies.set(cookieName, {
-      ...getCookie(),
-      customerId: 'customer-id',
-      token: 'ABC123'
+    cookies.set(H.CH, {
+      ...cookies.getJSON(H.CH),
+      customerId: H.CID,
+      token: H.TOKEN
     });
 
-    _ch('config', {
-      workspaceId: 'workspace_id',
-      nodeId: 'node_id',
-      token: 'CDE456'
-    });
+    H._ch('config', {workspaceId: H.WSID, nodeId: H.NID, token: 'CDE456'});
 
-    expect(getCookie().token).to.equal('CDE456');
-    expect(getCookie().customerId).to.equal(undefined);
-    expect(getCookie().hash).to.equal(undefined);
+    expect(cookies.getJSON(H.CH).token).to.equal('CDE456');
+    expect(cookies.getJSON(H.CH).customerId).to.equal(undefined);
+    expect(cookies.getJSON(H.CH).hash).to.equal(undefined);
   });
 
-  it('throws if required option are not specified', () => {
-    expect(() => {
-      _ch('config', {} as any);
-    }).to.throw();
-  });
-
-  it('throws if required option are not specified - debug', () => {
+  it('should log error if required option are not specified (no throw)', () => {
     const spy = sinon.stub(console, 'error').callsFake(() => undefined);
 
     expect(() => {
-      _ch('config', {debug: true} as any);
-    }).to.throw();
+      H._ch('config', {} as any);
+    }).not.to.throw();
 
     expect(
       spy.calledWith(

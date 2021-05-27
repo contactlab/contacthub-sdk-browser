@@ -75,18 +75,20 @@ const withDefaults = (o: ConfigOptions): C.CHCookie => ({
 
 const prepareCHCookie =
   (o: ConfigOptions): Endomorphism<C.CHCookie> =>
-  ch =>
-    o.token === ch.token // check if the auth token has changed
-      ? ch
-      : {
-          sid: newSessionId(),
-          token: o.token,
-          workspaceId: o.workspaceId ?? ch.workspaceId,
-          nodeId: o.nodeId ?? ch.nodeId,
-          context: o.context ?? ch.context,
-          contextInfo: o.contextInfo ?? ch.contextInfo,
-          debug: o.debug ?? ch.debug
-        };
+  ch => {
+    // check if the auth token has changed
+    const _ch = o.token === ch.token ? ch : ({} as C.CHCookie);
+
+    _ch.sid = _ch.sid || newSessionId();
+    _ch.token = o.token ?? ch.token;
+    _ch.workspaceId = o.workspaceId ?? ch.workspaceId;
+    _ch.nodeId = o.nodeId ?? ch.nodeId;
+    _ch.context = o.context ?? ch.context;
+    _ch.contextInfo = o.contextInfo ?? ch.contextInfo;
+    _ch.debug = o.debug ?? ch.debug;
+
+    return _ch;
+  };
 
 const prepareUTMCookie =
   (Env: ConfigEnv): Endomorphism<C.UTMCookie> =>

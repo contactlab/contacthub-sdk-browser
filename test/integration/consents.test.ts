@@ -20,8 +20,8 @@ describe('Consents', () => {
 
   it('can be set', done => {
     H._fetchMock
-      .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: CID})
-      .post(`${H.API}/workspaces/${H.WSID}/customers/${CID}/sessions`, 200);
+      .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: H.CID})
+      .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
     H._ch('customer', CUSTOMER);
 
@@ -36,11 +36,11 @@ describe('Consents', () => {
 
   it('can be updated', done => {
     H._fetchMock.mock(
-      `begin:${H.API}/workspaces/${H.WSID}/customers/${CID}`,
+      `begin:${H.API}/workspaces/${H.WSID}/customers/${H.CID}`,
       200
     );
 
-    cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: CID});
+    cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
     H._ch('customer', CUSTOMER);
 
@@ -59,7 +59,7 @@ describe('Consents', () => {
 
         expect(method).to.equal('PATCH');
         expect(url).to.equal(
-          `${H.API}/workspaces/${H.CONFIG.workspaceId}/customers/${CID}`
+          `${H.API}/workspaces/${H.CONFIG.workspaceId}/customers/${H.CID}`
         );
         expect(JSON.parse(body).consents).to.eql({
           softSpam: {email: {objection: true}}
@@ -70,8 +70,6 @@ describe('Consents', () => {
 });
 
 // --- Helpers
-const CID = 'abcd';
-
 const CUSTOMER: CustomerData = {
   externalId: 'foo.bar',
   base: {
