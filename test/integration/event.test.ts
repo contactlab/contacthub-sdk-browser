@@ -3,101 +3,94 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
 import sinon from 'sinon';
-import {ConfigOptions} from '../../src/config';
+import * as H from './_helpers';
 
-const apiUrl = 'https://api.contactlab.it/hub/v1';
-const cookieName = '_ch';
+const setConfig = (): void => H._ch('config', H.CONFIG);
 
-const config: ConfigOptions = {
-  workspaceId: 'workspace_id',
-  nodeId: 'node_id',
-  token: 'ABC123'
-};
-
-const _ch = window.ch;
-
-const getCookie = () => cookies.getJSON(cookieName) || {};
-
-const setConfig = (d?: boolean): void => {
-  const debug = d || false;
-
-  _ch('config', {...config, debug});
-};
-
-let spyError: sinon.SinonStub<any[], void>;
 let requests: sinon.SinonFakeXMLHttpRequest[];
-let xhr: sinon.SinonFakeXMLHttpRequestStatic;
-
-const debugMsg = (msg: string): boolean =>
-  spyError.calledWith('[DEBUG] @contactlab/sdk-browser', msg);
+const spy = sinon.stub(console, 'error').callsFake(() => undefined);
 
 describe('Event API', () => {
   beforeEach(() => {
-    spyError = sinon.stub(console, 'error').callsFake(() => undefined);
-    cookies.remove(cookieName);
-    requests = [];
-    xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = r => {
-      requests.push(r);
-    };
+    cookies.remove(H.CH);
   });
 
   afterEach(() => {
-    spyError.restore();
+    spy.resetHistory();
+
+    H._fetchMock.resetHistory();
   });
 
-  it('checks if required config is set', () => {
+  it('checks if required config is set', done => {
     expect(() => {
-      _ch('event', {type: 'viewedPage'});
-    }).to.throw(Error);
+      H._ch('event', {type: 'viewedPage'});
+    }).not.to.throw();
 
-    expect(requests.length).to.equal(0);
+    H.whenDone(() => {
+      expect(
+        spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Missing "_ch" cookie'
+        )
+      ).to.equal(true);
+
+      expect(H._fetchMock.called()).to.equal(false);
+    }, done);
   });
 
-  it('sends the event to the API', () => {
+  it('sends the event to the API', done => {
+    H._fetchMock.post(`${H.API}/workspaces/${H.WSID}/events`, 200);
+
     setConfig();
-    _ch('event', {type: 'viewedPage'});
 
-    const req = requests[0];
-    const reqBody = JSON.parse(req.requestBody);
+    H._ch('event', {type: 'viewedPage'});
 
-    expect(req.url).to.equal(
-      `${apiUrl}/workspaces/${config.workspaceId}/events`
-    );
-    expect(req.requestHeaders.Authorization).to.equal(`Bearer ${config.token}`);
-    expect(reqBody.type).to.equal('viewedPage');
-    expect(reqBody.bringBackProperties).to.eql({
-      type: 'SESSION_ID',
-      value: getCookie().sid,
-      nodeId: config.nodeId
-    });
+    H.whenDone(() => {
+      const headers = H._fetchMock.lastOptions()?.headers;
+      const body = JSON.parse(
+        H._fetchMock.lastOptions()?.body as unknown as string
+      );
+
+      expect(headers?.Authorization).to.equal(`Bearer ${H.TOKEN}`);
+      expect(body.type).to.equal('viewedPage');
+      expect(body.bringBackProperties).to.eql({
+        type: 'SESSION_ID',
+        value: cookies.getJSON(H.CH).sid,
+        nodeId: H.NID
+      });
+    }, done);
   });
 
-  it('sends customerId when available in cookie', () => {
+  it('sends customerId when available in cookie', done => {
+    H._fetchMock.post(`${H.API}/workspaces/${H.WSID}/events`, 200);
+
     setConfig();
-    cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
 
-    _ch('event', {type: 'viewedPage'});
+    cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
-    const req = requests[0];
-    expect(req.url).to.equal(
-      `${apiUrl}/workspaces/${config.workspaceId}/events`
-    );
-    expect(JSON.parse(req.requestBody).customerId).to.eql('my-cid');
+    H._ch('event', {type: 'viewedPage'});
+
+    H.whenDone(() => {
+      const body = H._fetchMock.lastOptions()?.body as unknown as string;
+
+      expect(JSON.parse(body).customerId).to.eql(H.CID);
+    }, done);
   });
 
-  it('omits bringBackProperties when customerId is available', () => {
+  it.only('omits bringBackProperties when customerId is available', done => {
+    H._fetchMock.post(`${H.API}/workspaces/${H.WSID}/events`, 200);
+
     setConfig();
-    cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
 
-    _ch('event', {type: 'viewedPage'});
+    cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
-    const req = requests[0];
-    expect(req.url).to.equal(
-      `${apiUrl}/workspaces/${config.workspaceId}/events`
-    );
+    H._ch('event', {type: 'viewedPage'});
 
-    expect(JSON.parse(req.requestBody).bringBackProperties).to.equal(undefined);
+    H.whenDone(() => {
+      const body = H._fetchMock.lastOptions()?.body as unknown as string;
+
+      expect(JSON.parse(body).bringBackProperties).to.equal(undefined);
+    }, done);
   });
 
   it('infers common "viewedPage" event properties', () => {
@@ -105,7 +98,7 @@ describe('Event API', () => {
 
     setConfig();
 
-    _ch('event', {type: 'viewedPage'});
+    H._ch('event', {type: 'viewedPage'});
 
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
@@ -119,7 +112,7 @@ describe('Event API', () => {
   it('allows to override inferred properties', () => {
     setConfig();
 
-    _ch('event', {type: 'viewedPage', properties: {title: 'Custom title'}});
+    H._ch('event', {type: 'viewedPage', properties: {title: 'Custom title'}});
 
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
@@ -133,7 +126,7 @@ describe('Event API', () => {
 
     setConfig();
 
-    _ch('event', {type: 'something'});
+    H._ch('event', {type: 'something'});
 
     const req = requests[0];
     const props = JSON.parse(req.requestBody).properties;
@@ -146,9 +139,10 @@ describe('Event API', () => {
 
   it('gets the "context" from the cookie', () => {
     setConfig();
-    cookies.set(cookieName, {...getCookie(), context: 'FOO'});
 
-    _ch('event', {type: 'viewedPage'});
+    cookies.set(H.CH, {...cookies.getJSON(H.CH), context: 'FOO'});
+
+    H._ch('event', {type: 'viewedPage'});
 
     const req = requests[0];
     const reqBody = JSON.parse(req.requestBody);
@@ -158,9 +152,10 @@ describe('Event API', () => {
 
   it('gets the "contextInfo" from the cookie', () => {
     setConfig();
-    cookies.set(cookieName, {...getCookie(), contextInfo: {foo: 'bar'}});
 
-    _ch('event', {type: 'viewedPage'});
+    cookies.set(H.CH, {...cookies.getJSON(H.CH), contextInfo: {foo: 'bar'}});
+
+    H._ch('event', {type: 'viewedPage'});
 
     const req = requests[0];
     const reqBody = JSON.parse(req.requestBody);
@@ -170,26 +165,35 @@ describe('Event API', () => {
 
   // --- Rejects
   it('should throw and log error when event type is not defined', () => {
-    setConfig(true);
+    setConfig();
 
     expect(() => {
-      _ch('event', {} as any);
+      H._ch('event', {} as any);
     }).to.throw(Error);
 
-    expect(debugMsg('Missing required event type')).to.equal(true);
+    expect(
+      spy.calledWith(
+        '[DEBUG] @contactlab/sdk-browser',
+        'Missing required event type'
+      )
+    ).to.equal(true);
+
+    spy.restore();
   });
 
   it('should log api call rejections', done => {
-    setConfig(true);
+    setConfig();
 
-    _ch('event', {type: 'viewedPage'});
+    H._ch('event', {type: 'viewedPage'});
 
     requests[0].respond(500, {}, 'KO');
 
-    setTimeout(() => {
-      expect(debugMsg('KO')).to.equal(true);
+    H.whenDone(() => {
+      expect(spy.calledWith('[DEBUG] @contactlab/sdk-browser', 'KO')).to.equal(
+        true
+      );
 
-      done();
-    }, 2);
+      spy.restore();
+    }, done);
   });
 });
