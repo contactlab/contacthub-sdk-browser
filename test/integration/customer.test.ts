@@ -1,623 +1,455 @@
-/* global describe, it, beforeEach, afterEach */
-
 import {expect} from 'chai';
 import cookies from 'js-cookie';
-import sinon from 'sinon';
-import {ConfigOptions} from '../../src/config';
-import {CustomerData} from '../../src/customer';
-
-const apiUrl = 'https://api.contactlab.it/hub/v1';
-const cookieName = '_ch';
-
-const config: ConfigOptions = {
-  workspaceId: 'workspace_id',
-  nodeId: 'node_id',
-  token: 'ABC123'
-};
-
-const CUSTOMER: CustomerData = {
-  externalId: 'foo.bar',
-  base: {
-    firstName: 'foo',
-    lastName: 'bar',
-    dob: '1980-03-17',
-    contacts: {
-      email: 'foo.bar@example.com'
-    }
-  }
-};
-
-const _ch = window.ch;
-
-const getCookie = () => cookies.getJSON(cookieName) || {};
-
-const setConfig = (d?: boolean): void => {
-  const debug = d || false;
-
-  _ch('config', {...config, debug});
-};
-
-let spyError: sinon.SinonStub<any[], void>;
-let requests: sinon.SinonFakeXMLHttpRequest[] = [];
-let xhr: sinon.SinonFakeXMLHttpRequestStatic;
-
-// Mocked Ajax calls return immediately but need a short setTimeout to avoid
-// race conditions. 0 ms works fine on all browsers except IE 10 which requires
-// at least 2 ms.
-// TODO: find a more elegant way to mock Ajax calls
-const whenDone = (f: () => void): void => {
-  setTimeout(() => f(), 2);
-};
-
-const debugMsg = (msg: string): boolean =>
-  spyError.calledWith('[DEBUG] @contactlab/sdk-browser', msg);
+import * as H from './_helpers';
 
 describe('Customer API:', () => {
   beforeEach(() => {
-    spyError = sinon.stub(console, 'error').callsFake(() => undefined);
-    cookies.remove(cookieName);
-    requests = [];
-    xhr = sinon.useFakeXMLHttpRequest();
-    xhr.onCreate = r => {
-      requests.push(r);
-    };
+    cookies.remove(H.CH);
   });
 
-  afterEach(done => {
-    spyError.restore();
-    whenDone(() => done());
+  afterEach(() => {
+    H.spy.resetHistory();
+
+    H._fetchMock.resetHistory();
   });
 
-  it('checks if required config is set', () => {
-    expect(() => {
-      _ch('customer', CUSTOMER);
-    }).to.throw(Error);
+  describe('when required config is not set', () => {
+    it('should log error', async () => {
+      expect(() => {
+        H._ch('customer', H.CUSTOMER);
+      }).not.to.throw();
+      await H.whenDone();
 
-    expect(requests.length).to.equal(0);
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Missing "_ch" cookie'
+        )
+      ).to.equal(true);
+
+      expect(H._fetchMock.called()).to.equal(false);
+    });
   });
 
   describe('when a customerId is not provided', () => {
-    describe('and no customerId is stored in the cookie', () => {
-      beforeEach(() => {
-        setConfig();
-        _ch('customer', CUSTOMER);
-      });
+    it('should create, store and reconcile if `customerId` is not in cookie', async () => {
+      H._fetchMock
+        .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: H.CID})
+        .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      it('creates a new customer', done => {
-        whenDone(() => {
-          expect(requests.length).to.equal(1);
-          const req = requests[0];
-          expect(req.method).to.equal('POST');
-          expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers`
-          );
-          expect(JSON.parse(req.requestBody)).to.eql({
-            nodeId: config.nodeId,
-            externalId: CUSTOMER.externalId,
-            base: CUSTOMER.base
-          });
-          expect(req.requestHeaders.Authorization).to.equal(
-            `Bearer ${config.token}`
-          );
+      H.setConfig();
 
-          done();
-        });
-      });
+      H._ch('customer', H.CUSTOMER);
 
-      it('handles 409 conflicts and updates the existing customer', done => {
-        whenDone(() => {
-          requests[0].respond(
-            409,
-            {},
-            JSON.stringify({data: {customer: {id: 'existing-cid'}}})
-          );
+      await H.whenDone();
 
-          whenDone(() => {
-            expect(requests.length).to.equal(2);
-            const req = requests[1];
-            expect(req.method).to.equal('PATCH');
-            expect(req.url).to.equal(
-              `${apiUrl}/workspaces/${config.workspaceId}/customers/existing-cid`
-            );
-            expect(JSON.parse(req.requestBody)).to.eql({
-              externalId: CUSTOMER.externalId,
-              base: CUSTOMER.base
-            });
+      expect(H._fetchMock.calls().length).to.equal(2);
+      const [create, reconcile] = H._fetchMock.calls();
 
-            done();
-          });
-        });
-      });
+      // --- create
+      const [, createOpts] = create;
+      const createBody = createOpts?.body as unknown as string;
+      const createHeaders = createOpts?.headers as any;
 
-      it('stores the customerId for future calls', done => {
-        whenDone(() => {
-          requests[0].respond(200, {}, JSON.stringify({id: 'new-cid'}));
+      expect(JSON.parse(createBody)).to.eql({...H.CUSTOMER, nodeId: H.NID});
+      expect(createHeaders.Authorization).to.equal(`Bearer ${H.TOKEN}`);
 
-          whenDone(() => {
-            expect(getCookie().customerId).to.equal('new-cid');
+      // --- from cookie
+      const {customerId, hash, sid} = cookies.getJSON(H.CH);
 
-            done();
-          });
-        });
-      });
+      // --- store
+      expect(customerId).to.equal(H.CID);
+      expect(hash).not.to.equal(undefined);
 
-      it('stores a hash of the customer data for future calls', done => {
-        whenDone(() => {
-          requests[0].respond(200, {}, JSON.stringify({id: 'new-cid'}));
-
-          whenDone(() => {
-            expect(getCookie().hash).not.to.equal(undefined);
-
-            done();
-          });
-        });
-      });
-
-      it('reconciles the sessionId with the customerId', done => {
-        const sid = getCookie().sid;
-
-        whenDone(() => {
-          requests[0].respond(200, {}, JSON.stringify({id: 'new-cid'}));
-
-          whenDone(() => {
-            expect(requests.length).to.equal(2);
-            const req = requests[1];
-            expect(req.url).to.equal(
-              `${apiUrl}/workspaces/${config.workspaceId}/customers/new-cid/sessions`
-            );
-            expect(JSON.parse(req.requestBody)).to.eql({
-              value: sid
-            });
-
-            done();
-          });
-        });
-      });
+      // --- reconcile
+      const [, reconcileOpts] = reconcile;
+      const reconcileBody = reconcileOpts?.body as unknown as string;
+      expect(JSON.parse(reconcileBody)).to.eql({value: sid});
     });
 
-    describe('and a customerId is stored in the cookie', () => {
-      beforeEach(() => {
-        setConfig();
+    it('should update the customer if `customerId` is in cookie', async () => {
+      H._fetchMock
+        .patch(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}`, 200)
+        .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-        cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
+      H.setConfig();
 
-        _ch('customer', CUSTOMER);
-      });
+      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
-      it('updates the customer', () => {
-        expect(requests.length).to.equal(1);
-        const req = requests[0];
-        expect(req.method).to.equal('PATCH');
-        expect(req.url).to.equal(
-          `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
-        );
-        expect(JSON.parse(req.requestBody)).to.eql({
-          externalId: CUSTOMER.externalId,
-          base: CUSTOMER.base
-        });
-      });
+      H._ch('customer', H.CUSTOMER);
 
-      it('does not update the customer if the same data is sent', done => {
-        requests[0].respond(200, {}, '');
+      await H.whenDone();
 
-        whenDone(() => {
-          _ch('customer', CUSTOMER);
+      const method = H._fetchMock.lastOptions()?.method;
+      const body = H._fetchMock.lastOptions()?.body as unknown as string;
 
-          expect(requests.length).to.equal(1);
+      expect(method).to.equal('PATCH');
 
-          done();
-        });
-      });
+      expect(JSON.parse(body)).to.eql(H.CUSTOMER);
 
-      it('does update the customer if updated data is sent', done => {
-        requests[0].respond(200, {}, '');
+      // --- does not update the customer if the same data is sent
+      H._ch('customer', H.CUSTOMER);
 
-        whenDone(() => {
-          if (CUSTOMER.base) {
-            CUSTOMER.base.lastName = 'Baz';
-          }
+      await H.whenDone();
 
-          _ch('customer', CUSTOMER);
+      expect(H._fetchMock.calls().length).to.equal(1);
 
-          expect(requests.length).to.equal(2);
+      // --- does update the customer if updated data is sent
+      H._ch('customer', {...H.CUSTOMER, externalId: 'baz'});
 
-          done();
-        });
-      });
+      await H.whenDone();
 
-      it('does update the customer if only the externalId has changed', done => {
-        requests[0].respond(200, {}, '');
+      const body2 = H._fetchMock.lastOptions()?.body as unknown as string;
 
-        whenDone(() => {
-          CUSTOMER.externalId = 'fuz';
-
-          _ch('customer', CUSTOMER);
-
-          expect(requests.length).to.equal(2);
-
-          done();
-        });
-      });
+      expect(JSON.parse(body2)).to.eql({...H.CUSTOMER, externalId: 'baz'});
     });
   });
 
   describe('when a customerId is provided but no customer data', () => {
-    describe('and the same customerId is stored in the cookie', () => {
-      beforeEach(() => {
-        setConfig();
-        cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
+    it('should not not make any API call if the same customerId is in cookie', async () => {
+      H.setConfig();
 
-        _ch('customer', {id: 'my-cid'});
-      });
+      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
-      it('does not make any API call', () => {
-        expect(requests.length).to.equal(0);
-      });
+      H._ch('customer', {id: H.CID});
+
+      await H.whenDone();
+
+      expect(H._fetchMock.called()).not.to.equal(true);
     });
 
-    describe('and a different customerId is stored in the cookie', () => {
-      beforeEach(() => {
-        setConfig();
-        cookies.set(cookieName, {...getCookie(), customerId: 'different-cid'});
+    it('should not make any API call if a different customerId is in cookie', async () => {
+      H.setConfig();
 
-        _ch('customer', {id: 'my-cid'});
+      cookies.set(H.CH, {
+        ...cookies.getJSON(H.CH),
+        customerId: 'different-cid'
       });
 
-      it('does not make any API call', () => {
-        expect(requests.length).to.equal(0);
-      });
+      H._ch('customer', {id: H.CID});
+
+      expect(H._fetchMock.called()).to.equal(false);
     });
 
-    describe('and no customerId is stored in the cookie', () => {
-      beforeEach(() => {
-        setConfig();
-      });
+    it('should reconcile and store if no customerId is in cookie', async () => {
+      H._fetchMock.post(
+        `${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`,
+        200
+      );
 
-      it('does not reset the sessionId', () => {
-        const {sid} = getCookie();
+      H.setConfig();
 
-        _ch('customer', {id: 'my-cid'});
+      const {sid} = cookies.getJSON(H.CH);
 
-        expect(getCookie().sid).to.eql(sid);
-      });
+      H._ch('customer', {id: H.CID});
 
-      it('reconciles the sessionId with the customerId', done => {
-        const {sid} = getCookie();
-        _ch('customer', {id: 'my-cid'});
+      await H.whenDone();
 
-        whenDone(() => {
-          expect(requests.length).to.equal(1);
-          const req = requests[0];
-          expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
-          );
-          expect(JSON.parse(req.requestBody)).to.eql({
-            value: sid
-          });
+      // --- does not reset the sessionId
+      expect(cookies.getJSON(H.CH).sid).to.eql(sid);
 
-          done();
-        });
-      });
+      // --- reconciles the sessionId with the customerId
+      const body = H._fetchMock.lastOptions()?.body as unknown as string;
 
-      it('does not make additional API requests', () => {
-        _ch('customer', {id: 'my-cid'});
+      expect(JSON.parse(body)).to.eql({value: sid});
 
-        expect(requests.length).to.equal(1);
-      });
+      // --- does not make additional API requests
+
+      expect(H._fetchMock.calls().length).to.equal(1);
     });
   });
 
   describe('when a customerId is provided along with some customer data', () => {
-    describe('and the same customerId is stored in the cookie', () => {
-      beforeEach(() => {
-        setConfig();
-        cookies.set(cookieName, {...getCookie(), customerId: 'my-cid'});
+    it('should update customer if the same customerId is in cookie', async () => {
+      H._fetchMock.patch(
+        `${H.API}/workspaces/${H.WSID}/customers/${H.CID}`,
+        200
+      );
 
-        _ch('customer', {...CUSTOMER, id: 'my-cid'});
-      });
+      H.setConfig();
 
-      it('updates the customer', done => {
-        whenDone(() => {
-          expect(requests.length).to.equal(1);
-          const req = requests[0];
-          expect(req.method).to.equal('PATCH');
-          expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
-          );
-          expect(JSON.parse(req.requestBody)).to.eql({
-            externalId: CUSTOMER.externalId,
-            base: CUSTOMER.base
-          });
+      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
-          done();
-        });
-      });
+      H._ch('customer', {...H.CUSTOMER, id: H.CID});
+
+      await H.whenDone();
+
+      expect(H._fetchMock.calls().length).to.equal(1);
+      const opts = H._fetchMock.lastOptions();
+      const body = opts?.body as unknown as string;
+      expect(opts?.method).to.equal('PATCH');
+      expect(JSON.parse(body)).to.eql({...H.CUSTOMER, id: H.CID});
     });
 
-    describe('and a different customerId is stored in the cookie', () => {
-      beforeEach(() => {
-        setConfig();
+    it('should reset, reconcile and update if a different customerId is in cookie', async () => {
+      H._fetchMock
+        .patch(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}`, 200)
+        .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-        cookies.set(cookieName, {...getCookie(), customerId: 'different-cid'});
+      H.setConfig();
+
+      cookies.set(H.CH, {
+        ...cookies.getJSON(H.CH),
+        customerId: 'different-cid'
       });
 
-      it('resets the sessionId', () => {
-        const {sid} = getCookie();
+      const {sid} = cookies.getJSON(H.CH);
 
-        _ch('customer', {...CUSTOMER, id: 'my-cid'});
+      H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
-        expect(getCookie().sid).not.to.eql(sid);
-      });
+      await H.whenDone();
 
-      it('reconciles the new sessionId with the customerId', done => {
-        _ch('customer', {...CUSTOMER, id: 'my-cid'});
+      const newSid = cookies.getJSON(H.CH).sid;
 
-        const {sid: newSid} = getCookie();
+      const [reconcile, update] = H._fetchMock.calls();
 
-        whenDone(() => {
-          expect(requests.length).to.equal(1);
-          const req = requests[0];
-          expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
-          );
-          expect(JSON.parse(req.requestBody)).to.eql({
-            value: newSid
-          });
+      // --- resets the sessionId
+      expect(newSid).not.to.eql(sid);
 
-          done();
-        });
-      });
+      // ---- reconciles the new sessionId with the customerId'
+      const [, reconcileOpts] = reconcile;
+      const reconcileBody = reconcileOpts?.body as unknown as string;
 
-      it('updates the customer', done => {
-        _ch('customer', {...CUSTOMER, id: 'my-cid'});
+      expect(JSON.parse(reconcileBody)).to.eql({value: newSid});
 
-        requests[0].respond(200, {}, '');
+      // --- updates the customer
+      const [, updateOpts] = update;
+      const updateBody = updateOpts?.body as unknown as string;
 
-        whenDone(() => {
-          expect(requests.length).to.equal(2);
-          const req = requests[1];
-          expect(req.method).to.equal('PATCH');
-          expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
-          );
-          expect(JSON.parse(req.requestBody)).to.eql({
-            externalId: CUSTOMER.externalId,
-            base: CUSTOMER.base
-          });
-
-          done();
-        });
-      });
+      expect(updateOpts?.method).to.equal('PATCH');
+      expect(JSON.parse(updateBody)).to.eql({...H.CUSTOMER, id: H.CID});
     });
 
-    describe('and no customerId is stored in the cookie', () => {
-      beforeEach(() => {
-        setConfig();
-      });
+    it('should reconcile and update but not reset if no customerId is in cookie', async () => {
+      H._fetchMock
+        .patch(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}`, 200)
+        .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      it('does not reset the sessionId', () => {
-        const {sid} = getCookie();
+      H.setConfig();
 
-        _ch('customer', {...CUSTOMER, id: 'my-cid'});
+      const {sid} = cookies.getJSON(H.CH);
 
-        expect(getCookie().sid).to.eql(sid);
-      });
+      H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
-      it('reconciles the sessionId with the customerId', done => {
-        const {sid} = getCookie();
+      await H.whenDone();
 
-        _ch('customer', {...CUSTOMER, id: 'my-cid'});
+      const newSid = cookies.getJSON(H.CH).sid;
 
-        whenDone(() => {
-          expect(requests.length).to.equal(1);
-          const req = requests[0];
-          expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid/sessions`
-          );
-          expect(JSON.parse(req.requestBody)).to.eql({
-            value: sid
-          });
+      const [reconcile, update] = H._fetchMock.calls();
 
-          done();
-        });
-      });
+      // --- does not reset the sessionId
+      expect(newSid).to.equal(sid);
 
-      it('updates the customer', done => {
-        _ch('customer', {...CUSTOMER, id: 'my-cid'});
+      // --- reconciles the sessionId with the customerId
+      const [, reconcileOpts] = reconcile;
+      const reconcileBody = reconcileOpts?.body as unknown as string;
 
-        requests[0].respond(200, {}, '');
+      expect(JSON.parse(reconcileBody)).to.eql({value: sid});
 
-        whenDone(() => {
-          expect(requests.length).to.equal(2);
-          const req = requests[1];
-          expect(req.method).to.equal('PATCH');
-          expect(req.url).to.equal(
-            `${apiUrl}/workspaces/${config.workspaceId}/customers/my-cid`
-          );
-          expect(JSON.parse(req.requestBody)).to.eql({
-            externalId: CUSTOMER.externalId,
-            base: CUSTOMER.base
-          });
+      // --- updates the customer
+      const [, updateOpts] = update;
+      const updateBody = updateOpts?.body as unknown as string;
 
-          done();
-        });
-      });
+      expect(updateOpts?.method).to.equal('PATCH');
+      expect(JSON.parse(updateBody)).to.eql({...H.CUSTOMER, id: H.CID});
     });
   });
 
   describe('when no object is provided', () => {
-    beforeEach(() => {
-      setConfig();
+    it('should remove user data from cookie and generate new session', async () => {
+      H.setConfig();
 
-      cookies.set(cookieName, {
-        ...getCookie(),
+      cookies.set(H.CH, {
+        ...cookies.getJSON(H.CH),
         customerId: 'old-customer-id',
         sid: 'old-session-id'
       });
 
-      _ch('customer');
-    });
+      H._ch('customer');
 
-    it('removes user data from cookie', () => {
-      expect(getCookie().customerId).to.equal(undefined);
-    });
+      await H.whenDone();
 
-    it('generates a new sessionId', () => {
-      const sid =
+      const {customerId, sid} = cookies.getJSON(H.CH);
+
+      const sidRgx =
         /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
-      expect(sid.test(getCookie().sid)).to.equal(true);
+      expect(customerId).to.equal(undefined);
+
+      expect(sidRgx.test(sid)).to.equal(true);
     });
   });
 
   // --- Rejections
-  describe('when id and customerId are provided it should logs catched promise rejection', () => {
+  describe('when id and customerId are provided', () => {
+    const OTHER_CID = 'efgh';
+
     beforeEach(() => {
-      setConfig(true);
+      H.setConfig();
 
-      cookies.set(cookieName, {...getCookie(), customerId: 'TEST'});
+      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
     });
 
-    it('when id != customerId and no other customer data provided', done => {
-      _ch('customer', {id: 'NO_TEST'});
+    it('should log errors if id != customerId and no other customer data provided', async () => {
+      H._ch('customer', {id: OTHER_CID});
 
-      whenDone(() => {
-        expect(
-          debugMsg('The provided id conflicts with the id stored in the cookie')
-        ).to.equal(true);
+      await H.whenDone();
 
-        done();
-      });
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'The provided id conflicts with the id stored in the cookie'
+        )
+      ).to.equal(true);
     });
 
-    it('when sessions api respond with error', done => {
-      _ch('customer', {id: 'NO_TEST', externalId: 'ANOTHER_ID'});
+    it('should log errors if sessions api respond with error', async () => {
+      H._fetchMock.post(
+        `${H.API}/workspaces/${H.WSID}/customers/${OTHER_CID}/sessions`,
+        500
+      );
 
-      requests[0].respond(500, {}, 'KO');
+      H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
 
-      whenDone(() => {
-        expect(debugMsg('KO')).to.equal(true);
+      await H.whenDone();
 
-        done();
-      });
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Request responded with status code 500'
+        )
+      ).to.equal(true);
     });
 
-    it('when customers api respond with error', done => {
-      _ch('customer', {id: 'TEST', externalId: 'ANOTHER_ID'});
+    it('should log errors if customers api respond with error', async () => {
+      H._fetchMock
+        .patch(`${H.API}/workspaces/${H.WSID}/customers/${OTHER_CID}`, 500)
+        .post(
+          `${H.API}/workspaces/${H.WSID}/customers/${OTHER_CID}/sessions`,
+          200
+        );
 
-      whenDone(() => {
-        requests[0].respond(500, {}, 'KO');
+      H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
 
-        whenDone(() => {
-          expect(debugMsg('KO')).to.equal(true);
+      await H.whenDone();
 
-          done();
-        });
-      });
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Request responded with status code 500'
+        )
+      ).to.equal(true);
     });
   });
 
-  describe('when customerId is NOT provided it should logs catched promise rejection', () => {
+  describe('when customerId is NOT provided', () => {
+    const OTHER_CID = 'efgh';
+
     beforeEach(() => {
-      setConfig(true);
+      H.setConfig();
     });
 
-    it('when sessions api respond with error', done => {
-      _ch('customer', {id: 'TEST'});
+    it('should log errors if sessions api respond with error', async () => {
+      H._fetchMock
+        .patch(`${H.API}/workspaces/${H.WSID}/customers/${OTHER_CID}`, 200)
+        .post(
+          `${H.API}/workspaces/${H.WSID}/customers/${OTHER_CID}/sessions`,
+          500
+        );
 
-      requests[0].respond(500, {}, 'KO');
+      H._ch('customer', {id: OTHER_CID});
 
-      whenDone(() => {
-        expect(debugMsg('KO')).to.equal(true);
+      await H.whenDone();
 
-        done();
-      });
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Request responded with status code 500'
+        )
+      ).to.equal(true);
     });
 
-    it('when customers api respond with error', done => {
-      _ch('customer', {id: 'TEST'});
+    it('should log errors if customers api respond with error', async () => {
+      H._fetchMock
+        .patch(`${H.API}/workspaces/${H.WSID}/customers/${OTHER_CID}`, 500)
+        .post(
+          `${H.API}/workspaces/${H.WSID}/customers/${OTHER_CID}/sessions`,
+          200
+        );
 
-      whenDone(() => {
-        requests[0].respond(500, {}, 'KO');
+      H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
 
-        whenDone(() => {
-          expect(debugMsg('KO')).to.equal(true);
+      await H.whenDone();
 
-          done();
-        });
-      });
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Request responded with status code 500'
+        )
+      ).to.equal(true);
     });
   });
 
-  describe('when customerId is provided and id is not provided it should logs catched promise rejection', () => {
-    beforeEach(() => {
-      setConfig(true);
+  describe('when customerId is provided and id is not provided', () => {
+    it('should log errors if customers api respond with error', async () => {
+      H._fetchMock
+        .patch(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}`, 500)
+        .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      cookies.set(cookieName, {...getCookie(), customerId: 'TEST'});
-    });
+      H.setConfig();
 
-    it('when customers api respond with error', done => {
-      _ch('customer', {externalId: 'ANOTHER_ID'});
+      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
-      requests[0].respond(500, {}, 'KO');
+      H._ch('customer', {externalId: 'ANOTHER_ID'});
 
-      whenDone(() => {
-        whenDone(() => {
-          expect(debugMsg('KO')).to.equal(true);
+      await H.whenDone();
 
-          done();
-        });
-      });
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Request responded with status code 500'
+        )
+      ).to.equal(true);
     });
   });
 
-  describe('when customerId and id are not provided it should logs catched promise rejection', () => {
+  describe('when customerId and id are not provided', () => {
     beforeEach(() => {
-      setConfig(true);
+      H.setConfig();
     });
 
-    it('when customers api respond with error', done => {
-      _ch('customer', {});
+    it('should log errors if customers api respond with error', async () => {
+      H._fetchMock
+        .post(`${H.API}/workspaces/${H.WSID}/customers`, 500)
+        .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      requests[0].respond(500, {}, 'KO');
+      H._ch('customer', {});
 
-      whenDone(() => {
-        whenDone(() => {
-          expect(debugMsg('KO')).to.equal(true);
+      await H.whenDone();
 
-          done();
-        });
-      });
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Request responded with status code 500'
+        )
+      ).to.equal(true);
     });
 
-    it('when customer api respond with error (on merge)', done => {
-      _ch('customer', {});
+    it('should log errors if sessions api respond with error', async () => {
+      H._fetchMock
+        .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: H.CID})
+        .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 500);
 
-      whenDone(() => {
-        requests[0].respond(500, {}, 'KO');
+      H._ch('customer', {});
 
-        whenDone(() => {
-          expect(debugMsg('KO')).to.equal(true);
+      await H.whenDone();
 
-          done();
-        });
-      });
-    });
-
-    it('when sessions api respond with error', done => {
-      _ch('customer', {});
-
-      whenDone(() => {
-        whenDone(() => {
-          requests[0].respond(500, {}, 'KO');
-
-          whenDone(() => {
-            expect(debugMsg('KO')).to.equal(true);
-
-            done();
-          });
-        });
-      });
+      expect(
+        H.spy.calledWith(
+          '[DEBUG] @contactlab/sdk-browser',
+          'Request responded with status code 500'
+        )
+      ).to.equal(true);
     });
   });
 });

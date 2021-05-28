@@ -3,7 +3,6 @@ import {withBody} from '@contactlab/appy/combinators/body';
 import {Decoder, withDecoder} from '@contactlab/appy/combinators/decoder';
 import {withHeaders} from '@contactlab/appy/combinators/headers';
 import * as E from 'fp-ts/Either';
-import * as IOE from 'fp-ts/IOEither';
 import {stringify} from 'fp-ts/Json';
 import * as RTE from 'fp-ts/ReaderTaskEither';
 import * as TE from 'fp-ts/TaskEither';
@@ -189,10 +188,9 @@ const prepareOperation =
   (data: CustomerData): Eff<CustomerEnv, void> =>
   Env =>
     pipe(
-      IOE.Do,
-      IOE.apS('ctx', Env.cookie.get(Env.cookieName(), C.CHDecoder)),
-      IOE.apS('hash', pipe(computeHash(data), IOE.fromEither)),
-      TE.fromIOEither,
+      TE.Do,
+      TE.apS('ctx', readCookie(Env)),
+      TE.apS('hash', pipe(computeHash(data), TE.fromEither)),
       TE.chain(({ctx, hash}) => {
         if (ctx.hash === hash) {
           return TE.right(undefined);
@@ -200,7 +198,7 @@ const prepareOperation =
 
         const result = operation(data.id, ctx.customerId);
 
-        return result({...Env, ctx, data, hash});
+        return result({...Env, data, hash});
       }),
       TE.map(constVoid)
     );
@@ -233,7 +231,6 @@ const operation = (cid?: string | null, cookieId?: string): Operation => {
 interface Eff<R, A> extends RTE.ReaderTaskEither<R, Error, A> {}
 
 interface OperationEnv extends CustomerEnv {
-  ctx: C.CHCookie;
   data: CustomerData;
   hash: string;
 }
@@ -258,67 +255,87 @@ const computeHash = (data: CustomerData): E.Either<Error, string> => {
   );
 };
 
-const resetCookie: Eff<CustomerEnv, void> = Env =>
+const readCookie = pipe(
+  RTE.ask<CustomerEnv>(),
+  RTE.chain(Env =>
+    RTE.fromIOEither(Env.cookie.get(Env.cookieName(), C.CHDecoder))
+  )
+);
+
+const writeCookie = <A>(x: A): Eff<CustomerEnv, void> =>
   pipe(
-    Env.cookie.get(Env.cookieName(), C.CHDecoder),
-    IOE.chain(ctx =>
-      Env.cookie.set(Env.cookieName(), {
-        ...ctx,
-        sid: uuidv4(),
-        customerId: undefined,
-        hash: undefined
-      })
-    ),
-    TE.fromIOEither
+    RTE.ask<CustomerEnv>(),
+    RTE.chain(Env => RTE.fromIOEither(Env.cookie.set(Env.cookieName(), x)))
   );
 
-const createCustomer: Operation = Env => {
-  const {token, workspaceId, nodeId} = Env.ctx;
-  const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers`;
-  const req = pipe(
-    post,
-    withHeaders(stdHeaders(token)),
-    withBody({...Env.data, nodeId}),
-    withDecoder(CustomerDecoder),
-    RTE.bimap(toError, resp => resp.data.id)
-  );
+const resetCookie: Eff<CustomerEnv, void> = pipe(
+  readCookie,
+  RTE.chain(ctx =>
+    writeCookie({
+      ...ctx,
+      sid: uuidv4(),
+      customerId: undefined,
+      hash: undefined
+    })
+  )
+);
 
-  return req(endpoint);
-};
+const createCustomer: Operation = Env =>
+  pipe(
+    readCookie(Env),
+    TE.chain(({token, workspaceId, nodeId}) => {
+      const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers`;
+      const req = pipe(
+        post,
+        withHeaders(stdHeaders(token)),
+        withBody({...Env.data, nodeId}),
+        withDecoder(CustomerDecoder),
+        RTE.bimap(toError, resp => resp.data.id)
+      );
+
+      return req(endpoint);
+    })
+  );
 
 const updateCustomer =
   (cid: string): Operation =>
-  Env => {
-    if (!shouldUpdate(Env.data)) {
-      return TE.right(cid);
-    }
+  Env =>
+    pipe(
+      readCookie(Env),
+      TE.chain(({token, workspaceId}) => {
+        if (!shouldUpdate(Env.data)) {
+          return TE.right(cid);
+        }
 
-    const {token, workspaceId} = Env.ctx;
-    const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers/${cid}`;
-    const req = pipe(
-      patch,
-      withHeaders(stdHeaders(token)),
-      withBody(Env.data),
-      RTE.bimap(toError, constant(cid))
+        const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers/${cid}`;
+        const req = pipe(
+          patch,
+          withHeaders(stdHeaders(token)),
+          withBody(Env.data),
+          RTE.bimap(toError, constant(cid))
+        );
+
+        return req(endpoint);
+      })
     );
-
-    return req(endpoint);
-  };
 
 const reconcileCustomer =
   (cid: string): Operation =>
-  Env => {
-    const {workspaceId, token, sid} = Env.ctx;
-    const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers/${cid}/sessions`;
-    const req = pipe(
-      post,
-      withHeaders(stdHeaders(token)),
-      withBody({value: sid}),
-      RTE.bimap(toError, constant(cid))
-    );
+  Env =>
+    pipe(
+      readCookie(Env),
+      TE.chain(({workspaceId, token, sid}) => {
+        const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers/${cid}/sessions`;
+        const req = pipe(
+          post,
+          withHeaders(stdHeaders(token)),
+          withBody({value: sid}),
+          RTE.bimap(toError, constant(cid))
+        );
 
-    return req(endpoint);
-  };
+        return req(endpoint);
+      })
+    );
 
 const resolveIdConflict = (cid: string, cookieId: string): Operation =>
   pipe(
@@ -348,12 +365,8 @@ const store =
   (customerId: string): Operation =>
   Env =>
     pipe(
-      Env.cookie.set(Env.cookieName(), {
-        ...Env.ctx,
-        customerId,
-        hash: Env.hash
-      }),
-      TE.fromIOEither,
+      readCookie(Env),
+      TE.chain(ctx => writeCookie({...ctx, customerId, hash: Env.hash})(Env)),
       TE.map(constant(customerId))
     );
 

@@ -1,8 +1,10 @@
-import {SDKFunction} from '../../src/types';
+import {FetchMockSandbox} from 'fetch-mock';
+import {SDK} from '../../src/main';
 
 declare global {
   interface Window {
-    ch: SDKFunction;
+    ch: SDK;
+    fetchMock: FetchMockSandbox;
   }
 }
 
