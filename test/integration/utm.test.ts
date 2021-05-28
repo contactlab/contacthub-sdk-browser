@@ -16,7 +16,7 @@ describe('UTM automatic handling', () => {
     window.location.hash =
       '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
 
-    setConfig();
+    H.setConfig();
 
     expect(Cookies.getJSON(H.CH).ga).to.equal(undefined);
   });
@@ -25,7 +25,7 @@ describe('UTM automatic handling', () => {
     window.location.hash =
       '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
 
-    setConfig();
+    H.setConfig();
 
     expect(Cookies.getJSON(H.UTM)).to.eql({
       utm_source: 'foo',
@@ -39,7 +39,7 @@ describe('UTM automatic handling', () => {
   it('sends utm_* vars in the event payload', async () => {
     H._fetchMock.post(`${H.API}/workspaces/${H.WSID}/events`, 200);
 
-    setConfig();
+    H.setConfig();
 
     const utm: UTMCookie = {
       utm_source: 'foo',
@@ -60,6 +60,3 @@ describe('UTM automatic handling', () => {
     expect(JSON.parse(body).tracking).to.eql({ga: utm});
   });
 });
-
-// --- Helpers
-const setConfig = (): void => H._ch('config', H.CONFIG);

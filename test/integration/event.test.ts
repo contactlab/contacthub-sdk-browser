@@ -33,7 +33,7 @@ describe('Event API', () => {
   });
 
   it('sends the event to the API', async () => {
-    setConfig();
+    H.setConfig();
 
     H._ch('event', {type: 'viewedPage'});
 
@@ -54,7 +54,7 @@ describe('Event API', () => {
   });
 
   it('sends customerId when available in cookie', async () => {
-    setConfig();
+    H.setConfig();
 
     cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
@@ -68,7 +68,7 @@ describe('Event API', () => {
   });
 
   it('omits bringBackProperties when customerId is available', async () => {
-    setConfig();
+    H.setConfig();
 
     cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
@@ -84,7 +84,7 @@ describe('Event API', () => {
   it('infers common "viewedPage" event properties', async () => {
     document.title = 'Hello world';
 
-    setConfig();
+    H.setConfig();
 
     H._ch('event', {type: 'viewedPage'});
 
@@ -100,7 +100,7 @@ describe('Event API', () => {
   });
 
   it('allows to override inferred properties', async () => {
-    setConfig();
+    H.setConfig();
 
     H._ch('event', {type: 'viewedPage', properties: {title: 'Custom title'}});
 
@@ -116,7 +116,7 @@ describe('Event API', () => {
   it('does not infer properties on other event types', async () => {
     document.title = 'Hello world';
 
-    setConfig();
+    H.setConfig();
 
     H._ch('event', {type: 'something'});
 
@@ -129,7 +129,7 @@ describe('Event API', () => {
   });
 
   it('gets the "context" from the cookie', async () => {
-    setConfig();
+    H.setConfig();
 
     cookies.set(H.CH, {...cookies.getJSON(H.CH), context: 'FOO'});
 
@@ -143,7 +143,7 @@ describe('Event API', () => {
   });
 
   it('gets the "contextInfo" from the cookie', async () => {
-    setConfig();
+    H.setConfig();
 
     cookies.set(H.CH, {...cookies.getJSON(H.CH), contextInfo: {foo: 'bar'}});
 
@@ -158,7 +158,7 @@ describe('Event API', () => {
 
   // --- Rejects
   it('should log error when event type is not defined (no throws)', async () => {
-    setConfig();
+    H.setConfig();
 
     expect(() => {
       H._ch('event', {} as any);
@@ -180,7 +180,7 @@ describe('Event API', () => {
       body: 'KO'
     });
 
-    setConfig();
+    H.setConfig();
 
     H._ch('event', {type: 'viewedPage'});
 
@@ -194,6 +194,3 @@ describe('Event API', () => {
     ).to.equal(true);
   });
 });
-
-// --- Helpers
-const setConfig = (): void => H._ch('config', H.CONFIG);

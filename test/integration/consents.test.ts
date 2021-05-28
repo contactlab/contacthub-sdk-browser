@@ -1,8 +1,5 @@
-/* global describe, it, beforeEach, afterEach */
-
 import {expect} from 'chai';
 import cookies from 'js-cookie';
-import {CustomerData} from '../../src/customer';
 import * as H from './_helpers';
 
 describe('Consents', () => {
@@ -21,7 +18,7 @@ describe('Consents', () => {
       .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: H.CID})
       .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-    H._ch('customer', CUSTOMER);
+    H._ch('customer', H.CUSTOMER);
 
     await H.whenDone();
 
@@ -29,7 +26,7 @@ describe('Consents', () => {
     const [, opts] = create;
     const body = opts?.body as unknown as string;
 
-    expect(JSON.parse(body).consents).to.eql(CUSTOMER.consents);
+    expect(JSON.parse(body).consents).to.eql(H.CUSTOMER.consents);
   });
 
   it('can be updated', async () => {
@@ -40,12 +37,12 @@ describe('Consents', () => {
 
     cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
 
-    H._ch('customer', CUSTOMER);
+    H._ch('customer', H.CUSTOMER);
 
     await H.whenDone();
 
     H._ch('customer', {
-      ...CUSTOMER,
+      ...H.CUSTOMER,
       consents: {
         softSpam: {email: {objection: true}}
       }
@@ -66,30 +63,3 @@ describe('Consents', () => {
     });
   });
 });
-
-// --- Helpers
-const CUSTOMER: CustomerData = {
-  externalId: 'foo.bar',
-  base: {
-    firstName: 'foo',
-    lastName: 'bar',
-    dob: '1980-03-17',
-    contacts: {
-      email: 'foo.bar@example.com'
-    }
-  },
-  consents: {
-    disclaimer: {
-      date: '2018-04-28:16:01Z',
-      version: 'v1.0'
-    },
-    marketing: {
-      automatic: {
-        sms: {
-          status: true,
-          limitation: true
-        }
-      }
-    }
-  }
-};

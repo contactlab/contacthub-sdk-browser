@@ -1,5 +1,6 @@
 import sinon from 'sinon';
 import {ConfigOptions} from '../../src/config';
+import {CustomerData} from '../../src/customer';
 
 export const CH = '_ch';
 export const UTM = '_chutm';
@@ -12,6 +13,32 @@ export const CONFIG: ConfigOptions = {
   workspaceId: WSID,
   nodeId: NID,
   token: TOKEN
+};
+
+export const CUSTOMER: CustomerData = {
+  externalId: 'foo.bar',
+  base: {
+    firstName: 'foo',
+    lastName: 'bar',
+    dob: '1980-03-17',
+    contacts: {
+      email: 'foo.bar@example.com'
+    }
+  },
+  consents: {
+    disclaimer: {
+      date: '2018-04-28:16:01Z',
+      version: 'v1.0'
+    },
+    marketing: {
+      automatic: {
+        sms: {
+          status: true,
+          limitation: true
+        }
+      }
+    }
+  }
 };
 
 /**
@@ -36,3 +63,8 @@ export const _fetchMock = window.fetchMock;
  * Stubs `console.error`
  */
 export const spy = sinon.stub(console, 'error').callsFake(() => undefined);
+
+/**
+ * Sets test configuration (token + wsid + nodeid)
+ */
+export const setConfig = (): void => _ch('config', CONFIG);
