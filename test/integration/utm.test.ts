@@ -36,7 +36,7 @@ describe('UTM automatic handling', () => {
     });
   });
 
-  it('sends utm_* vars in the event payload', done => {
+  it('sends utm_* vars in the event payload', async () => {
     H._fetchMock.post(`${H.API}/workspaces/${H.WSID}/events`, 200);
 
     setConfig();
@@ -53,11 +53,11 @@ describe('UTM automatic handling', () => {
 
     H._ch('event', {type: 'viewedPage'});
 
-    H.whenDone(() => {
-      const body = H._fetchMock.lastOptions()?.body as unknown as string;
+    await H.whenDone();
 
-      expect(JSON.parse(body).tracking).to.eql({ga: utm});
-    }, done);
+    const body = H._fetchMock.lastOptions()?.body as unknown as string;
+
+    expect(JSON.parse(body).tracking).to.eql({ga: utm});
   });
 });
 

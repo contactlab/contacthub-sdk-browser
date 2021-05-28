@@ -6,5 +6,7 @@ import FM from 'fetch-mock';
 
 const sb = FM.sandbox();
 
+sb.config.overwriteRoutes = true;
+
 (window as any).fetchMock = sb;
 window.fetch = sb;

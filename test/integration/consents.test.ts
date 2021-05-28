@@ -12,29 +12,27 @@ describe('Consents', () => {
     H._ch('config', H.CONFIG);
   });
 
-  afterEach(done => {
+  afterEach(() => {
     H._fetchMock.resetHistory();
-
-    H.whenDone(() => undefined, done);
   });
 
-  it('can be set', done => {
+  it('can be set', async () => {
     H._fetchMock
       .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: H.CID})
       .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
     H._ch('customer', CUSTOMER);
 
-    H.whenDone(() => {
-      const [create] = H._fetchMock.calls();
-      const [, opts] = create;
-      const body = opts?.body as unknown as string;
+    await H.whenDone();
 
-      expect(JSON.parse(body).consents).to.eql(CUSTOMER.consents);
-    }, done);
+    const [create] = H._fetchMock.calls();
+    const [, opts] = create;
+    const body = opts?.body as unknown as string;
+
+    expect(JSON.parse(body).consents).to.eql(CUSTOMER.consents);
   });
 
-  it('can be updated', done => {
+  it('can be updated', async () => {
     H._fetchMock.mock(
       `begin:${H.API}/workspaces/${H.WSID}/customers/${H.CID}`,
       200
@@ -44,27 +42,27 @@ describe('Consents', () => {
 
     H._ch('customer', CUSTOMER);
 
-    H.whenDone(() => {
-      H._ch('customer', {
-        ...CUSTOMER,
-        consents: {
-          softSpam: {email: {objection: true}}
-        }
-      });
+    await H.whenDone();
 
-      H.whenDone(() => {
-        const body = H._fetchMock.lastOptions()?.body as unknown as string;
-        const method = H._fetchMock.lastOptions()?.method;
-        const url = H._fetchMock.lastUrl();
+    H._ch('customer', {
+      ...CUSTOMER,
+      consents: {
+        softSpam: {email: {objection: true}}
+      }
+    });
 
-        expect(method).to.equal('PATCH');
-        expect(url).to.equal(
-          `${H.API}/workspaces/${H.CONFIG.workspaceId}/customers/${H.CID}`
-        );
-        expect(JSON.parse(body).consents).to.eql({
-          softSpam: {email: {objection: true}}
-        });
-      }, done);
+    await H.whenDone();
+
+    const body = H._fetchMock.lastOptions()?.body as unknown as string;
+    const method = H._fetchMock.lastOptions()?.method;
+    const url = H._fetchMock.lastUrl();
+
+    expect(method).to.equal('PATCH');
+    expect(url).to.equal(
+      `${H.API}/workspaces/${H.CONFIG.workspaceId}/customers/${H.CID}`
+    );
+    expect(JSON.parse(body).consents).to.eql({
+      softSpam: {email: {objection: true}}
     });
   });
 });

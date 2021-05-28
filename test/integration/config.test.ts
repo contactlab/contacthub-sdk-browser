@@ -1,6 +1,5 @@
 import {expect} from 'chai';
 import cookies from 'js-cookie';
-import sinon from 'sinon';
 import * as H from './_helpers';
 
 describe('Config API', () => {
@@ -8,6 +7,10 @@ describe('Config API', () => {
     cookies.remove(H.CH);
 
     H._ch('config', H.CONFIG);
+  });
+
+  afterEach(() => {
+    H.spy.resetHistory();
   });
 
   it('sets a cookie', () => {
@@ -87,19 +90,15 @@ describe('Config API', () => {
   });
 
   it('should log error if required option are not specified (no throw)', () => {
-    const spy = sinon.stub(console, 'error').callsFake(() => undefined);
-
     expect(() => {
       H._ch('config', {} as any);
     }).not.to.throw();
 
     expect(
-      spy.calledWith(
+      H.spy.calledWith(
         '[DEBUG] @contactlab/sdk-browser',
         'Invalid ContactHub configuration'
       )
     ).to.equal(true);
-
-    spy.restore();
   });
 });
