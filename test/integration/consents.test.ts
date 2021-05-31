@@ -1,22 +1,22 @@
 import {expect} from 'chai';
-import cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 import * as H from './_helpers';
 
 describe('Consents', () => {
   beforeEach(() => {
-    cookies.remove(H.CH);
-
-    H._ch('config', H.CONFIG);
+    Cookies.remove(H.CH);
   });
 
   afterEach(() => {
     H._fetchMock.resetHistory();
   });
 
-  it('can be set', async () => {
+  it('should be set', async () => {
     H._fetchMock
       .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: H.CID})
       .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
+
+    await H.setConfig();
 
     H._ch('customer', H.CUSTOMER);
 
@@ -29,13 +29,15 @@ describe('Consents', () => {
     expect(JSON.parse(body).consents).to.eql(H.CUSTOMER.consents);
   });
 
-  it('can be updated', async () => {
+  it('should be updated', async () => {
     H._fetchMock.mock(
       `begin:${H.API}/workspaces/${H.WSID}/customers/${H.CID}`,
       200
     );
 
-    cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
+    await H.setConfig();
+
+    Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
 
     H._ch('customer', H.CUSTOMER);
 

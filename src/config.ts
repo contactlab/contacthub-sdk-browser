@@ -1,17 +1,17 @@
 import * as IO from 'fp-ts/IO';
-import * as IOE from 'fp-ts/IOEither';
+import * as TE from 'fp-ts/TaskEither';
 import {Endomorphism, pipe} from 'fp-ts/function';
 import {v4 as uuidv4} from 'uuid';
 import * as C from './cookie';
 import {customer} from './customer';
-import {Global} from './global';
-import {Location} from './location';
-import {Runner} from './runner';
+import {HttpSvc} from './http';
+import {LocationSvc} from './location';
+import {Effect} from './program';
 
-export interface ConfigEnv extends C.CookieSvc, Location, Global, Runner {}
+export interface ConfigEnv extends HttpSvc, C.CookieSvc, LocationSvc {}
 
 export interface Config {
-  (options: ConfigOptions): void;
+  (options: ConfigOptions): Effect;
 }
 
 export interface ConfigOptions {
@@ -26,46 +26,40 @@ export interface ConfigOptions {
 const newSessionId: IO.IO<string> = () => uuidv4();
 
 export const config =
-  (Env: ConfigEnv): Config =>
+  (E: ConfigEnv): Config =>
   options =>
     pipe(
       checkOptions(options),
-      IOE.chain(opts =>
+      TE.chain(opts =>
         pipe(
-          Env.cookie.get(Env.cookieName(), C.CHDecoder, withDefaults(opts)),
-          IOE.map(prepareCHCookie(opts)),
-          IOE.chain(
-            _ch => Env.cookie.set(Env.cookieName(), _ch, {expires: 365}) // expires in 1 year
-          )
+          E.cookie.getHub(withDefaults(opts)),
+          TE.map(prepareCHCookie(opts)),
+          TE.chain(_ch => E.cookie.setHub(_ch, {expires: 365}))
         )
       ),
-      IOE.chain(() =>
+      TE.chain(() =>
         pipe(
-          Env.cookie.get(Env.utmCookieName(), C.UTMDecoder, {}),
-          IOE.map(prepareUTMCookie(Env)),
-          IOE.chain(
-            _chutm =>
-              Env.cookie.set(Env.utmCookieName(), _chutm, {expires: 1 / 48}) // expires in 30 mins
-          )
+          E.cookie.getUTM({}),
+          TE.map(prepareUTMCookie(E)),
+          TE.chain(_chutm => E.cookie.setUTM(_chutm, {expires: 1 / 48}))
         )
       ),
-      IOE.chain(() =>
-        IOE.rightIO(() => {
-          const id = Env.queryParam('clabId');
+      TE.chain(() => {
+        const id = E.location.qp('clabId');
 
-          return typeof id === 'undefined' ? undefined : customer(Env)({id});
-        })
-      ),
-      Env.run
+        return typeof id === 'undefined'
+          ? TE.right(undefined)
+          : customer(E)({id});
+      })
     );
 
 // --- Helpers
-const checkOptions = IOE.fromPredicate<Error, ConfigOptions>(
+const checkOptions = TE.fromPredicate<Error, ConfigOptions>(
   o => 'workspaceId' in o && 'nodeId' in o && 'token' in o,
   () => new Error('Invalid ContactHub configuration')
 );
 
-const withDefaults = (o: ConfigOptions): C.CHCookie => ({
+const withDefaults = (o: ConfigOptions): C.HubCookie => ({
   ...o,
   sid: newSessionId(),
   debug: o.debug || false,
@@ -74,10 +68,10 @@ const withDefaults = (o: ConfigOptions): C.CHCookie => ({
 });
 
 const prepareCHCookie =
-  (o: ConfigOptions): Endomorphism<C.CHCookie> =>
+  (o: ConfigOptions): Endomorphism<C.HubCookie> =>
   ch => {
     // check if the auth token has changed
-    const _ch = o.token === ch.token ? ch : ({} as C.CHCookie);
+    const _ch = o.token === ch.token ? ch : ({} as C.HubCookie);
 
     _ch.sid = _ch.sid || newSessionId();
     _ch.token = o.token ?? ch.token;
@@ -91,20 +85,20 @@ const prepareCHCookie =
   };
 
 const prepareUTMCookie =
-  (Env: ConfigEnv): Endomorphism<C.UTMCookie> =>
+  (E: ConfigEnv): Endomorphism<C.UTMCookie> =>
   chutm => {
     const _chutm = {...chutm};
 
     // read Google Analytics UTM query params if present
-    const utmSource = Env.queryParam('utm_source');
+    const utmSource = E.location.qp('utm_source');
 
     if (utmSource) {
       // Store UTM values in the _chutm cookie, overwriting any previous UTM value.
       _chutm.utm_source = utmSource;
-      _chutm.utm_medium = Env.queryParam('utm_medium');
-      _chutm.utm_term = Env.queryParam('utm_term');
-      _chutm.utm_content = Env.queryParam('utm_content');
-      _chutm.utm_campaign = Env.queryParam('utm_campaign');
+      _chutm.utm_medium = E.location.qp('utm_medium');
+      _chutm.utm_term = E.location.qp('utm_term');
+      _chutm.utm_content = E.location.qp('utm_content');
+      _chutm.utm_campaign = E.location.qp('utm_campaign');
     }
 
     return _chutm;

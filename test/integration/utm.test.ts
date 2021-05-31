@@ -12,20 +12,20 @@ describe('UTM automatic handling', () => {
     H._fetchMock.resetHistory();
   });
 
-  it('does not store utm_* vars in the main _ch cookie', () => {
+  it('should not store utm_* vars in the main _ch cookie', async () => {
     window.location.hash =
       '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
 
-    H.setConfig();
+    await H.setConfig();
 
     expect(Cookies.getJSON(H.CH).ga).to.equal(undefined);
   });
 
-  it('stores utm_* vars in a separate _chutm cookie', () => {
+  it('should store utm_* vars in a separate _chutm cookie', async () => {
     window.location.hash =
       '?utm_source=foo&utm_medium=bar&utm_term=baz&utm_content=foobar&utm_campaign=foobarbaz';
 
-    H.setConfig();
+    await H.setConfig();
 
     expect(Cookies.getJSON(H.UTM)).to.eql({
       utm_source: 'foo',
@@ -36,10 +36,10 @@ describe('UTM automatic handling', () => {
     });
   });
 
-  it('sends utm_* vars in the event payload', async () => {
+  it('should send utm_* vars in the event payload', async () => {
     H._fetchMock.post(`${H.API}/workspaces/${H.WSID}/events`, 200);
 
-    H.setConfig();
+    await H.setConfig();
 
     const utm: UTMCookie = {
       utm_source: 'foo',

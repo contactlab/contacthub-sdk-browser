@@ -1,24 +1,18 @@
-import {Err, patch, post} from '@contactlab/appy';
-import {withBody} from '@contactlab/appy/combinators/body';
-import {Decoder, withDecoder} from '@contactlab/appy/combinators/decoder';
-import {withHeaders} from '@contactlab/appy/combinators/headers';
-import * as E from 'fp-ts/Either';
-import {stringify} from 'fp-ts/Json';
-import * as RTE from 'fp-ts/ReaderTaskEither';
+import {Either, right, left} from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
-import {constant, constVoid, pipe} from 'fp-ts/function';
+import {constVoid, pipe} from 'fp-ts/function';
 import sha256 from 'jssha/dist/sha256';
 import {v4 as uuidv4} from 'uuid';
-import * as C from './cookie';
-import {Global} from './global';
-import {Runner} from './runner';
+import {CookieSvc} from './cookie';
+import {HttpSvc} from './http';
+import {Effect} from './program';
 
 type Nullable<A> = A | null;
 
-export interface CustomerEnv extends C.CookieSvc, Global, Runner {}
+export interface CustomerEnv extends HttpSvc, CookieSvc {}
 
 export interface Customer {
-  (options?: CustomerData): void;
+  (options?: CustomerData): Effect;
 }
 
 export interface CustomerData {
@@ -177,214 +171,178 @@ interface CustomerSubscription {
 }
 
 export const customer =
-  (Env: CustomerEnv): Customer =>
+  (E: CustomerEnv): Customer =>
   options => {
-    const op = !options ? resetCookie : prepareOperation(options);
+    const op = !options ? resetCookie : prepareEffect(options);
 
-    return Env.runAsync(op(Env));
+    return op(E);
   };
 
-const prepareOperation =
-  (data: CustomerData): Eff<CustomerEnv, void> =>
-  Env =>
+const prepareEffect =
+  (data: CustomerData) =>
+  (E: CustomerEnv): Effect =>
     pipe(
       TE.Do,
-      TE.apS('ctx', readCookie(Env)),
+      TE.apS('ctx', E.cookie.getHub()),
       TE.apS('hash', pipe(computeHash(data), TE.fromEither)),
       TE.chain(({ctx, hash}) => {
         if (ctx.hash === hash) {
           return TE.right(undefined);
         }
 
-        const result = operation(data.id, ctx.customerId);
+        const cid = data.id;
+        const cookieId = ctx.customerId;
+        const OEnv = {...E, data, hash};
+        const create = createCustomer(OEnv);
+        const update = updateCustomer(OEnv);
+        const reconcile = reconcileCustomer(OEnv);
+        const resolve = resolveIdConflict(OEnv);
 
-        return result({...Env, data, hash});
-      }),
-      TE.map(constVoid)
+        if (cid && cookieId) {
+          return pipe(
+            resolve(cid, cookieId),
+            TE.chain(() => update(cid))
+          );
+        }
+
+        if (cid) {
+          return pipe(
+            reconcile(cid),
+            TE.chain(() => update(cid))
+          );
+        }
+
+        if (cookieId) {
+          return update(cookieId);
+        }
+
+        return pipe(create, TE.chain(reconcile));
+      })
     );
-
-const operation = (cid?: string | null, cookieId?: string): Operation => {
-  if (cid && cookieId) {
-    return pipe(
-      resolveIdConflict(cid, cookieId),
-      RTE.chain(updateCustomer),
-      RTE.chain(store)
-    );
-  }
-
-  if (cid) {
-    return pipe(
-      reconcileCustomer(cid),
-      RTE.chain(updateCustomer),
-      RTE.chain(store)
-    );
-  }
-
-  if (cookieId) {
-    return pipe(updateCustomer(cookieId), RTE.chain(store));
-  }
-
-  return pipe(createCustomer, RTE.chain(store), RTE.chain(reconcileCustomer));
-};
 
 // --- Helpers
-interface Eff<R, A> extends RTE.ReaderTaskEither<R, Error, A> {}
-
-interface OperationEnv extends CustomerEnv {
+interface EffectEnv extends CustomerEnv {
   data: CustomerData;
   hash: string;
 }
 
-interface Operation extends Eff<OperationEnv, string> {}
-
 // TODO: could we do better?
-const computeHash = (data: CustomerData): E.Either<Error, string> => {
+const computeHash = (data: CustomerData): Either<Error, string> => {
   const {externalId, base, extended, consents, extra, tags} = data; // brrr....
 
-  return pipe(
-    stringify({externalId, base, extended, consents, extra, tags}),
-    E.bimap(
-      () => new Error('Customer data cannot be stringified'),
-      d => {
-        // eslint-disable-next-line new-cap
-        const shaObj = new sha256('SHA-256', 'TEXT');
-        shaObj.update(d);
-        return shaObj.getHash('HEX');
-      }
-    )
-  );
+  try {
+    const d = JSON.stringify({
+      externalId,
+      base,
+      extended,
+      consents,
+      extra,
+      tags
+    });
+    // eslint-disable-next-line new-cap
+    const shaObj = new sha256('SHA-256', 'TEXT');
+    shaObj.update(d);
+
+    return right(shaObj.getHash('HEX'));
+  } catch (e) {
+    return left(new Error('Customer data cannot be stringified'));
+  }
 };
 
-const readCookie = pipe(
-  RTE.ask<CustomerEnv>(),
-  RTE.chain(Env =>
-    RTE.fromIOEither(Env.cookie.get(Env.cookieName(), C.CHDecoder))
-  )
-);
-
-const writeCookie = <A>(x: A): Eff<CustomerEnv, void> =>
+const resetCookie = (E: CustomerEnv): Effect =>
   pipe(
-    RTE.ask<CustomerEnv>(),
-    RTE.chain(Env => RTE.fromIOEither(Env.cookie.set(Env.cookieName(), x)))
+    E.cookie.getHub(),
+    TE.chain(ctx =>
+      E.cookie.setHub({
+        ...ctx,
+        sid: uuidv4(),
+        customerId: undefined,
+        hash: undefined
+      })
+    )
   );
 
-const resetCookie: Eff<CustomerEnv, void> = pipe(
-  readCookie,
-  RTE.chain(ctx =>
-    writeCookie({
-      ...ctx,
-      sid: uuidv4(),
-      customerId: undefined,
-      hash: undefined
-    })
-  )
-);
-
-const createCustomer: Operation = Env =>
+const createCustomer = (E: EffectEnv): Effect<string> =>
   pipe(
-    readCookie(Env),
-    TE.chain(({token, workspaceId, nodeId}) => {
-      const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers`;
-      const req = pipe(
-        post,
-        withHeaders(stdHeaders(token)),
-        withBody({...Env.data, nodeId}),
-        withDecoder(CustomerDecoder),
-        RTE.bimap(toError, resp => resp.data.id)
-      );
+    E.cookie.getHub(),
+    TE.chain(({token, workspaceId, nodeId}) =>
+      E.http.post(
+        `/workspaces/${workspaceId}/customers`,
+        {...E.data, nodeId},
+        token
+      )
+    ),
+    TE.chain(u => {
+      const o = u as {id: string};
 
-      return req(endpoint);
-    })
+      return typeof o.id === 'string'
+        ? TE.right(o.id)
+        : TE.left(new Error('Customer id has to be a string'));
+    }),
+    TE.chainFirst(storeCustomer(E))
   );
 
 const updateCustomer =
-  (cid: string): Operation =>
-  Env =>
+  (E: EffectEnv) =>
+  (cid: string): Effect =>
     pipe(
-      readCookie(Env),
+      E.cookie.getHub(),
       TE.chain(({token, workspaceId}) => {
-        if (!shouldUpdate(Env.data)) {
-          return TE.right(cid);
+        if (!shouldUpdate(E.data)) {
+          return TE.right(undefined);
         }
 
-        const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers/${cid}`;
-        const req = pipe(
-          patch,
-          withHeaders(stdHeaders(token)),
-          withBody(Env.data),
-          RTE.bimap(toError, constant(cid))
+        return E.http.patch(
+          `/workspaces/${workspaceId}/customers/${cid}`,
+          E.data,
+          token
         );
-
-        return req(endpoint);
-      })
+      }),
+      TE.chain(() => storeCustomer(E)(cid))
     );
 
 const reconcileCustomer =
-  (cid: string): Operation =>
-  Env =>
+  (E: EffectEnv) =>
+  (cid: string): Effect =>
     pipe(
-      readCookie(Env),
-      TE.chain(({workspaceId, token, sid}) => {
-        const endpoint = `${Env.apiUrl()}/workspaces/${workspaceId}/customers/${cid}/sessions`;
-        const req = pipe(
-          post,
-          withHeaders(stdHeaders(token)),
-          withBody({value: sid}),
-          RTE.bimap(toError, constant(cid))
-        );
-
-        return req(endpoint);
-      })
+      E.cookie.getHub(),
+      TE.chain(({workspaceId, token, sid}) =>
+        E.http.post(
+          `/workspaces/${workspaceId}/customers/${cid}/sessions`,
+          {value: sid},
+          token
+        )
+      ),
+      TE.map(constVoid)
     );
 
-const resolveIdConflict = (cid: string, cookieId: string): Operation =>
-  pipe(
-    RTE.ask<OperationEnv>(),
-    RTE.chain(({data}) => {
-      if (cid === cookieId) {
-        return RTE.right(cid);
-      }
+const resolveIdConflict =
+  (E: EffectEnv) =>
+  (cid: string, cookieId: string): Effect => {
+    if (cid === cookieId) {
+      return TE.right(undefined);
+    }
 
-      // FIXME: tell me why...
-      if (!shouldUpdate(data)) {
-        return RTE.left(
-          new Error(
-            'The provided id conflicts with the id stored in the cookie'
-          )
-        );
-      }
-
-      return pipe(
-        resetCookie,
-        RTE.chain(() => reconcileCustomer(cid))
+    // FIXME: tell me why...
+    if (!shouldUpdate(E.data)) {
+      return TE.left(
+        new Error('The provided id conflicts with the id stored in the cookie')
       );
-    })
-  );
+    }
 
-const store =
-  (customerId: string): Operation =>
-  Env =>
-    pipe(
-      readCookie(Env),
-      TE.chain(ctx => writeCookie({...ctx, customerId, hash: Env.hash})(Env)),
-      TE.map(constant(customerId))
+    return pipe(
+      resetCookie(E),
+      TE.chain(() => reconcileCustomer(E)(cid))
     );
+  };
 
-const CustomerDecoder: Decoder<{id: string}> = u => {
-  const o = u as {id: string};
-
-  return typeof o.id === 'string'
-    ? E.right(o)
-    : E.left(new Error('Customer id has to be a string'));
-};
-
-const toError = (e: Err): Error => e.error;
-
-const stdHeaders = (token: string): Record<string, string> => ({
-  Accept: 'application/json',
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${token}`
-});
+const storeCustomer =
+  (E: EffectEnv) =>
+  (customerId: string): Effect =>
+    pipe(
+      E.cookie.getHub(),
+      TE.chain(ctx => E.cookie.setHub({...ctx, customerId, hash: E.hash}))
+    );
 
 // FIXME: do we REALLY need this???
 const shouldUpdate = (data: CustomerData): boolean => {

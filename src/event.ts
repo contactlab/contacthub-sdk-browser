@@ -1,16 +1,16 @@
-import {post} from '@contactlab/appy';
-import {withBody} from '@contactlab/appy/combinators/body';
-import {withHeaders} from '@contactlab/appy/combinators/headers';
-import * as IOE from 'fp-ts/IOEither';
-import * as RTE from 'fp-ts/ReaderTaskEither';
 import * as TE from 'fp-ts/TaskEither';
 import {constVoid, pipe} from 'fp-ts/function';
-import * as C from './cookie';
-import {Global} from './global';
-import {Location} from './location';
-import {Runner} from './runner';
+import {CookieSvc} from './cookie';
+import {DocumentSvc} from './doc';
+import {HttpSvc} from './http';
+import {LocationSvc} from './location';
+import {Effect} from './program';
 
-export interface EventEnv extends C.CookieSvc, Global, Location, Runner {}
+export interface EventEnv
+  extends HttpSvc,
+    CookieSvc,
+    LocationSvc,
+    DocumentSvc {}
 
 type EventProperties = Record<string, unknown>;
 
@@ -20,24 +20,23 @@ export interface EventOptions {
 }
 
 export interface Event {
-  (options: EventOptions): void;
+  (options: EventOptions): Effect;
 }
 
 export const event =
-  (Env: EventEnv): Event =>
+  (E: EventEnv): Event =>
   options =>
     pipe(
-      IOE.Do,
-      IOE.apS('opts', checkOptions(options)),
-      IOE.apS('cookie', Env.cookie.get(Env.cookieName(), C.CHDecoder)),
-      IOE.apS(
+      TE.Do,
+      TE.apS('opts', checkOptions(options)),
+      TE.apS('cookie', E.cookie.getHub()),
+      TE.apS(
         'utm',
         pipe(
-          Env.cookie.get(Env.utmCookieName(), C.UTMDecoder),
-          IOE.altW(() => IOE.right(undefined))
+          E.cookie.getUTM(),
+          TE.altW(() => TE.right(undefined))
         )
       ),
-      TE.fromIOEither,
       TE.chain(({cookie, opts, utm}) => {
         const {
           token,
@@ -49,22 +48,16 @@ export const event =
           sid
         } = cookie;
 
-        const properties = inferProperties(Env)(opts);
+        const properties = inferProperties(E)(opts);
         const tracking = typeof utm === 'undefined' ? utm : {ga: utm};
 
         const bringBackProperties = customerId
           ? undefined
           : {type: 'SESSION_ID', value: sid, nodeId};
 
-        const url = `${Env.apiUrl()}/workspaces/${workspaceId}/events`;
-        const req = pipe(
-          post,
-          withHeaders({
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }),
-          withBody({
+        return E.http.post(
+          `/workspaces/${workspaceId}/events`,
+          {
             type: opts.type,
             context,
             contextInfo,
@@ -72,35 +65,33 @@ export const event =
             tracking,
             customerId,
             bringBackProperties
-          }),
-          RTE.bimap(e => e.error, constVoid)
+          },
+          token
         );
-
-        return req(url);
       }),
-      Env.runAsync
+      TE.map(constVoid)
     );
 
 // --- Helpers
-const checkOptions = IOE.fromPredicate<Error, EventOptions>(
+const checkOptions = TE.fromPredicate<Error, EventOptions>(
   o => typeof o.type === 'string' && o.type.length > 0,
   () => new Error('Missing required event type')
 );
 
 const inferProperties =
-  (Env: EventEnv) =>
+  (E: EventEnv) =>
   ({type, properties}: EventOptions): EventProperties | undefined => {
     if (type !== 'viewedPage') {
       return properties;
     }
 
-    const {href, pathname} = Env.location();
+    const {href, pathname} = E.location.data();
 
     return {
-      title: Env.title(),
+      title: E.document.title(),
       url: href,
       path: pathname,
-      referer: Env.referrer(),
+      referer: E.document.referrer(),
 
       ...properties
     };

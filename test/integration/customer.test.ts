@@ -1,10 +1,10 @@
 import {expect} from 'chai';
-import cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 import * as H from './_helpers';
 
 describe('Customer API:', () => {
   beforeEach(() => {
-    cookies.remove(H.CH);
+    Cookies.remove(H.CH);
   });
 
   afterEach(() => {
@@ -18,6 +18,7 @@ describe('Customer API:', () => {
       expect(() => {
         H._ch('customer', H.CUSTOMER);
       }).not.to.throw();
+
       await H.whenDone();
 
       expect(
@@ -37,7 +38,7 @@ describe('Customer API:', () => {
         .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: H.CID})
         .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      H.setConfig();
+      await H.setConfig();
 
       H._ch('customer', H.CUSTOMER);
 
@@ -55,7 +56,7 @@ describe('Customer API:', () => {
       expect(createHeaders.Authorization).to.equal(`Bearer ${H.TOKEN}`);
 
       // --- from cookie
-      const {customerId, hash, sid} = cookies.getJSON(H.CH);
+      const {customerId, hash, sid} = Cookies.getJSON(H.CH);
 
       // --- store
       expect(customerId).to.equal(H.CID);
@@ -72,9 +73,9 @@ describe('Customer API:', () => {
         .patch(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}`, 200)
         .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      H.setConfig();
+      await H.setConfig();
 
-      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
+      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
 
       H._ch('customer', H.CUSTOMER);
 
@@ -107,9 +108,9 @@ describe('Customer API:', () => {
 
   describe('when a customerId is provided but no customer data', () => {
     it('should not not make any API call if the same customerId is in cookie', async () => {
-      H.setConfig();
+      await H.setConfig();
 
-      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
+      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
 
       H._ch('customer', {id: H.CID});
 
@@ -119,10 +120,10 @@ describe('Customer API:', () => {
     });
 
     it('should not make any API call if a different customerId is in cookie', async () => {
-      H.setConfig();
+      await H.setConfig();
 
-      cookies.set(H.CH, {
-        ...cookies.getJSON(H.CH),
+      Cookies.set(H.CH, {
+        ...Cookies.getJSON(H.CH),
         customerId: 'different-cid'
       });
 
@@ -137,16 +138,16 @@ describe('Customer API:', () => {
         200
       );
 
-      H.setConfig();
+      await H.setConfig();
 
-      const {sid} = cookies.getJSON(H.CH);
+      const {sid} = Cookies.getJSON(H.CH);
 
       H._ch('customer', {id: H.CID});
 
       await H.whenDone();
 
       // --- does not reset the sessionId
-      expect(cookies.getJSON(H.CH).sid).to.eql(sid);
+      expect(Cookies.getJSON(H.CH).sid).to.eql(sid);
 
       // --- reconciles the sessionId with the customerId
       const body = H._fetchMock.lastOptions()?.body as unknown as string;
@@ -166,9 +167,9 @@ describe('Customer API:', () => {
         200
       );
 
-      H.setConfig();
+      await H.setConfig();
 
-      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
+      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
 
       H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
@@ -186,20 +187,20 @@ describe('Customer API:', () => {
         .patch(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}`, 200)
         .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      H.setConfig();
+      await H.setConfig();
 
-      cookies.set(H.CH, {
-        ...cookies.getJSON(H.CH),
+      Cookies.set(H.CH, {
+        ...Cookies.getJSON(H.CH),
         customerId: 'different-cid'
       });
 
-      const {sid} = cookies.getJSON(H.CH);
+      const {sid} = Cookies.getJSON(H.CH);
 
       H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
       await H.whenDone();
 
-      const newSid = cookies.getJSON(H.CH).sid;
+      const newSid = Cookies.getJSON(H.CH).sid;
 
       const [reconcile, update] = H._fetchMock.calls();
 
@@ -225,15 +226,15 @@ describe('Customer API:', () => {
         .patch(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}`, 200)
         .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      H.setConfig();
+      await H.setConfig();
 
-      const {sid} = cookies.getJSON(H.CH);
+      const {sid} = Cookies.getJSON(H.CH);
 
       H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
       await H.whenDone();
 
-      const newSid = cookies.getJSON(H.CH).sid;
+      const newSid = Cookies.getJSON(H.CH).sid;
 
       const [reconcile, update] = H._fetchMock.calls();
 
@@ -257,10 +258,10 @@ describe('Customer API:', () => {
 
   describe('when no object is provided', () => {
     it('should remove user data from cookie and generate new session', async () => {
-      H.setConfig();
+      await H.setConfig();
 
-      cookies.set(H.CH, {
-        ...cookies.getJSON(H.CH),
+      Cookies.set(H.CH, {
+        ...Cookies.getJSON(H.CH),
         customerId: 'old-customer-id',
         sid: 'old-session-id'
       });
@@ -269,7 +270,7 @@ describe('Customer API:', () => {
 
       await H.whenDone();
 
-      const {customerId, sid} = cookies.getJSON(H.CH);
+      const {customerId, sid} = Cookies.getJSON(H.CH);
 
       const sidRgx =
         /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
@@ -284,10 +285,10 @@ describe('Customer API:', () => {
   describe('when id and customerId are provided', () => {
     const OTHER_CID = 'efgh';
 
-    beforeEach(() => {
-      H.setConfig();
+    beforeEach(async () => {
+      await H.setConfig();
 
-      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
+      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
     });
 
     it('should log errors if id != customerId and no other customer data provided', async () => {
@@ -345,8 +346,8 @@ describe('Customer API:', () => {
   describe('when customerId is NOT provided', () => {
     const OTHER_CID = 'efgh';
 
-    beforeEach(() => {
-      H.setConfig();
+    beforeEach(async () => {
+      await H.setConfig();
     });
 
     it('should log errors if sessions api respond with error', async () => {
@@ -396,9 +397,9 @@ describe('Customer API:', () => {
         .patch(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}`, 500)
         .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      H.setConfig();
+      await H.setConfig();
 
-      cookies.set(H.CH, {...cookies.getJSON(H.CH), customerId: H.CID});
+      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
 
       H._ch('customer', {externalId: 'ANOTHER_ID'});
 
@@ -414,8 +415,8 @@ describe('Customer API:', () => {
   });
 
   describe('when customerId and id are not provided', () => {
-    beforeEach(() => {
-      H.setConfig();
+    beforeEach(async () => {
+      await H.setConfig();
     });
 
     it('should log errors if customers api respond with error', async () => {

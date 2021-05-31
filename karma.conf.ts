@@ -95,15 +95,13 @@ export default function (config: Config): void {
     frameworks: ['mocha'],
 
     files: [
-      'test/integration/fetch.ts',
       'test/integration/setup.js',
-      'src/index.ts',
+      'test/integration/source.ts',
       'test/integration/index.ts'
     ],
 
     preprocessors: {
-      'test/integration/fetch.ts': ['webpack'],
-      'src/index.ts': ['webpack'],
+      'test/integration/source.ts': ['webpack'],
       'test/integration/index.ts': ['webpack']
     },
 

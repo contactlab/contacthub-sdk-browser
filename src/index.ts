@@ -1,14 +1,18 @@
+import {fetch} from 'cross-fetch';
+import {polyfill} from 'es6-promise';
 import {cookie} from './cookie';
-import {global} from './global';
+import {document} from './doc';
+import {http} from './http';
 import {location} from './location';
-import {logger} from './logger';
 import {main} from './main';
-import {runner} from './runner';
+import {program} from './program';
+
+polyfill();
 
 main({
-  window,
-  cookie,
-  ...global(window),
-  ...location(window),
-  ...runner({logger})
+  document: document(),
+  cookie: cookie(),
+  http: http(fetch),
+  location: location(),
+  program: program()
 });
