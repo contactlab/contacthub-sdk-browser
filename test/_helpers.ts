@@ -1,10 +1,20 @@
+interface WinMockEnv {
+  href: string;
+  title?: string;
+  referrer?: string;
+}
+
 /**
  * Mocks global Window object and return a function to reset the mock.
  */
-export const WIN_MOCK = (href: string): (() => void) => {
+export const WIN_MOCK = (E: WinMockEnv): (() => void) => {
   (global as any).window = {
+    document: {
+      title: E.title || '',
+      referrer: E.referrer || ''
+    },
     location: {
-      href,
+      href: E.href,
       pathname: 'some/path'
     }
   } as unknown as Window;

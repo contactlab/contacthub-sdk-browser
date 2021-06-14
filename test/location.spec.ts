@@ -6,7 +6,7 @@ afterEach(() => {
 });
 
 test('location.data() should return window.locatio object', () => {
-  const teardown = WIN_MOCK('http://test.com/some/path');
+  const teardown = WIN_MOCK({href: 'http://test.com/some/path'});
 
   expect(location().data()).toEqual({
     href: 'http://test.com/some/path',
@@ -17,9 +17,9 @@ test('location.data() should return window.locatio object', () => {
 });
 
 test('location.qp() should read query param from window href', () => {
-  const teardown = WIN_MOCK(
-    'http://test.com/some/path?foo=bar&baz=100&aaa=false'
-  );
+  const teardown = WIN_MOCK({
+    href: 'http://test.com/some/path?foo=bar&baz=100&aaa=false'
+  });
 
   expect(location().qp('baz')).toBe('100');
   expect(location().qp('bar')).toBe(undefined);
