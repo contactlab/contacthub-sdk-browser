@@ -4,7 +4,7 @@
 
 Browser SDK for the Contactlab Customer Hub API.
 
-The easiest way to send pageviews, events and customer information from your website to the [CUstomer Hub API](http://developer.contactlab.com/hub-swagger/).
+The easiest way to send pageviews, events and customer information from your website to the [Customer Hub API](http://developer.contactlab.com/hub-swagger/).
 
 ## How to use
 
@@ -20,11 +20,11 @@ Insert this snippet in your website (preferably in the `<HEAD>` section):
 <script async src="https://unpkg.com/@contactlab/sdk-browser/sdk.min.js"></script>
 ```
 
-Compressed and uncompressed copies of CUstomer Hub SDK files are available.
+Compressed and uncompressed copies of Customer Hub SDK files are available.
 The uncompressed file is best used during development or debugging; the compressed file saves bandwidth and improves performance in production.
 
-Use CDNs can offer a performance benefit by hosting CUstomer Hub SDK on servers spread across the globe.
-This also offers an advantage that if the visitor to your webpage has already downloaded a copy of CUstomer Hub SDK from the same CDN, it won't have to be re-downloaded.
+Use CDNs can offer a performance benefit by hosting Customer Hub SDK on servers spread across the globe.
+This also offers an advantage that if the visitor to your webpage has already downloaded a copy of Customer Hub SDK from the same CDN, it won't have to be re-downloaded.
 
 To load a hosted library, copy and paste the HTML snippet for that library (shown below) in your web page.
 
@@ -62,9 +62,9 @@ We recommend that you load libraries from the CDN via HTTPS, even if your own we
 
 ```js
 ch('config', {
-  workspaceId: 'w_id', // required, found in the CUstomer Hub admin area
-  nodeId: 'node_id', // required, found in the CUstomer Hub admin area
-  token: 'UYTF546FUTF636JH', // required, found in the CUstomer Hub admin area
+  workspaceId: 'w_id', // required, found in the Customer Hub admin area
+  nodeId: 'node_id', // required, found in the Customer Hub admin area
+  token: 'UYTF546FUTF636JH', // required, found in the Customer Hub admin area
   context: 'CTX', // optional, defaults to 'WEB'
   contextInfo: {}, // optional, defaults to an empty object,
 });
@@ -100,9 +100,9 @@ ch('customer', {
 });
 ```
 
-If you have defined a "matching policy" in your workspace (using the CUstomer Hub web interface), and the data you're providing matches the data of an existing customer, the existing customer will be updated instead.
+If you have defined a "matching policy" in your workspace (using the Customer Hub web interface), and the data you're providing matches the data of an existing customer, the existing customer will be updated instead.
 
-If you have defined required properties in your workspace (using the CUstomer Hub web interface), and they are not present in the javascript object, the call will fail.
+If you have defined required properties in your workspace (using the Customer Hub web interface), and they are not present in the javascript object, the call will fail.
 
 #### Resending identical data
 
@@ -114,7 +114,7 @@ You can also call this function the moment a user succesfully logs in, if the lo
 
 #### Updating the current user
 
-If a user adds some personal information to his/her profile, you don't need to send his full profile again, as the new data you send will be automatically merged with the data that is already available on the CUstomer Hub database.
+If a user adds some personal information to his/her profile, you don't need to send his full profile again, as the new data you send will be automatically merged with the data that is already available on the Customer Hub database.
 
 ```js
 // Add the mobile phone to the existing customer data
@@ -142,11 +142,11 @@ ch('customer', {
 });
 ```
 
-If you omit the property, or set it to `undefined`, CUstomer Hub will assume you want to keep the current value for that property.
+If you omit the property, or set it to `undefined`, Customer Hub will assume you want to keep the current value for that property.
 
 #### Logging out
 
-If a user logs out, you might want to stop linking events to his/her session. You can call `ch('customer')` without the second parameter and a new CUstomer Hub session id will be generated.
+If a user logs out, you might want to stop linking events to his/her session. You can call `ch('customer')` without the second parameter and a new Customer Hub session id will be generated.
 All the events from this point will be associated to the new session id and will not be linked to the previous user.
 
 ### The event API
@@ -163,16 +163,16 @@ ch('event', {
 Please note we will infer some standard properties automatically (`url`, `title`, `referrer`, `path`).
 If you want, you can override those in your custom `properties` object.
 
-Since v1.0.0 of this library, `utm_` tags from Google Analytics are also automatically detected from the query string, stored in the ContactHub cookie and attached automatically to all CUstomer Hub Events.
+Since v1.0.0 of this library, `utm_` tags from Google Analytics are also automatically detected from the query string, stored in the ContactHub cookie and attached automatically to all Customer Hub Events.
 
 ## Advanced usage
 
-#### Renaming the global CUstomer Hub object
+#### Renaming the global Customer Hub object
 
 This script will register a global variable in your `window` object called `ch`.
 This is similar for example to the `ga` global variable used by Google Analytics.
-If for any reason you already have a global variable called `ch` in your website, you can ask CUstomer Hub to use a different name.
-Simply add this line _before_ the standard CUstomer Hub snippet:
+If for any reason you already have a global variable called `ch` in your website, you can ask Customer Hub to use a different name.
+Simply add this line _before_ the standard Customer Hub snippet:
 
 ```js
 window.ContactHubObject = 'chub';
@@ -190,9 +190,9 @@ You also have to replace all occurrences of `ch` in the snippet:
 <script async src="https://unpkg.com/@contactlab/sdk-browser/sdk.min.js"></script>
 ```
 
-#### Renaming the CUstomer Hub cookie
+#### Renaming the Customer Hub cookie
 
-In the same way, you can set a custom name for the CUstomer Hub cookie using:
+In the same way, you can set a custom name for the Customer Hub cookie using:
 
 ```js
 window.ContactHubCookie = '__chub';
@@ -206,11 +206,11 @@ For testing or debugging purposes, you might want to use a different API server:
 window.ContactHubAPI = 'https://test-api/hub/v2';
 ```
 
-#### CUstomer Hub ID
+#### Customer Hub ID
 
-Every Customer is assigned an id in CUstomer Hub. In general, you don't have to think about it as the library will take care of it and avoid generating multiple IDs for the same Customer.
+Every Customer is assigned an id in Customer Hub. In general, you don't have to think about it as the library will take care of it and avoid generating multiple IDs for the same Customer.
 
-If you store CUstomer Hub ids on your database and you want to make sure that events sent via the library are associated to the same id, you can specify the ID when you use the `ch('customer', {...})` method:
+If you store Customer Hub ids on your database and you want to make sure that events sent via the library are associated to the same id, you can specify the ID when you use the `ch('customer', {...})` method:
 
 ```js
 ch('customer', {
@@ -221,7 +221,7 @@ ch('customer', {
 
 #### The clabId query parameter
 
-You can also send a CUstomer Hub id using the `clabId` parameter in the query string (`?clabId=A_VALID_CONTACTHUB_ID`). This is transformed by the library in the following call:
+You can also send a Customer Hub id using the `clabId` parameter in the query string (`?clabId=A_VALID_CONTACTHUB_ID`). This is transformed by the library in the following call:
 
 ```js
 ch('customer', {id: clabId});
@@ -229,7 +229,7 @@ ch('customer', {id: clabId});
 
 An example use case is if you send a newsletter to your customers and you want to make sure that if they reach your website from a link contained in the email, they are immediately recognised even if they are not logged in.
 
-Please note that if a different user is logged in, the CUstomer Hub id for the currently logged in user is stored in the CUstomer Hub cookie. The id contained in the CUstomer Hub cookie always takes precedence over an id specified using the
+Please note that if a different user is logged in, the Customer Hub id for the currently logged in user is stored in the Customer Hub cookie. The id contained in the Customer Hub cookie always takes precedence over an id specified using the
 `clabId` query string parameter.
 
 ## Contributing to this library
@@ -246,7 +246,7 @@ Please note that if a different user is logged in, the CUstomer Hub id for the c
 
 `npm test` will run all tests once using Chrome in headless mode.
 
-`BROWSERSTACK_USERNAME=<user> BROWSERSTACK_ACCESS_KEY=<key> npm run test:bs` will run tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.js`
+`BROWSERSTACK_USERNAME=<user> BROWSERSTACK_ACCESS_KEY=<key> npm run test:bs` will run tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.ts`
 
 ### How to open the example page in your browser
 
