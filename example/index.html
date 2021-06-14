@@ -13,7 +13,7 @@
     <script>
       window.ch =
         window.ch ||
-        function() {
+        function () {
           (ch.q = ch.q || []).push(arguments);
         };
       ch.l = +new Date();
@@ -25,7 +25,7 @@
       });
       ch('event', {type: 'viewedPage'});
     </script>
-    <script async src="../dist/contacthub.js"></script>
+    <script async src="../dist/sdk.js"></script>
   </head>
 
   <body>
@@ -33,11 +33,7 @@
 
     <script>
       function randomEmail() {
-        return (
-          Math.random()
-            .toString(36)
-            .substr(2, 8) + '@example.com'
-        );
+        return Math.random().toString(36).substr(2, 8) + '@example.com';
       }
 
       var initialEmail = randomEmail();

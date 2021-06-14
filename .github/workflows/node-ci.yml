@@ -3,30 +3,29 @@
 
 name: Node CI
 
-# --- Run pipeline only for "master" changes
+# --- Run pipeline only for "master" and "next" changes
 on:
   push:
-    branches: [ master ]
+    branches: [master, next]
   pull_request:
-    branches: [ master ]
+    branches: [master, next]
 
 jobs:
   test:
-    
     # --- Ubuntu agent
     runs-on: ubuntu-latest
 
     # --- Execute the job with different versions of Node
     strategy:
       matrix:
-        node-version: [8.x]
+        node-version: [14.x, 16.x]
 
     # --- Job tasks
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run build
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run build
