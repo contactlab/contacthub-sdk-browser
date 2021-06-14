@@ -6,7 +6,10 @@ const config: Config.InitialOptions = {
   automock: false,
   bail: true,
   collectCoverage: true,
-  coveragePathIgnorePatterns: ['<rootDir>/node_modules/'],
+  coveragePathIgnorePatterns: [
+    '<rootDir>/test/_helpers.ts',
+    '<rootDir>/node_modules/'
+  ],
   coverageReporters: ['text'],
   globals: {
     'ts-jest': {
