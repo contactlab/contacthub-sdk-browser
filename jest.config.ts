@@ -18,6 +18,7 @@ const config: Config.InitialOptions = {
   },
   moduleFileExtensions: ['js', 'json', 'node', 'ts'],
   roots: ['<rootDir>/test/'],
+  setupFiles: ['<rootDir>/test/_setup.ts'],
   testEnvironment: 'node',
   testMatch: undefined,
   testRegex: '(\\.|/)spec\\.ts$'

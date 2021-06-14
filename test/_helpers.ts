@@ -2,6 +2,7 @@ interface WinMockEnv {
   href: string;
   title?: string;
   referrer?: string;
+  ContactHubAPI?: string;
 }
 
 /**
@@ -9,6 +10,7 @@ interface WinMockEnv {
  */
 export const WIN_MOCK = (E: WinMockEnv): (() => void) => {
   (global as any).window = {
+    ContactHubAPI: E.ContactHubAPI,
     document: {
       title: E.title || '',
       referrer: E.referrer || ''
