@@ -3,12 +3,12 @@
 
 name: Node CI
 
-# --- Run pipeline only for "master" changes
+# --- Run pipeline only for "master" and "next" changes
 on:
   push:
-    branches: [master]
+    branches: [master, next]
   pull_request:
-    branches: [master]
+    branches: [master, next]
 
 jobs:
   test:
