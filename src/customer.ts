@@ -173,7 +173,8 @@ interface CustomerSubscription {
 export const customer =
   (E: CustomerEnv): Customer =>
   options => {
-    const op = !options ? resetCookie : prepareEffect(options);
+    const op =
+      typeof options === 'undefined' ? resetCookie : prepareEffect(options);
 
     return op(E);
   };

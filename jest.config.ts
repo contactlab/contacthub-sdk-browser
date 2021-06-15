@@ -8,6 +8,7 @@ const config: Config.InitialOptions = {
   collectCoverage: true,
   coveragePathIgnorePatterns: [
     '<rootDir>/test/_helpers.ts',
+    '<rootDir>/test/services/',
     '<rootDir>/node_modules/'
   ],
   coverageReporters: ['text'],

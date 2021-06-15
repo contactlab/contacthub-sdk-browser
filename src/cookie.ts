@@ -18,7 +18,7 @@ export interface CookieSvc {
   cookie: Cookie;
 }
 
-interface Cookie {
+export interface Cookie {
   /**
    * Gets the Hub cookie.
    */
