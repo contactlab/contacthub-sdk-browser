@@ -5,14 +5,16 @@ import {event} from '../src/event';
 import * as H from './_helpers';
 import * as S from './services';
 
-test('event() should send an event to API', async () => {
-  const _HTTP = S.HTTP({});
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
+test('event() should send an event to API', async () => {
   const e = event({
     location: S.LOCATION(),
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right(HUB_COOKIE),
+      hub: TE.right(S.HUB_COOKIE_CID),
       utm: TE.left(new Error())
     }),
     document: S.DOC({})
@@ -28,7 +30,7 @@ test('event() should send an event to API', async () => {
     `/workspaces/${H.WSID}/events`,
     {
       type: 'completedOrder',
-      context: '',
+      context: 'WEB',
       contextInfo: {},
       properties: {orderId: '1234'},
       tracking: undefined,
@@ -40,14 +42,11 @@ test('event() should send an event to API', async () => {
 });
 
 test('event() should send an event to API - with tracking', async () => {
-  const _HTTP = S.HTTP({});
-
   const e = event({
     location: S.LOCATION(),
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right(HUB_COOKIE),
-      utm: TE.right({utm_source: 'abc', utm_medium: 'web'})
+      hub: TE.right(S.HUB_COOKIE_CID)
     }),
     document: S.DOC({})
   });
@@ -62,10 +61,10 @@ test('event() should send an event to API - with tracking', async () => {
     `/workspaces/${H.WSID}/events`,
     {
       type: 'completedOrder',
-      context: '',
+      context: 'WEB',
       contextInfo: {},
       properties: {orderId: '1234'},
-      tracking: {ga: {utm_source: 'abc', utm_medium: 'web'}},
+      tracking: {ga: {utm_source: 'abcd', utm_medium: 'web'}},
       customerId: H.CID,
       bringBackProperties: undefined
     },
@@ -74,13 +73,10 @@ test('event() should send an event to API - with tracking', async () => {
 });
 
 test('event() should send an event to API - with bringBackProperties', async () => {
-  const _HTTP = S.HTTP({});
-
   const e = event({
     location: S.LOCATION(),
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right(HUB_COOKIE_NO_CID),
       utm: TE.left(new Error())
     }),
     document: S.DOC({})
@@ -96,14 +92,14 @@ test('event() should send an event to API - with bringBackProperties', async () 
     `/workspaces/${H.WSID}/events`,
     {
       type: 'completedOrder',
-      context: '',
+      context: 'WEB',
       contextInfo: {},
       properties: {orderId: '1234'},
       tracking: undefined,
       customerId: undefined,
       bringBackProperties: {
         type: 'SESSION_ID',
-        value: S.UUID_STR,
+        value: S.HUB_COOKIE.sid,
         nodeId: H.NID
       }
     },
@@ -112,13 +108,11 @@ test('event() should send an event to API - with bringBackProperties', async () 
 });
 
 test('event() should send an event to API - with inferred properties', async () => {
-  const _HTTP = S.HTTP({});
-
   const e = event({
     location: S.LOCATION(),
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right(HUB_COOKIE),
+      hub: TE.right(S.HUB_COOKIE_CID),
       utm: TE.left(new Error())
     }),
     document: S.DOC({})
@@ -134,7 +128,7 @@ test('event() should send an event to API - with inferred properties', async () 
     `/workspaces/${H.WSID}/events`,
     {
       type: 'viewedPage',
-      context: '',
+      context: 'WEB',
       contextInfo: {},
       properties: {
         title: 'Some title',
@@ -152,8 +146,6 @@ test('event() should send an event to API - with inferred properties', async () 
 });
 
 test('event() should fail if options are not valid', async () => {
-  const _HTTP = S.HTTP({});
-
   const e = event({
     location: S.LOCATION(),
     http: _HTTP,
@@ -181,8 +173,6 @@ test('event() should fail if options are not valid', async () => {
 });
 
 test('event() should fail if Hub cookie does not exists', async () => {
-  const _HTTP = S.HTTP({});
-
   const e = event({
     location: S.LOCATION(),
     http: _HTTP,
@@ -205,11 +195,11 @@ test('event() should fail if Hub cookie does not exists', async () => {
 });
 
 test('event() should fail if service fails', async () => {
-  const _HTTP = S.HTTP({post: TE.left(new Error('network error'))});
+  const HTTP_FAIL = S.HTTP({post: TE.left(new Error('network error'))});
 
   const e = event({
     location: S.LOCATION(),
-    http: _HTTP,
+    http: HTTP_FAIL,
     cookie: S.COOKIE({
       hub: TE.right(HUB_COOKIE),
       utm: TE.left(new Error())
@@ -226,6 +216,8 @@ test('event() should fail if service fails', async () => {
 });
 
 // --- Helpers
+const _HTTP = S.HTTP({});
+
 const HUB_COOKIE_NO_CID: HubCookie = {
   token: H.TOKEN,
   workspaceId: H.WSID,

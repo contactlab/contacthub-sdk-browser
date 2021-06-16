@@ -1,17 +1,9 @@
-import {ConfigOptions} from '../src/config';
-
 export const CH = '_ch';
 export const UTM = '_chutm';
-// export const API = 'https://api.contactlab.it/hub/v1';
-export const WSID = 'workspace_id';
-export const NID = 'node_id';
-export const TOKEN = 'ABC123';
-export const CID = 'abcd';
-export const CONFIG: ConfigOptions = {
-  workspaceId: WSID,
-  nodeId: NID,
-  token: TOKEN
-};
+export const WSID = 'wsid';
+export const NID = 'nid';
+export const TOKEN = 'TOKEN';
+export const CID = 'abcd1234';
 
 interface WinMockEnv {
   href: string;
@@ -43,6 +35,9 @@ export const WIN_MOCK = (E: WinMockEnv): (() => void) => {
   return () => delete (global as any).window;
 };
 
+/**
+ * Waits for async command execution.
+ */
 export const wait = (): Promise<void> =>
   new Promise(resolve => {
     setTimeout(() => resolve(undefined), 2);

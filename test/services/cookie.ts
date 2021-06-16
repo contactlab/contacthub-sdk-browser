@@ -27,8 +27,10 @@ export const HUB_COOKIE: HubCookie = {
   debug: false,
   context: 'WEB',
   contextInfo: {},
-  sid: 'ABCD-1234'
+  sid: '5ed6cae6-e956-4da1-9b06-c971887ed756'
 };
+
+export const HUB_COOKIE_CID: HubCookie = {...HUB_COOKIE, customerId: H.CID};
 
 export const UTM_COOKIE: UTMCookie = {
   utm_source: 'abcd',

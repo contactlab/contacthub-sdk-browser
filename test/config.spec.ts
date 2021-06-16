@@ -9,11 +9,12 @@ afterEach(() => {
 });
 
 test('config() should set SDK configuration - with defaults', async () => {
-  const _HTTP = S.HTTP({});
-
   const c = config({
     location: S.LOCATION(),
-    cookie: S.COOKIE({hub: TE.left(new Error()), utm: TE.left(new Error())}),
+    cookie: S.COOKIE({
+      hub: TE.left(new Error()),
+      utm: TE.left(new Error())
+    }),
     http: _HTTP,
     uuid: S.UUID
   });
@@ -43,28 +44,15 @@ test('config() should set SDK configuration - with defaults', async () => {
 });
 
 test('config() should set SDK configuration - with cookies values', async () => {
-  const _HTTP = S.HTTP({});
-
   const c = config({
     location: S.LOCATION(),
-    cookie: S.COOKIE({
-      hub: TE.right({
-        token: 'DEF456',
-        workspaceId: H.WSID,
-        nodeId: H.NID,
-        sid: S.UUID_STR,
-        context: 'OTHER',
-        contextInfo: {},
-        debug: false
-      }),
-      utm: TE.right({utm_source: 'abc', utm_medium: 'web'})
-    }),
+    cookie: S.COOKIE({}),
     http: _HTTP,
     uuid: S.UUID
   });
 
   const OPTIONS: ConfigOptions = {
-    token: H.TOKEN,
+    token: 'OTHER_TOKEN',
     workspaceId: H.WSID,
     nodeId: H.NID,
     context: 'AAA',
@@ -86,7 +74,7 @@ test('config() should set SDK configuration - with cookies values', async () => 
     {expires: 365}
   );
   expect(S.SET_UTM_COOKIE).toBeCalledWith(
-    {utm_source: 'abc', utm_medium: 'web'},
+    {utm_source: 'abcd', utm_medium: 'web'},
     {expires: 1 / 48}
   );
   expect(_HTTP.post).not.toBeCalled();
@@ -94,8 +82,6 @@ test('config() should set SDK configuration - with cookies values', async () => 
 });
 
 test('config() should fail if provided options are not valid', async () => {
-  const _HTTP = S.HTTP({});
-
   const c = config({
     location: S.LOCATION(),
     cookie: S.COOKIE({hub: TE.left(new Error()), utm: TE.left(new Error())}),
@@ -113,15 +99,12 @@ test('config() should fail if provided options are not valid', async () => {
 });
 
 test('config() should use utm_* query params to set UTM cookie', async () => {
-  const _HTTP = S.HTTP({});
-
   const c = config({
     location: S.LOCATION(
       'http://test.com?utm_source=def&utm_campaign=foo&utm_term=bar'
     ),
     cookie: S.COOKIE({
-      hub: TE.left(new Error()),
-      utm: TE.right({utm_source: 'abc', utm_medium: 'web'})
+      hub: TE.left(new Error())
     }),
     http: _HTTP,
     uuid: S.UUID
@@ -147,8 +130,6 @@ test('config() should use utm_* query params to set UTM cookie', async () => {
 });
 
 test('config() should fail is service fails', async () => {
-  const _HTTP = S.HTTP({});
-
   const c = config({
     location: S.LOCATION(),
     cookie: S.COOKIE_SET_KO({
@@ -172,22 +153,9 @@ test('config() should fail is service fails', async () => {
 });
 
 test('config() should set customer if there is a clabId param in query string', async () => {
-  const _HTTP = S.HTTP({});
-
   const c = config({
     location: S.LOCATION('http://test.com?clabId=abcdef123456'),
-    cookie: S.COOKIE({
-      hub: TE.right({
-        token: H.TOKEN,
-        workspaceId: H.WSID,
-        nodeId: H.NID,
-        sid: S.UUID_STR,
-        context: 'WEB',
-        contextInfo: {},
-        debug: false
-      }),
-      utm: TE.left(new Error())
-    }),
+    cookie: S.COOKIE({}),
     http: _HTTP,
     uuid: S.UUID
   });
@@ -201,25 +169,13 @@ test('config() should set customer if there is a clabId param in query string', 
   const result = await c(OPTIONS)();
   expect(result).toEqual(right(undefined));
   expect(S.SET_HUB_COOKIE).toBeCalledTimes(2);
-  expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(
-    1,
-    {
-      ...OPTIONS,
-      sid: S.UUID_STR,
-      context: 'WEB',
-      contextInfo: {},
-      debug: false
-    },
-    {expires: 365}
-  );
+  expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(1, S.HUB_COOKIE, {
+    expires: 365
+  });
   expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(
     2,
     {
-      ...OPTIONS,
-      sid: S.UUID_STR,
-      context: 'WEB',
-      contextInfo: {},
-      debug: false,
+      ...S.HUB_COOKIE,
       customerId: 'abcdef123456',
       hash: '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a'
     },
@@ -227,8 +183,11 @@ test('config() should set customer if there is a clabId param in query string', 
   );
   expect(_HTTP.post).toBeCalledTimes(1); // <-- customer `shouldUpdate` return false;
   expect(_HTTP.post).toBeCalledWith(
-    '/workspaces/workspace_id/customers/abcdef123456/sessions',
-    {value: '4ed6cae6-e956-4da1-9b06-c971887ed756'},
-    'ABC123'
+    `/workspaces/${H.WSID}/customers/abcdef123456/sessions`,
+    {value: S.HUB_COOKIE.sid},
+    H.TOKEN
   );
 });
+
+// --- Helpers
+const _HTTP = S.HTTP({});

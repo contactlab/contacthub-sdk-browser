@@ -23,12 +23,7 @@ test('customer() should reset Hub cookie when called without options', async () 
   expect(_HTTP.patch).not.toBeCalled();
   expect(S.SET_HUB_COOKIE).toBeCalledWith(
     {
-      token: H.TOKEN,
-      workspaceId: H.WSID,
-      nodeId: H.NID,
-      debug: false,
-      context: 'WEB',
-      contextInfo: {},
+      ...S.HUB_COOKIE,
       sid: S.UUID_STR,
       customerId: undefined,
       hash: undefined
@@ -50,19 +45,13 @@ test('customer() should reconcile and update when customer id is provided but is
   expect(_HTTP.post).toBeCalledTimes(1); // <-- `shouldUpdate` is false because;
   expect(_HTTP.post).toBeCalledWith(
     `/workspaces/${H.WSID}/customers/abcd1234/sessions`,
-    {value: 'ABCD-1234'},
+    {value: S.HUB_COOKIE.sid},
     H.TOKEN
   );
   expect(_HTTP.patch).not.toBeCalled();
   expect(S.SET_HUB_COOKIE).toBeCalledWith(
     {
-      token: H.TOKEN,
-      workspaceId: H.WSID,
-      nodeId: H.NID,
-      debug: false,
-      context: 'WEB',
-      contextInfo: {},
-      sid: 'ABCD-1234',
+      ...S.HUB_COOKIE,
       customerId: 'abcd1234',
       hash: '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a'
     },
@@ -74,7 +63,7 @@ test('customer() should update when customer id is in cookie', async () => {
   const c = customer({
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right({...S.HUB_COOKIE, customerId: 'abcd1234'})
+      hub: TE.right(S.HUB_COOKIE_CID)
     }),
     uuid: S.UUID
   });
@@ -85,14 +74,13 @@ test('customer() should update when customer id is in cookie', async () => {
   expect(_HTTP.post).not.toBeCalled();
   expect(_HTTP.patch).toBeCalledTimes(1);
   expect(_HTTP.patch).toBeCalledWith(
-    `/workspaces/${H.WSID}/customers/abcd1234`,
+    `/workspaces/${H.WSID}/customers/${H.CID}`,
     {base: {firstName: 'Foo', lastName: 'Bar'}},
     H.TOKEN
   );
   expect(S.SET_HUB_COOKIE).toBeCalledWith(
     {
-      ...S.HUB_COOKIE,
-      customerId: 'abcd1234',
+      ...S.HUB_COOKIE_CID,
       hash: 'e7489d96d261f13e4caaf12ac7145bf4d86ac81136af76532877a91e4f8b58a0'
     },
     undefined
@@ -103,7 +91,7 @@ test('customer() should resolve and update when customer id is provided and is i
   const c = customer({
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right({...S.HUB_COOKIE, customerId: 'abcd1234'})
+      hub: TE.right(S.HUB_COOKIE_CID)
     }),
     uuid: S.UUID
   });
@@ -150,7 +138,7 @@ test('customer() should only update when customer id is provided and is in cooki
   const c = customer({
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right({...S.HUB_COOKIE, customerId: 'abcd1234'})
+      hub: TE.right(S.HUB_COOKIE_CID)
     }),
     uuid: S.UUID
   });
@@ -164,15 +152,14 @@ test('customer() should only update when customer id is provided and is in cooki
   expect(_HTTP.post).not.toBeCalled();
   expect(_HTTP.patch).toBeCalledTimes(1);
   expect(_HTTP.patch).toBeCalledWith(
-    `/workspaces/${H.WSID}/customers/abcd1234`,
+    `/workspaces/${H.WSID}/customers/${H.CID}`,
     {id: 'abcd1234', base: {firstName: 'Foo', lastName: 'Bar'}},
     H.TOKEN
   );
   expect(S.SET_HUB_COOKIE).toBeCalledTimes(1);
   expect(S.SET_HUB_COOKIE).toBeCalledWith(
     {
-      ...S.HUB_COOKIE,
-      customerId: 'abcd1234',
+      ...S.HUB_COOKIE_CID,
       hash: 'e7489d96d261f13e4caaf12ac7145bf4d86ac81136af76532877a91e4f8b58a0'
     },
     undefined
@@ -218,7 +205,7 @@ test('customer() should create and reconcile when no customer id is provided or 
   );
   expect(HTTP_CREATE.post).toBeCalledWith(
     `/workspaces/${H.WSID}/customers/abcd1234/sessions`,
-    {value: 'ABCD-1234'},
+    {value: S.HUB_COOKIE.sid},
     H.TOKEN
   );
 });
@@ -228,8 +215,7 @@ test('customer() should do nothing if data are the same', async () => {
     http: _HTTP,
     cookie: S.COOKIE({
       hub: TE.right({
-        ...S.HUB_COOKIE,
-        customerId: 'abcd1234',
+        ...S.HUB_COOKIE_CID,
         hash: 'e7489d96d261f13e4caaf12ac7145bf4d86ac81136af76532877a91e4f8b58a0'
       })
     }),
@@ -337,7 +323,7 @@ test('customer() should fail when customer id conflict cannot be resolved', asyn
   const c = customer({
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right({...S.HUB_COOKIE, customerId: 'abcd1234'})
+      hub: TE.right(S.HUB_COOKIE_CID)
     }),
     uuid: S.UUID
   });
