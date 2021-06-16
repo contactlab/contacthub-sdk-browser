@@ -27,8 +27,8 @@
     "check": "tsc",
     "karma": "karma start",
     "pretest": "npm run check && npm run lint",
-    "test": "jest && karma start",
-    "test:bs": "BS=true npm run karma",
+    "test": "jest && npm run karma",
+    "test:bs": "jest && BS=true npm run karma",
     "prebuild": "npm run test",
     "build": "webpack",
     "example": "open-cli 'http://127.0.0.1:8080/example/?workspaceId=WORKSPACE_ID&nodeId=NODE_ID&token=TOKEN' && http-server"
