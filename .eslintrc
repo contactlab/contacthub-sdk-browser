@@ -2,7 +2,13 @@
   "extends": ["contactlab/typescript", "prettier"],
   "rules": {
     "camelcase": 0,
-    "no-underscore-dangle": 0
+    "no-underscore-dangle": 0,
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ]
   },
   "overrides": [
     // Disable typescript rules for tests and js files

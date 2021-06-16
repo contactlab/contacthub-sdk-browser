@@ -212,16 +212,20 @@ test('config() should set customer if there is a clabId param in query string', 
     },
     {expires: 365}
   );
-  expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(2, {
-    ...OPTIONS,
-    sid: S.UUID_STR,
-    context: 'WEB',
-    contextInfo: {},
-    debug: false,
-    customerId: 'abcdef123456',
-    hash: '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a'
-  });
-  expect(_HTTP.post).toBeCalledTimes(1); // <-- custom `shouldUpdate` return false;
+  expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(
+    2,
+    {
+      ...OPTIONS,
+      sid: S.UUID_STR,
+      context: 'WEB',
+      contextInfo: {},
+      debug: false,
+      customerId: 'abcdef123456',
+      hash: '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a'
+    },
+    undefined
+  );
+  expect(_HTTP.post).toBeCalledTimes(1); // <-- customer `shouldUpdate` return false;
   expect(_HTTP.post).toBeCalledWith(
     '/workspaces/workspace_id/customers/abcdef123456/sessions',
     {value: '4ed6cae6-e956-4da1-9b06-c971887ed756'},

@@ -1,19 +1,26 @@
 import {orElse, left, right, TaskEither} from 'fp-ts/TaskEither';
-import {pipe} from 'fp-ts/function';
+import {constVoid, pipe} from 'fp-ts/function';
 import {Cookie, HubCookie, UTMCookie} from '../../src/cookie';
 import * as H from '../_helpers';
 
-export const SET_HUB_COOKIE = jest.fn(() => right(undefined));
-export const SET_HUB_COOKIE_KO = jest.fn(() =>
+type MockedSetHub = jest.MockedFunction<Cookie['setHub']>;
+type MockedSetUTM = jest.MockedFunction<Cookie['setUTM']>;
+
+export const SET_HUB_COOKIE: MockedSetHub = jest.fn((_v, _o) =>
+  right(constVoid())
+);
+export const SET_HUB_COOKIE_KO: MockedSetHub = jest.fn((_v, _o) =>
   left(new Error('Cookie "_ch" cannot be set'))
 );
 
-export const SET_UTM_COOKIE = jest.fn(() => right(undefined));
-export const SET_UTM_COOKIE_KO = jest.fn(() =>
+export const SET_UTM_COOKIE: MockedSetUTM = jest.fn((_v, _o) =>
+  right(constVoid())
+);
+export const SET_UTM_COOKIE_KO: MockedSetUTM = jest.fn((_v, _o) =>
   left(new Error('Cookie "_chutm" cannot be set'))
 );
 
-const HUB_COOKIE: HubCookie = {
+export const HUB_COOKIE: HubCookie = {
   token: H.TOKEN,
   workspaceId: H.WSID,
   nodeId: H.NID,
@@ -23,7 +30,7 @@ const HUB_COOKIE: HubCookie = {
   sid: 'ABCD-1234'
 };
 
-const UTM_COOKIE: UTMCookie = {
+export const UTM_COOKIE: UTMCookie = {
   utm_source: 'abcd',
   utm_medium: 'web'
 };
@@ -36,23 +43,36 @@ interface CookieProps {
 export const COOKIE = ({
   hub = right(HUB_COOKIE),
   utm = right(UTM_COOKIE)
-}: CookieProps): Cookie => ({
-  getHub: f =>
-    pipe(
-      hub,
-      orElse(e => (typeof f === 'undefined' ? left(e) : right(f)))
-    ),
+}: CookieProps): Cookie => {
+  let _hub = hub;
+  let _utm = utm;
 
-  setHub: SET_HUB_COOKIE,
+  return {
+    getHub: f =>
+      pipe(
+        _hub,
+        orElse(e => (typeof f === 'undefined' ? left(e) : right(f)))
+      ),
 
-  getUTM: f =>
-    pipe(
-      utm,
-      orElse(e => (typeof f === 'undefined' ? left(e) : right(f)))
-    ),
+    setHub: (v, o) =>
+      pipe(SET_HUB_COOKIE(v, o), x => {
+        _hub = right(v);
+        return x;
+      }),
 
-  setUTM: SET_UTM_COOKIE
-});
+    getUTM: f =>
+      pipe(
+        _utm,
+        orElse(e => (typeof f === 'undefined' ? left(e) : right(f)))
+      ),
+
+    setUTM: (v, o) =>
+      pipe(SET_UTM_COOKIE(v, o), x => {
+        _utm = right(v);
+        return x;
+      })
+  };
+};
 
 export const COOKIE_SET_KO = ({
   hub = right(HUB_COOKIE),
