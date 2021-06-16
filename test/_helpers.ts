@@ -42,3 +42,8 @@ export const WIN_MOCK = (E: WinMockEnv): (() => void) => {
 
   return () => delete (global as any).window;
 };
+
+export const wait = (): Promise<void> =>
+  new Promise(resolve => {
+    setTimeout(() => resolve(undefined), 2);
+  });
