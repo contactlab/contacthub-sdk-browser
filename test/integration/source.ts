@@ -6,6 +6,7 @@ import {http} from '../../src/http';
 import {location} from '../../src/location';
 import {main} from '../../src/main';
 import {program} from '../../src/program';
+import {uuid} from '../../src/uuid';
 
 polyfill();
 
@@ -20,5 +21,6 @@ main({
   cookie: cookie(),
   http: http(sb),
   location: location(),
-  program: program()
+  program: program(),
+  uuid: uuid()
 });

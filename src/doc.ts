@@ -4,7 +4,7 @@ export interface DocumentSvc {
   document: Document;
 }
 
-interface Document {
+export interface Document {
   title: IO<string>;
   referrer: IO<string>;
 }

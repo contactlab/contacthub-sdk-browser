@@ -2,14 +2,14 @@ import {Either, right, left} from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import {constVoid, pipe} from 'fp-ts/function';
 import sha256 from 'jssha/dist/sha256';
-import {v4 as uuidv4} from 'uuid';
 import {CookieSvc} from './cookie';
 import {HttpSvc} from './http';
 import {Effect} from './program';
+import {UuisSvc} from './uuid';
 
 type Nullable<A> = A | null;
 
-export interface CustomerEnv extends HttpSvc, CookieSvc {}
+export interface CustomerEnv extends HttpSvc, CookieSvc, UuisSvc {}
 
 export interface Customer {
   (options?: CustomerData): Effect;
@@ -173,7 +173,8 @@ interface CustomerSubscription {
 export const customer =
   (E: CustomerEnv): Customer =>
   options => {
-    const op = !options ? resetCookie : prepareEffect(options);
+    const op =
+      typeof options === 'undefined' ? resetCookie : prepareEffect(options);
 
     return op(E);
   };
@@ -255,7 +256,7 @@ const resetCookie = (E: CustomerEnv): Effect =>
     TE.chain(ctx =>
       E.cookie.setHub({
         ...ctx,
-        sid: uuidv4(),
+        sid: E.uuid.v4(),
         customerId: undefined,
         hash: undefined
       })

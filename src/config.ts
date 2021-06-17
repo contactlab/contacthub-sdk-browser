@@ -1,14 +1,13 @@
-import * as IO from 'fp-ts/IO';
 import * as TE from 'fp-ts/TaskEither';
 import {Endomorphism, pipe} from 'fp-ts/function';
-import {v4 as uuidv4} from 'uuid';
 import * as C from './cookie';
 import {customer} from './customer';
 import {HttpSvc} from './http';
 import {LocationSvc} from './location';
 import {Effect} from './program';
+import {UuisSvc} from './uuid';
 
-export interface ConfigEnv extends HttpSvc, C.CookieSvc, LocationSvc {}
+export interface ConfigEnv extends HttpSvc, C.CookieSvc, LocationSvc, UuisSvc {}
 
 export interface Config {
   (options: ConfigOptions): Effect;
@@ -23,20 +22,20 @@ export interface ConfigOptions {
   debug?: boolean;
 }
 
-const newSessionId: IO.IO<string> = () => uuidv4();
-
 export const config =
   (E: ConfigEnv): Config =>
   options =>
     pipe(
       checkOptions(options),
-      TE.chain(opts =>
-        pipe(
-          E.cookie.getHub(withDefaults(opts)),
-          TE.map(prepareCHCookie(opts)),
+      TE.chain(opts => {
+        const OE = {...E, options: opts};
+
+        return pipe(
+          E.cookie.getHub(withDefaults(OE)),
+          TE.map(prepareCHCookie(OE)),
           TE.chain(_ch => E.cookie.setHub(_ch, {expires: 365}))
-        )
-      ),
+        );
+      }),
       TE.chain(() =>
         pipe(
           E.cookie.getUTM({}),
@@ -59,27 +58,31 @@ const checkOptions = TE.fromPredicate<Error, ConfigOptions>(
   () => new Error('Invalid ContactHub configuration')
 );
 
-const withDefaults = (o: ConfigOptions): C.HubCookie => ({
-  ...o,
-  sid: newSessionId(),
-  debug: o.debug || false,
-  context: o.context || 'WEB',
-  contextInfo: o.contextInfo || {}
+interface WithOptionsEnv extends ConfigEnv {
+  options: ConfigOptions;
+}
+
+const withDefaults = (E: WithOptionsEnv): C.HubCookie => ({
+  ...E.options,
+  sid: E.uuid.v4(),
+  debug: E.options.debug || false,
+  context: E.options.context || 'WEB',
+  contextInfo: E.options.contextInfo || {}
 });
 
 const prepareCHCookie =
-  (o: ConfigOptions): Endomorphism<C.HubCookie> =>
+  (E: WithOptionsEnv): Endomorphism<C.HubCookie> =>
   ch => {
     // check if the auth token has changed
-    const _ch = o.token === ch.token ? ch : ({} as C.HubCookie);
+    const _ch = E.options.token === ch.token ? ch : ({} as C.HubCookie);
 
-    _ch.sid = _ch.sid || newSessionId();
-    _ch.token = o.token ?? ch.token;
-    _ch.workspaceId = o.workspaceId ?? ch.workspaceId;
-    _ch.nodeId = o.nodeId ?? ch.nodeId;
-    _ch.context = o.context ?? ch.context;
-    _ch.contextInfo = o.contextInfo ?? ch.contextInfo;
-    _ch.debug = o.debug ?? ch.debug;
+    _ch.sid = _ch.sid || E.uuid.v4();
+    _ch.token = E.options.token;
+    _ch.workspaceId = E.options.workspaceId;
+    _ch.nodeId = E.options.nodeId;
+    _ch.context = E.options.context ?? ch.context;
+    _ch.contextInfo = E.options.contextInfo ?? ch.contextInfo;
+    _ch.debug = E.options.debug ?? ch.debug;
 
     return _ch;
   };

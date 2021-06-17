@@ -244,9 +244,9 @@ Please note that if a different user is logged in, the Customer Hub id for the c
 
 ### How to run tests
 
-`npm test` will run all tests once using Chrome in headless mode.
+`npm test` will run all unit tests (with [`Jest`](https://jestjs.io/)) and all integration tests once using Chrome in headless mode (with [`Karma`](karma-runner.github.io/)).
 
-`BROWSERSTACK_USERNAME=<user> BROWSERSTACK_ACCESS_KEY=<key> npm run test:bs` will run tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.ts`
+`BROWSERSTACK_USERNAME=<user> BROWSERSTACK_ACCESS_KEY=<key> npm run test:bs` will run integration tests on real browsers using BrowserStack. The list of browsers is statically defined in `package.json` and `karma.conf.ts`
 
 ### How to open the example page in your browser
 

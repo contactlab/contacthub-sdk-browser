@@ -56,27 +56,19 @@ const request =
   (F: FetchInstance) =>
   (url: string, options: RequestInit): TE.TaskEither<Error, unknown> =>
   () =>
-    F(url, options).then(
-      resp => {
+    F(url, options)
+      .then(resp => {
         if (!resp.ok) {
-          return E.left(
-            new Error(`Request responded with status code ${resp.status}`)
-          );
+          throw new Error(`Request responded with status code ${resp.status}`);
         }
 
-        return resp.text().then(
-          v => {
-            try {
-              return E.right(JSON.parse(v.length === 0 ? '{}' : v)); // handle empty responses
-            } catch (e) {
-              return E.left(e);
-            }
-          },
-          e => E.left(e)
-        );
-      },
-      e => E.left(e)
-    );
+        return resp.text().then(v => {
+          const result = JSON.parse(v.length === 0 ? '{}' : v);
+
+          return E.right(result);
+        });
+      })
+      .catch(e => E.left(e));
 
 const stringify = <A>(a: A): TE.TaskEither<Error, string> => {
   try {
