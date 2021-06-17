@@ -9,6 +9,6 @@ export interface UuisSvc {
   uuid: Uuid;
 }
 
-export const uuid: Uuid = {
+export const uuid = (): Uuid => ({
   v4: () => uuidv4()
-};
+});
