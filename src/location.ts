@@ -1,9 +1,25 @@
+/**
+ * Service to handle page's `Location`.
+ *
+ * @since 2.0.0
+ */
+
 import {IO} from 'fp-ts/IO';
 
+/**
+ * @category capabilities
+ * @since 2.0.0
+ */
 export interface LocationSvc {
   location: Location;
 }
 
+/**
+ * Defines the `Location` service capabilities.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface Location {
   /**
    * Gets Location data of provided Window.
@@ -16,6 +32,12 @@ export interface Location {
   qp: (name: string) => string | undefined;
 }
 
+/**
+ * Live instance of `Location` service.
+ *
+ * @category instances
+ * @since 2.0.0
+ */
 export const location = (): Location => ({
   data: () => window.location,
 

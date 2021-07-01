@@ -1,3 +1,7 @@
+/**
+ * @since 2.0.0
+ */
+
 import {Either, right, left} from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import {constVoid, pipe} from 'fp-ts/function';
@@ -9,12 +13,30 @@ import {UuisSvc} from './uuid';
 
 type Nullable<A> = A | null;
 
+/**
+ * Defines capabilities and services required by the `customer` method in order to work.
+ *
+ * @category capabilities
+ * @since 2.0.0
+ */
 export interface CustomerEnv extends HttpSvc, CookieSvc, UuisSvc {}
 
+/**
+ * Defines the `customer` method signature.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface Customer {
   (options?: CustomerData): Effect;
 }
 
+/**
+ * Defines the `customer` method options.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface CustomerData {
   id?: Nullable<string>;
   externalId?: Nullable<string>;
@@ -170,6 +192,12 @@ interface CustomerSubscription {
   }>;
 }
 
+/**
+ * SDK's customer method: creates, updates, reconcile and stores provided customer's data.
+ *
+ * @category methods
+ * @since 2.0.0
+ */
 export const customer =
   (E: CustomerEnv): Customer =>
   options => {
