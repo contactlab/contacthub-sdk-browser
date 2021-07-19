@@ -12,7 +12,7 @@
     "jsdoc/check-tag-names": [
       "error",
       {
-        "definedTags": ["category"]
+        "definedTags": ["category", "jest-environment"]
       }
     ]
   },
