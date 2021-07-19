@@ -5,6 +5,21 @@ nav_order: 2
 
 # Change Log
 
+## [2.0.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.0.0)
+
+#### New features:
+
+- Third party CDN instead of assets.contactlab.it [#66](https://github.com/contactlab/contacthub-sdk-browser/issues/66)
+
+#### Documentation:
+
+- API documentation [#67](https://github.com/contactlab/contacthub-sdk-browser/issues/67)
+
+#### Internal:
+
+- Move to Typescript [#64](https://github.com/contactlab/contacthub-sdk-browser/issues/64)
+- Unit tests [#65](https://github.com/contactlab/contacthub-sdk-browser/issues/65)
+
 ## [1.4.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v1.4.0)
 
 This version adds a `debug` flag in configuration object which if it is set to `true` will lead the SDK to log errors to the browser's console.
