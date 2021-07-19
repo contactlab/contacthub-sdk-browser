@@ -1,3 +1,8 @@
+---
+title: CHANGELOG
+nav_order: 2
+---
+
 # Change Log
 
 ## [2.0.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.0.0)
@@ -59,13 +64,13 @@ This version adds a `debug` flag in configuration object which if it is set to `
 - Automatic Google Analytics properties for Events ([#28](https://github.com/contactlab/contacthub-sdk-browser/issues/28))
 - run build on Travis ([#24](https://github.com/contactlab/contacthub-sdk-browser/issues/24))
 
-## [0.4.1](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v0.4.1)
+## [v0.4.1](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v0.4.1)
 
 #### Bug fixes:
 
 - Update to work with new API version (without hyperlinks) ([#22](https://github.com/contactlab/contacthub-sdk-browser/issues/22))
 
-## [0.4.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v0.4.0)
+## [v0.4.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v0.4.0)
 
 #### Bug fixes:
 
@@ -77,14 +82,14 @@ This version adds a `debug` flag in configuration object which if it is set to `
 
 - add resetSessionId method to use when a user logs out ([#18](https://github.com/contactlab/contacthub-sdk-browser/issues/18))
 
-## [0.3.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v0.3.0)
+## [v0.3.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v0.3.0)
 
 #### New features:
 
 - Handle 409 API errors on create ([#12](https://github.com/contactlab/contacthub-sdk-browser/issues/12))
 - Use "referer" instead of "referrer"
 
-## [0.2.2](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v0.2.2)
+## [v0.2.2](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v0.2.2)
 
 #### New features:
 

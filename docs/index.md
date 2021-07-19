@@ -1,3 +1,8 @@
+---
+title: Home
+nav_order: 1
+---
+
 ![Node CI](https://github.com/contactlab/contacthub-sdk-browser/workflows/Node%20CI/badge.svg?branch=master) [![GitHub release](https://img.shields.io/github/release/contactlab/contacthub-sdk-browser.svg)](https://github.com/contactlab/contacthub-sdk-browser/releases)
 
 # @contactlab/sdk-browser
@@ -12,12 +17,23 @@ Insert this snippet in your website (preferably in the `<HEAD>` section):
 
 ```html
 <script>
-  window.ch = function() {(ch.q = ch.q || []).push(arguments);};
-  ch('config', { /* see below */ });
-  ch('customer', { /* see below */ });
-  ch('event', { /* see below */ });
+  window.ch = function () {
+    (ch.q = ch.q || []).push(arguments);
+  };
+  ch('config', {
+    /* see below */
+  });
+  ch('customer', {
+    /* see below */
+  });
+  ch('event', {
+    /* see below */
+  });
 </script>
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.min.js"></script>
+<script
+  async
+  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.min.js"
+></script>
 ```
 
 Compressed and uncompressed copies of Customer Hub SDK files are available.
@@ -31,25 +47,37 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 #### ES6 version minified
 
 ```html
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.min.js"></script>
+<script
+  async
+  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.min.js"
+></script>
 ```
 
 #### ES6 version uncompressed
 
 ```html
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.js"></script>
+<script
+  async
+  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.js"
+></script>
 ```
 
 #### ES5 version minified
 
 ```html
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.legacy.min.js"></script>
+<script
+  async
+  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.legacy.min.js"
+></script>
 ```
 
 #### ES5 version uncompressed
 
 ```html
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.legacy.js"></script>
+<script
+  async
+  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.legacy.js"
+></script>
 ```
 
 To load a specific version, replace `2` with the version number.
@@ -66,7 +94,7 @@ ch('config', {
   nodeId: 'node_id', // required, found in the Customer Hub admin area
   token: 'UYTF546FUTF636JH', // required, found in the Customer Hub admin area
   context: 'CTX', // optional, defaults to 'WEB'
-  contextInfo: {}, // optional, defaults to an empty object,
+  contextInfo: {} // optional, defaults to an empty object,
 });
 ```
 
@@ -187,7 +215,10 @@ You also have to replace all occurrences of `ch` in the snippet:
   chub('customer', { ... });
   chub('event', { ... });
 </script>
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/sdk.min.js"></script>
+<script
+  async
+  src="https://unpkg.com/@contactlab/sdk-browser@2/sdk.min.js"
+></script>
 ```
 
 #### Renaming the Customer Hub cookie
@@ -237,6 +268,7 @@ Please note that if a different user is logged in, the Customer Hub id for the c
 ### How to build locally
 
 `npm run build` will generate:
+
 - `dist/sdk.js` (ES6 version);
 - `dist/sdk.min.js` (ES6 version minified);
 - `dist/sdk.legacy.js` (ES5 version);
