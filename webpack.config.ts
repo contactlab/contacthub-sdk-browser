@@ -10,8 +10,10 @@ const commons: Configuration = {
     sdk: './src/index.ts'
   },
   output: {
-    library: 'ContactlabSDKBrowser',
-    libraryTarget: 'umd'
+    library: {
+      name: 'ContactlabSDKBrowser',
+      type: 'umd'
+    }
   },
   optimization: {
     emitOnErrors: false,
