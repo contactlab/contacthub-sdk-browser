@@ -59,10 +59,10 @@ SDK signature.
 
 ```ts
 export interface SDK {
-  q?: unknown[];
   (method: 'config', options: ConfigOptions): Promise<void>;
   (method: 'event', options: EventOptions): Promise<void>;
   (method: 'customer', options?: CustomerData): Promise<void>;
+  q?: unknown[];
 }
 ```
 

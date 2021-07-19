@@ -22,10 +22,10 @@ export interface MainEnv extends ProgramSvc, ConfigEnv, CustomerEnv, EventEnv {}
  * @since 2.0.0
  */
 export interface SDK {
-  q?: unknown[];
   (method: 'config', options: ConfigOptions): Promise<void>;
   (method: 'event', options: EventOptions): Promise<void>;
   (method: 'customer', options?: CustomerData): Promise<void>;
+  q?: unknown[];
 }
 
 /**
