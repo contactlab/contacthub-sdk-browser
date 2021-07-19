@@ -1,17 +1,39 @@
+/**
+ * @since 2.0.0
+ */
+
 import {ConfigOptions, ConfigEnv, config} from './config';
 import {CustomerData, CustomerEnv, customer} from './customer';
 import {EventOptions, EventEnv, event} from './event';
 import {Effect, ProgramSvc} from './program';
 
-interface MainEnv extends ProgramSvc, ConfigEnv, CustomerEnv, EventEnv {}
+/**
+ * Defines capabilities and services required by the SDK's `main` function.
+ *
+ * @category capabilities
+ * @since 2.0.0
+ */
+export interface MainEnv extends ProgramSvc, ConfigEnv, CustomerEnv, EventEnv {}
 
+/**
+ * SDK signature.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface SDK {
-  q?: unknown[];
   (method: 'config', options: ConfigOptions): Promise<void>;
   (method: 'event', options: EventOptions): Promise<void>;
   (method: 'customer', options?: CustomerData): Promise<void>;
+  q?: unknown[];
 }
 
+/**
+ * Main function that starts and makes available the SDK features.
+ *
+ * @category methods
+ * @since 2.0.0
+ */
 export const main = (E: MainEnv): void => {
   const sdk: SDK = (
     method: 'config' | 'event' | 'customer',

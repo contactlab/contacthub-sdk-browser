@@ -1,3 +1,7 @@
+/**
+ * @since 2.0.0
+ */
+
 import * as TE from 'fp-ts/TaskEither';
 import {constVoid, pipe} from 'fp-ts/function';
 import {CookieSvc} from './cookie';
@@ -6,23 +10,47 @@ import {HttpSvc} from './http';
 import {LocationSvc} from './location';
 import {Effect} from './program';
 
+/**
+ * Defines capabilities and services required by the `event` method in order to work.
+ *
+ * @category capabilities
+ * @since 2.0.0
+ */
 export interface EventEnv
   extends HttpSvc,
     CookieSvc,
     LocationSvc,
     DocumentSvc {}
 
-type EventProperties = Record<string, unknown>;
+/**
+ * Defines the `event` method signature.
+ *
+ * @category model
+ * @since 2.0.0
+ */
+export interface Event {
+  (options: EventOptions): Effect;
+}
 
+/**
+ * Defines the `event` method options.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface EventOptions {
   type: string;
   properties?: EventProperties;
 }
 
-export interface Event {
-  (options: EventOptions): Effect;
-}
+type EventProperties = Record<string, unknown>;
 
+/**
+ * SDK's event method: sends provided event to Customer Hub's API.
+ *
+ * @category methods
+ * @since 2.0.0
+ */
 export const event =
   (E: EventEnv): Event =>
   options =>

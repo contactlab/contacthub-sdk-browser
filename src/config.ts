@@ -1,3 +1,7 @@
+/**
+ * @since 2.0.0
+ */
+
 import * as TE from 'fp-ts/TaskEither';
 import {Endomorphism, pipe} from 'fp-ts/function';
 import * as C from './cookie';
@@ -7,12 +11,34 @@ import {LocationSvc} from './location';
 import {Effect} from './program';
 import {UuisSvc} from './uuid';
 
-export interface ConfigEnv extends HttpSvc, C.CookieSvc, LocationSvc, UuisSvc {}
+// --- Aliases for better documentation
+import CookieSvc = C.CookieSvc;
+// ---
 
+/**
+ * Defines capabilities and services required by the `config` method in order to work.
+ *
+ * @category capabilities
+ * @since 2.0.0
+ */
+export interface ConfigEnv extends HttpSvc, CookieSvc, LocationSvc, UuisSvc {}
+
+/**
+ * Defines the `config` method signature.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface Config {
   (options: ConfigOptions): Effect;
 }
 
+/**
+ * Defines the `config` method options.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface ConfigOptions {
   token: string;
   workspaceId: string;
@@ -22,6 +48,14 @@ export interface ConfigOptions {
   debug?: boolean;
 }
 
+/**
+ * SDK's configuration method: sets provided configuration and persists them in a cookie (with defaults).
+ *
+ * It also handles UTM values passed via query parameters and sets current customer if a `clabId` query param is provided.
+ *
+ * @category methods
+ * @since 2.0.0
+ */
 export const config =
   (E: ConfigEnv): Config =>
   options =>

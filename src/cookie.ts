@@ -1,3 +1,9 @@
+/**
+ * Service to handle cookies.
+ *
+ * @since 2.0.0
+ */
+
 import {Either, right, left} from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import {pipe} from 'fp-ts/function';
@@ -14,10 +20,20 @@ interface WithVars extends Window {
   ContactHubUtmCookie?: string;
 }
 
+/**
+ * @category capabilities
+ * @since 2.0.0
+ */
 export interface CookieSvc {
   cookie: Cookie;
 }
 
+/**
+ * Defines the `Cookie` service capabilities.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface Cookie {
   /**
    * Gets the Hub cookie.
@@ -37,14 +53,26 @@ export interface Cookie {
   setUTM: CookieSet<UTMCookie>;
 }
 
-interface CookieGet<A> {
+/**
+ * @since 2.0.0
+ */
+export interface CookieGet<A> {
   (fallback?: A): Effect<A>;
 }
 
-interface CookieSet<A> {
+/**
+ * @since 2.0.0
+ */
+export interface CookieSet<A> {
   (value: A, options?: Cookies.CookieAttributes): Effect;
 }
 
+/**
+ * Live instance of `Cookie` service.
+ *
+ * @category instances
+ * @since 2.0.0
+ */
 export const cookie = (): Cookie => {
   const hubName = (): string => (window as WithVars).ContactHubCookie ?? '_ch';
 
@@ -60,6 +88,12 @@ export const cookie = (): Cookie => {
 };
 
 // --- CH cookie
+/**
+ * Defines the shape of SDK's cookie value.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface HubCookie {
   token: string;
   workspaceId: string;
@@ -81,6 +115,12 @@ const CHDecoder: Decoder<HubCookie> = u => {
 };
 
 // --- UTM cookie
+/**
+ * Defines the shape of the UTM cookie value.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface UTMCookie {
   utm_source?: string;
   utm_medium?: string;

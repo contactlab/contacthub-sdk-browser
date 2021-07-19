@@ -1,6 +1,16 @@
+/**
+ * Service to handle http requests.
+ *
+ * @since 2.0.0
+ */
+
 import * as E from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import {pipe} from 'fp-ts/function';
+
+// --- Aliases for better documentation
+import TaskEither = TE.TaskEither;
+// ---
 
 type FetchInstance = typeof fetch;
 
@@ -8,24 +18,36 @@ interface WithVars extends Window {
   ContactHubAPI?: string;
 }
 
+/**
+ * @category capabilities
+ * @since 2.0.0
+ */
+export interface HttpSvc {
+  http: Http;
+}
+
+/**
+ * Defines the `Http` service capabilities.
+ *
+ * @category model
+ * @since 2.0.0
+ */
 export interface Http {
-  post: <A>(
-    path: string,
-    body: A,
-    token: string
-  ) => TE.TaskEither<Error, unknown>;
+  post: <A>(path: string, body: A, token: string) => TaskEither<Error, unknown>;
 
   patch: <A>(
     path: string,
     body: A,
     token: string
-  ) => TE.TaskEither<Error, unknown>;
+  ) => TaskEither<Error, unknown>;
 }
 
-export interface HttpSvc {
-  http: Http;
-}
-
+/**
+ * Live instance of `Http` service.
+ *
+ * @category instances
+ * @since 2.0.0
+ */
 export const http = (F: FetchInstance): Http => {
   const apiUrl = (): string =>
     (window as WithVars).ContactHubAPI ?? 'https://api.contactlab.it/hub/v1';
@@ -54,7 +76,7 @@ export const http = (F: FetchInstance): Http => {
 // --- Helpers
 const request =
   (F: FetchInstance) =>
-  (url: string, options: RequestInit): TE.TaskEither<Error, unknown> =>
+  (url: string, options: RequestInit): TaskEither<Error, unknown> =>
   () =>
     F(url, options)
       .then(resp => {
@@ -70,7 +92,7 @@ const request =
       })
       .catch(e => E.left(e));
 
-const stringify = <A>(a: A): TE.TaskEither<Error, string> => {
+const stringify = <A>(a: A): TaskEither<Error, string> => {
   try {
     return TE.right(JSON.stringify(a));
   } catch (e) {
