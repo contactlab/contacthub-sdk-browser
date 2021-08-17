@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie';
+
 export const CH = '_ch';
 export const UTM = '_chutm';
 export const WSID = 'wsid';
@@ -42,3 +44,14 @@ export const wait = (): Promise<void> =>
   new Promise(resolve => {
     setTimeout(() => resolve(undefined), 2);
   });
+
+// --- Cookie utilities
+export const removeCookie = Cookies.remove;
+
+export const getCookie = Cookies.get;
+
+export const getCookieJSON = (name: string): any =>
+  JSON.parse(Cookies.get(name) || '{}');
+
+export const setCookieJSON = (name: string, value: any): string | undefined =>
+  Cookies.set(name, JSON.stringify(value));

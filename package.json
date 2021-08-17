@@ -41,7 +41,7 @@
     "cross-fetch": "3.1.4",
     "es6-promise": "4.2.8",
     "fp-ts": "2.11.1",
-    "js-cookie": "2.2.1",
+    "js-cookie": "3.0.0",
     "jssha": "3.2.0",
     "tslib": "2.3.1",
     "uuid": "8.3.2"
@@ -76,7 +76,7 @@
     "pretty-quick": "3.1.1",
     "puppeteer": "10.2.0",
     "sinon": "11.1.2",
-    "ts-jest": "27.0.4",
+    "ts-jest": "27.0.5",
     "ts-loader": "9.2.5",
     "ts-node": "10.2.0",
     "typescript": "4.3.5",

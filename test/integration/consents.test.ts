@@ -1,10 +1,10 @@
 import {expect} from 'chai';
-import Cookies from 'js-cookie';
+import * as C from '../_helpers';
 import * as H from './_helpers';
 
 describe('Consents', () => {
   beforeEach(() => {
-    Cookies.remove(H.CH);
+    C.removeCookie(H.CH);
   });
 
   afterEach(() => {
@@ -37,7 +37,7 @@ describe('Consents', () => {
 
     await H.setConfig();
 
-    Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
+    C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
     H._ch('customer', H.CUSTOMER);
 

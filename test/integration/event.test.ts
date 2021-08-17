@@ -1,10 +1,10 @@
 import {expect} from 'chai';
-import Cookies from 'js-cookie';
+import * as C from '../_helpers';
 import * as H from './_helpers';
 
 describe('Event API', () => {
   beforeEach(() => {
-    Cookies.remove(H.CH);
+    C.removeCookie(H.CH);
 
     H._fetchMock.post(`${H.API}/workspaces/${H.WSID}/events`, 200);
   });
@@ -48,7 +48,7 @@ describe('Event API', () => {
     expect(body.type).to.equal('viewedPage');
     expect(body.bringBackProperties).to.eql({
       type: 'SESSION_ID',
-      value: Cookies.getJSON(H.CH).sid,
+      value: C.getCookieJSON(H.CH).sid,
       nodeId: H.NID
     });
   });
@@ -56,7 +56,7 @@ describe('Event API', () => {
   it('should send customerId when available in cookie', async () => {
     await H.setConfig();
 
-    Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
+    C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
     H._ch('event', {type: 'viewedPage'});
 
@@ -70,7 +70,7 @@ describe('Event API', () => {
   it('should omit bringBackProperties when customerId is available', async () => {
     await H.setConfig();
 
-    Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
+    C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
     H._ch('event', {type: 'viewedPage'});
 
@@ -131,7 +131,7 @@ describe('Event API', () => {
   it('should get the "context" from the cookie', async () => {
     await H.setConfig();
 
-    Cookies.set(H.CH, {...Cookies.getJSON(H.CH), context: 'FOO'});
+    C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), context: 'FOO'});
 
     H._ch('event', {type: 'viewedPage'});
 
@@ -145,7 +145,10 @@ describe('Event API', () => {
   it('should get the "contextInfo" from the cookie', async () => {
     await H.setConfig();
 
-    Cookies.set(H.CH, {...Cookies.getJSON(H.CH), contextInfo: {foo: 'bar'}});
+    C.setCookieJSON(H.CH, {
+      ...C.getCookieJSON(H.CH),
+      contextInfo: {foo: 'bar'}
+    });
 
     H._ch('event', {type: 'viewedPage'});
 

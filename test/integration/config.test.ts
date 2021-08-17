@@ -1,10 +1,10 @@
 import {expect} from 'chai';
-import Cookies from 'js-cookie';
+import * as C from '../_helpers';
 import * as H from './_helpers';
 
 describe('Config API', () => {
   beforeEach(async () => {
-    Cookies.remove(H.CH);
+    C.removeCookie(H.CH);
   });
 
   afterEach(() => {
@@ -17,26 +17,26 @@ describe('Config API', () => {
     const uuidV4 =
       /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
-    expect(typeof Cookies.get(H.CH)).not.to.equal(undefined);
-    expect(uuidV4.test(Cookies.getJSON(H.CH).sid)).to.equal(true);
+    expect(typeof C.getCookie(H.CH)).not.to.equal(undefined);
+    expect(uuidV4.test(C.getCookieJSON(H.CH).sid)).to.equal(true);
   });
 
   it('should not regenerate sessionId if already present', async () => {
     await H.setConfig();
 
-    const sid = Cookies.getJSON(H.CH).sid;
+    const sid = C.getCookieJSON(H.CH).sid;
 
     H._ch('config', H.CONFIG);
 
     await H.whenDone();
 
-    expect(Cookies.getJSON(H.CH).sid).to.equal(sid);
+    expect(C.getCookieJSON(H.CH).sid).to.equal(sid);
   });
 
   it('should store all config data in the cookie and uses defaults', async () => {
     await H.setConfig();
 
-    const c = Cookies.getJSON(H.CH);
+    const c = C.getCookieJSON(H.CH);
 
     expect(c.workspaceId).to.equal(H.WSID);
     expect(c.nodeId).to.equal(H.NID);
@@ -57,7 +57,7 @@ describe('Config API', () => {
 
     await H.whenDone();
 
-    const c = Cookies.getJSON(H.CH);
+    const c = C.getCookieJSON(H.CH);
 
     expect(c.context).to.equal('foo');
     expect(c.contextInfo).to.eql({foo: 'bar'});
@@ -65,8 +65,8 @@ describe('Config API', () => {
   });
 
   it('should remove user data from cookie if the token changes', async () => {
-    Cookies.set(H.CH, {
-      ...Cookies.getJSON(H.CH),
+    C.setCookieJSON(H.CH, {
+      ...C.getCookieJSON(H.CH),
       customerId: H.CID,
       token: H.TOKEN
     });
@@ -75,7 +75,7 @@ describe('Config API', () => {
 
     await H.whenDone();
 
-    const c = Cookies.getJSON(H.CH);
+    const c = C.getCookieJSON(H.CH);
 
     expect(c.token).to.equal('CDE456');
     expect(c.customerId).to.equal(undefined);
