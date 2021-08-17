@@ -263,9 +263,19 @@ An example use case is if you send a newsletter to your customers and you want t
 
 Please note that if a different user is logged in, the Customer Hub id for the currently logged in user is stored in the Customer Hub cookie. The id contained in the Customer Hub cookie always takes precedence over an id specified using the `clabId` query string parameter.
 
-#### Setting `target` via query parameter
+#### Aggregate nodes
 
-The config's `target` option can also be set using the `target` parameter in the query string (`?target=AGGREGATE`).
+The SDK can handle also [aggregate nodes](https://explore.contactlab.com/understanding-nodes-and-trees/?lang=en).
+
+In order to send data to this kind of nodes (instead of standard "entry" ones), you have to set these optional configuration properties:
+
+- `target` to `AGGREGATE`;
+- `aggregateNodeId` to the aggregate node's id (found in the Customer Hub admin area);
+- `aggregateToken` to the aggregate node's token (found in the Customer Hub admin area).
+
+Please be aware that customer's creation and updating **are bypassed** when `target` is `AGGREGATE`, but reconciliation and id conflict resolution keep executing.
+
+Just as `clabId` also the `target` property can be set using the `target` parameter in the query string (`?target=AGGREGATE`).
 
 ## Contributing to this library
 
