@@ -19,5 +19,11 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["./src", "./test", "./webpack.config.ts", "./karma.conf.ts"]
+  "include": [
+    "./src",
+    "./test",
+    "./webpack.config.ts",
+    "./karma.conf.ts",
+    "./scripts"
+  ]
 }
