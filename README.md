@@ -28,6 +28,8 @@ This also offers an advantage that if the visitor to your webpage has already do
 
 To load a hosted library, copy and paste the HTML snippet for that library (shown below) in your web page.
 
+**Warning! The SDK is published in [UMD](https://github.com/umdjs/umd) format: if you use non-standard ways to load scripts in page (like [RequireJS](https://requirejs.org/)), please refer to the corresponding documentation.**
+
 #### ES6 version minified
 
 ```html
