@@ -104,6 +104,9 @@ export interface HubCookie {
   sid: string;
   customerId?: string;
   hash?: string;
+  target?: 'ENTRY' | 'AGGREGATE';
+  aggregateToken?: string;
+  aggregateNodeId?: string;
 }
 
 const CHDecoder: Decoder<HubCookie> = u => {

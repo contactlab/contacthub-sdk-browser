@@ -79,9 +79,12 @@ export interface ConfigOptions {
   token: string;
   workspaceId: string;
   nodeId: string;
+  target?: 'ENTRY' | 'AGGREGATE';
   context?: string;
   contextInfo?: Record<string, unknown>;
   debug?: boolean;
+  aggregateToken?: string;
+  aggregateNodeId?: string;
 }
 ```
 

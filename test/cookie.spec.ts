@@ -18,6 +18,7 @@ afterEach(() => {
 
 test('cookie.getHub() should return current value of Hub cookie', async () => {
   const HUB_COOKIE: HubCookie = {
+    target: 'ENTRY',
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID,
@@ -38,6 +39,7 @@ test('cookie.getHub() should return current value of Hub cookie - use configured
   (window as any).ContactHubCookie = '_foo';
 
   const HUB_COOKIE: HubCookie = {
+    target: 'ENTRY',
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID,
@@ -58,6 +60,7 @@ test('cookie.getHub() should return current value of Hub cookie - use configured
 
 test('cookie.getHub() should return current value of Hub cookie - with fallback', async () => {
   const HUB_COOKIE_FALLBACK: HubCookie = {
+    target: 'ENTRY',
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID,
@@ -102,6 +105,7 @@ test('cookie.getHub() should return current value of Hub cookie - parse error', 
 
 test('cookie.setHub() should set provided Hub cookie', async () => {
   const HUB_COOKIE: HubCookie = {
+    target: 'ENTRY',
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID,

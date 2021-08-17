@@ -9,6 +9,7 @@ import {DocumentSvc} from './doc';
 import {HttpSvc} from './http';
 import {LocationSvc} from './location';
 import {Effect} from './program';
+import {getNodeAndToken} from './target';
 
 /**
  * Defines capabilities and services required by the `event` method in order to work.
@@ -65,16 +66,11 @@ export const event =
           TE.altW(() => TE.right(undefined))
         )
       ),
-      TE.chain(({cookie, opts, utm}) => {
-        const {
-          token,
-          workspaceId,
-          nodeId,
-          context,
-          contextInfo,
-          customerId,
-          sid
-        } = cookie;
+      // TODO: is this right? should the operation fail if target is AGGREGATE but aggregateNodeId and aggregateToken are not defined?
+      TE.bind('nt', ({cookie}) => getNodeAndToken(cookie)),
+      TE.chain(({cookie, opts, utm, nt}) => {
+        const {token, nodeId} = nt;
+        const {workspaceId, context, contextInfo, customerId, sid} = cookie;
 
         const properties = inferProperties(E)(opts);
         const tracking = typeof utm === 'undefined' ? utm : {ga: utm};

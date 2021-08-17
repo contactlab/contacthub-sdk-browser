@@ -9,6 +9,7 @@ import sha256 from 'jssha/dist/sha256';
 import {CookieSvc} from './cookie';
 import {HttpSvc} from './http';
 import {Effect} from './program';
+import {getNodeAndToken} from './target';
 import {UuisSvc} from './uuid';
 
 type Nullable<A> = A | null;
@@ -294,11 +295,13 @@ const resetCookie = (E: CustomerEnv): Effect =>
 const createCustomer = (E: EffectEnv): Effect<string> =>
   pipe(
     E.cookie.getHub(),
-    TE.chain(({token, workspaceId, nodeId}) =>
+    TE.bindTo('ch'),
+    TE.bind('nt', ({ch}) => getNodeAndToken(ch)),
+    TE.chain(({ch, nt}) =>
       E.http.post(
-        `/workspaces/${workspaceId}/customers`,
-        {...E.data, nodeId},
-        token
+        `/workspaces/${ch.workspaceId}/customers`,
+        {...E.data, nodeId: nt.nodeId},
+        nt.token
       )
     ),
     TE.chain(u => {
@@ -316,15 +319,17 @@ const updateCustomer =
   (cid: string): Effect =>
     pipe(
       E.cookie.getHub(),
-      TE.chain(({token, workspaceId}) => {
+      TE.bindTo('ch'),
+      TE.bind('nt', ({ch}) => getNodeAndToken(ch)),
+      TE.chain(({ch, nt}) => {
         if (!shouldUpdate(E.data)) {
           return TE.right(undefined);
         }
 
         return E.http.patch(
-          `/workspaces/${workspaceId}/customers/${cid}`,
+          `/workspaces/${ch.workspaceId}/customers/${cid}`,
           E.data,
-          token
+          nt.token
         );
       }),
       TE.chain(() => storeCustomer(E)(cid))
@@ -335,11 +340,19 @@ const reconcileCustomer =
   (cid: string): Effect =>
     pipe(
       E.cookie.getHub(),
-      TE.chain(({workspaceId, token, sid}) =>
+      TE.bindTo('ch'),
+      TE.bind('nt', ({ch}) =>
+        pipe(
+          getNodeAndToken(ch),
+          // keep executing reconciliation even if getting AGGREGATE node and token fails
+          TE.alt(() => TE.right({nodeId: ch.nodeId, token: ch.token}))
+        )
+      ),
+      TE.chain(({ch, nt}) =>
         E.http.post(
-          `/workspaces/${workspaceId}/customers/${cid}/sessions`,
-          {value: sid},
-          token
+          `/workspaces/${ch.workspaceId}/customers/${cid}/sessions`,
+          {value: ch.sid},
+          nt.token
         )
       ),
       TE.map(constVoid)

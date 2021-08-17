@@ -31,6 +31,7 @@ test('config() should set SDK configuration - with defaults', async () => {
   expect(S.SET_HUB_COOKIE).toBeCalledWith(
     {
       ...OPTIONS,
+      target: 'ENTRY',
       sid: S.UUID_STR,
       debug: false,
       context: 'WEB',
@@ -55,9 +56,12 @@ test('config() should set SDK configuration - with cookies values', async () => 
     token: 'OTHER_TOKEN',
     workspaceId: H.WSID,
     nodeId: H.NID,
+    target: 'AGGREGATE',
     context: 'AAA',
     contextInfo: {foo: 'bar'},
-    debug: true
+    debug: true,
+    aggregateNodeId: 'aggrNid',
+    aggregateToken: 'AGGR_TOKEN'
   };
 
   const result = await c(OPTIONS)();
@@ -69,7 +73,9 @@ test('config() should set SDK configuration - with cookies values', async () => 
       sid: S.UUID_STR,
       context: 'AAA',
       contextInfo: {foo: 'bar'},
-      debug: true
+      debug: true,
+      aggregateNodeId: 'aggrNid',
+      aggregateToken: 'AGGR_TOKEN'
     },
     {expires: 365}
   );
@@ -152,6 +158,39 @@ test('config() should fail is service fails', async () => {
   expect(_HTTP.patch).not.toBeCalled();
 });
 
+test('config() should set target if there is a `target` param in query string', async () => {
+  const withRightParam = config({
+    location: S.LOCATION('http://test.com?target=AGGREGATE'),
+    cookie: S.COOKIE({}),
+    http: _HTTP,
+    uuid: S.UUID
+  });
+
+  const withWrongParam = config({
+    location: S.LOCATION('http://test.com?target=foobarbaz'),
+    cookie: S.COOKIE({}),
+    http: _HTTP,
+    uuid: S.UUID
+  });
+
+  const OPTIONS: ConfigOptions = {
+    token: H.TOKEN,
+    workspaceId: H.WSID,
+    nodeId: H.NID
+  };
+
+  await withRightParam(OPTIONS)();
+
+  expect(S.SET_HUB_COOKIE).toBeCalledWith(
+    {...S.HUB_COOKIE(), target: 'AGGREGATE'},
+    {expires: 365}
+  );
+
+  await withWrongParam(OPTIONS)();
+
+  expect(S.SET_HUB_COOKIE).toBeCalledWith(S.HUB_COOKIE(), {expires: 365});
+});
+
 test('config() should set customer if there is a clabId param in query string', async () => {
   const c = config({
     location: S.LOCATION('http://test.com?clabId=abcdef123456'),
@@ -169,13 +208,13 @@ test('config() should set customer if there is a clabId param in query string', 
   const result = await c(OPTIONS)();
   expect(result).toEqual(right(undefined));
   expect(S.SET_HUB_COOKIE).toBeCalledTimes(2);
-  expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(1, S.HUB_COOKIE, {
+  expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(1, S.HUB_COOKIE(), {
     expires: 365
   });
   expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(
     2,
     {
-      ...S.HUB_COOKIE,
+      ...S.HUB_COOKIE(),
       customerId: 'abcdef123456',
       hash: '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a'
     },
@@ -184,7 +223,7 @@ test('config() should set customer if there is a clabId param in query string', 
   expect(_HTTP.post).toBeCalledTimes(1); // <-- customer `shouldUpdate` return false;
   expect(_HTTP.post).toBeCalledWith(
     `/workspaces/${H.WSID}/customers/abcdef123456/sessions`,
-    {value: S.HUB_COOKIE.sid},
+    {value: S.HUB_COOKIE().sid},
     H.TOKEN
   );
 });

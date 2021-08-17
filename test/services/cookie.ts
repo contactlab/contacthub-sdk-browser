@@ -20,7 +20,9 @@ export const SET_UTM_COOKIE_KO: MockedSetUTM = jest.fn((_v, _o) =>
   left(new Error('Cookie "_chutm" cannot be set'))
 );
 
-export const HUB_COOKIE: HubCookie = {
+// beware of mutability...
+export const HUB_COOKIE = (): HubCookie => ({
+  target: 'ENTRY',
   token: H.TOKEN,
   workspaceId: H.WSID,
   nodeId: H.NID,
@@ -28,14 +30,17 @@ export const HUB_COOKIE: HubCookie = {
   context: 'WEB',
   contextInfo: {},
   sid: '5ed6cae6-e956-4da1-9b06-c971887ed756'
-};
+});
 
-export const HUB_COOKIE_CID: HubCookie = {...HUB_COOKIE, customerId: H.CID};
+export const HUB_COOKIE_CID = (): HubCookie => ({
+  ...HUB_COOKIE(),
+  customerId: H.CID
+});
 
-export const UTM_COOKIE: UTMCookie = {
+export const UTM_COOKIE = (): UTMCookie => ({
   utm_source: 'abcd',
   utm_medium: 'web'
-};
+});
 
 interface CookieProps {
   hub?: TaskEither<Error, HubCookie>;
@@ -43,8 +48,8 @@ interface CookieProps {
 }
 
 export const COOKIE = ({
-  hub = right(HUB_COOKIE),
-  utm = right(UTM_COOKIE)
+  hub = right(HUB_COOKIE()),
+  utm = right(UTM_COOKIE())
 }: CookieProps): Cookie => {
   let _hub = hub;
   let _utm = utm;
@@ -77,8 +82,8 @@ export const COOKIE = ({
 };
 
 export const COOKIE_SET_KO = ({
-  hub = right(HUB_COOKIE),
-  utm = right(UTM_COOKIE)
+  hub = right(HUB_COOKIE()),
+  utm = right(UTM_COOKIE())
 }: CookieProps): Cookie => ({
   getHub: f =>
     pipe(
