@@ -5,6 +5,12 @@ nav_order: 2
 
 # Change Log
 
+## [2.1.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.1.0)
+
+#### New features:
+
+- Handle aggregate nodes [#80](https://github.com/contactlab/contacthub-sdk-browser/issues/80)
+
 ## [2.0.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.0.0)
 
 #### New features:
