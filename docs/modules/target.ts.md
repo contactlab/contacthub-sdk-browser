@@ -28,7 +28,9 @@ Gets the node id and token based on `target`.
 **Signature**
 
 ```ts
-export declare const getNodeAndToken: (c: HubCookie) => Effect<NodeAndToken>;
+export declare const getNodeAndToken: (
+  c: HubCookieWithTarget
+) => Effect<NodeAndToken>;
 ```
 
 Added in v2.1.0

@@ -5,7 +5,7 @@
  */
 
 import * as TE from 'fp-ts/TaskEither';
-import {HubCookie} from './cookie';
+import {HubCookieWithTarget} from './cookie';
 import {Effect} from './program';
 
 interface NodeAndToken {
@@ -18,10 +18,10 @@ interface NodeAndToken {
  *
  * @since 2.1.0
  */
-export const getNodeAndToken = (c: HubCookie): Effect<NodeAndToken> => {
-  const target = c.target || 'ENTRY';
-
-  if (target === 'ENTRY') {
+export const getNodeAndToken = (
+  c: HubCookieWithTarget
+): Effect<NodeAndToken> => {
+  if (c.target === 'ENTRY') {
     return TE.right({nodeId: c.nodeId, token: c.token});
   }
 

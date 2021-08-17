@@ -6,7 +6,7 @@ import {Either, right, left} from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import {constVoid, pipe} from 'fp-ts/function';
 import sha256 from 'jssha/dist/sha256';
-import {CookieSvc} from './cookie';
+import {CookieSvc, HubCookieWithTarget} from './cookie';
 import {HttpSvc} from './http';
 import {Effect} from './program';
 import {getNodeAndToken} from './target';
@@ -295,13 +295,12 @@ const resetCookie = (E: CustomerEnv): Effect =>
 const createCustomer = (E: EffectEnv): Effect<string> =>
   pipe(
     E.cookie.getHub(),
-    TE.bindTo('ch'),
-    TE.bind('nt', ({ch}) => getNodeAndToken(ch)),
-    TE.chain(({ch, nt}) =>
+    TE.chain(shouldBeEntry),
+    TE.chain(({workspaceId, nodeId, token}) =>
       E.http.post(
-        `/workspaces/${ch.workspaceId}/customers`,
-        {...E.data, nodeId: nt.nodeId},
-        nt.token
+        `/workspaces/${workspaceId}/customers`,
+        {...E.data, nodeId},
+        token
       )
     ),
     TE.chain(u => {
@@ -319,17 +318,16 @@ const updateCustomer =
   (cid: string): Effect =>
     pipe(
       E.cookie.getHub(),
-      TE.bindTo('ch'),
-      TE.bind('nt', ({ch}) => getNodeAndToken(ch)),
-      TE.chain(({ch, nt}) => {
+      TE.chain(shouldBeEntry),
+      TE.chain(({workspaceId, token}) => {
         if (!shouldUpdate(E.data)) {
           return TE.right(undefined);
         }
 
         return E.http.patch(
-          `/workspaces/${ch.workspaceId}/customers/${cid}`,
+          `/workspaces/${workspaceId}/customers/${cid}`,
           E.data,
-          nt.token
+          token
         );
       }),
       TE.chain(() => storeCustomer(E)(cid))
@@ -341,13 +339,7 @@ const reconcileCustomer =
     pipe(
       E.cookie.getHub(),
       TE.bindTo('ch'),
-      TE.bind('nt', ({ch}) =>
-        pipe(
-          getNodeAndToken(ch),
-          // keep executing reconciliation even if getting AGGREGATE node and token fails
-          TE.alt(() => TE.right({nodeId: ch.nodeId, token: ch.token}))
-        )
-      ),
+      TE.bind('nt', ({ch}) => pipe(getNodeAndToken(ch))),
       TE.chain(({ch, nt}) =>
         E.http.post(
           `/workspaces/${ch.workspaceId}/customers/${cid}/sessions`,
@@ -401,3 +393,10 @@ const shouldUpdate = (data: CustomerData): boolean => {
     return false;
   }
 };
+
+const shouldBeEntry = (ch: HubCookieWithTarget): Effect<HubCookieWithTarget> =>
+  ch.target === 'ENTRY'
+    ? TE.right(ch)
+    : TE.left(
+        new Error('this operation is allowed only when "target" is "ENTRY"')
+      );

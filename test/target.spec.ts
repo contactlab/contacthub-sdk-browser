@@ -4,16 +4,9 @@ import * as H from './_helpers';
 import {HUB_COOKIE} from './services';
 
 test('getNodeAndToken() should return `nodeId` and `token`', async () => {
-  const withTarget = await getNodeAndToken(HUB_COOKIE())();
+  const result = await getNodeAndToken(HUB_COOKIE())();
 
-  expect(withTarget).toEqual(right({nodeId: H.NID, token: H.TOKEN}));
-
-  const noTarget = await getNodeAndToken({
-    ...HUB_COOKIE(),
-    target: undefined
-  })();
-
-  expect(noTarget).toEqual(right({nodeId: H.NID, token: H.TOKEN}));
+  expect(result).toEqual(right({nodeId: H.NID, token: H.TOKEN}));
 });
 
 test('getNodeAndToken() should return `aggregateNodeId` and `aggregateToken`', async () => {

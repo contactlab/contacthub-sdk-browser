@@ -1,5 +1,6 @@
 import {left, right} from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
+import {HubCookieWithTarget} from '../src/cookie';
 import {customer} from '../src/customer';
 import {Http} from '../src/http';
 import * as H from './_helpers';
@@ -59,35 +60,28 @@ test('customer() should reconcile and update when customer id is provided but is
   );
 });
 
-test('customer() should reconcile and update when customer id is provided but is not in cookie - nodeId and target fallback', async () => {
+test('customer() should reconcile and not update when customer id is provided but is not in cookie and target is AGGREGATE', async () => {
   const c = customer({
     http: _HTTP,
-    cookie: S.COOKIE({hub: TE.right({...S.HUB_COOKIE(), target: 'AGGREGATE'})}),
+    cookie: S.COOKIE({hub: TE.right({...S.HUB_COOKIE(), ...AGGREGATE})}),
     uuid: S.UUID
   });
 
   const result = await c({id: 'abcd1234'})();
 
-  // the entire operation fails because `update` fails (no aggregate nodeId and token in hub cookie)
   expect(result).toEqual(
-    left(
-      new Error(
-        '"aggregateNodeId" and "aggregateToken" must be set when "target" is "AGGREGATE"'
-      )
-    )
+    left(new Error('this operation is allowed only when "target" is "ENTRY"'))
   );
 
-  // so `update` and `store` are bypassed
-  expect(_HTTP.patch).not.toBeCalled();
-  expect(S.SET_HUB_COOKIE).not.toBeCalled();
-
-  // `reconcile` succeeds instead
   expect(_HTTP.post).toBeCalledTimes(1);
   expect(_HTTP.post).toBeCalledWith(
     `/workspaces/${H.WSID}/customers/abcd1234/sessions`,
     {value: S.HUB_COOKIE().sid},
-    H.TOKEN
+    AGGREGATE.aggregateToken
   );
+
+  expect(_HTTP.patch).not.toBeCalled();
+  expect(S.SET_HUB_COOKIE).not.toBeCalled();
 });
 
 test('customer() should update when customer id is in cookie', async () => {
@@ -116,6 +110,25 @@ test('customer() should update when customer id is in cookie', async () => {
     },
     undefined
   );
+});
+
+test('customer() should not update when customer id is in cookie and target is AGGREGATE', async () => {
+  const c = customer({
+    http: _HTTP,
+    cookie: S.COOKIE({
+      hub: TE.right({...S.HUB_COOKIE_CID(), target: 'AGGREGATE'})
+    }),
+    uuid: S.UUID
+  });
+
+  const result = await c({base: {firstName: 'Foo', lastName: 'Bar'}})();
+
+  expect(result).toEqual(
+    left(new Error('this operation is allowed only when "target" is "ENTRY"'))
+  );
+  expect(_HTTP.post).not.toBeCalled();
+  expect(_HTTP.patch).not.toBeCalled();
+  expect(S.SET_HUB_COOKIE).not.toBeCalled();
 });
 
 test('customer() should resolve and update when customer id is provided and is in cookie', async () => {
@@ -163,6 +176,47 @@ test('customer() should resolve and update when customer id is provided and is i
     },
     undefined
   );
+});
+
+test('customer() should resolve but not update when customer id is provided and is in cookie and target is AGGREGATE', async () => {
+  const c = customer({
+    http: _HTTP,
+    cookie: S.COOKIE({
+      hub: TE.right({...S.HUB_COOKIE_CID(), ...AGGREGATE})
+    }),
+    uuid: S.UUID
+  });
+
+  const result = await c({
+    id: 'efgh5678',
+    base: {firstName: 'Foo', lastName: 'Bar'}
+  })();
+
+  expect(result).toEqual(
+    left(new Error('this operation is allowed only when "target" is "ENTRY"'))
+  );
+
+  expect(S.SET_HUB_COOKIE).toBeCalledTimes(1);
+  expect(S.SET_HUB_COOKIE).toBeCalledWith(
+    {
+      ...S.HUB_COOKIE(),
+      target: 'AGGREGATE',
+      aggregateNodeId: 'aggr_nid',
+      aggregateToken: 'AGGR_TOKEN',
+      sid: S.UUID_STR,
+      customerId: undefined,
+      hash: undefined
+    },
+    undefined
+  );
+
+  expect(_HTTP.post).toBeCalledTimes(1);
+  expect(_HTTP.post).toBeCalledWith(
+    `/workspaces/${H.WSID}/customers/efgh5678/sessions`,
+    {value: S.UUID_STR},
+    AGGREGATE.aggregateToken
+  );
+  expect(_HTTP.patch).not.toBeCalled();
 });
 
 test('customer() should only update when customer id is provided and is in cookie and are equals', async () => {
@@ -239,6 +293,23 @@ test('customer() should create and reconcile when no customer id is provided or 
     {value: S.HUB_COOKIE().sid},
     H.TOKEN
   );
+});
+
+test('customer() should not create and reconcile when no customer id is provided or in cookie and target is AGGREGATE', async () => {
+  const c = customer({
+    http: _HTTP,
+    cookie: S.COOKIE({hub: TE.right({...S.HUB_COOKIE(), ...AGGREGATE})}),
+    uuid: S.UUID
+  });
+
+  const result = await c({base: {firstName: 'Foo', lastName: 'Bar'}})();
+
+  expect(result).toEqual(
+    left(new Error('this operation is allowed only when "target" is "ENTRY"'))
+  );
+
+  expect(_HTTP.post).not.toBeCalled();
+  expect(S.SET_HUB_COOKIE).not.toBeCalled();
 });
 
 test('customer() should do nothing if data are the same', async () => {
@@ -373,3 +444,9 @@ test('customer() should fail when customer id conflict cannot be resolved', asyn
 
 // --- Helpers
 const _HTTP = S.HTTP({});
+
+const AGGREGATE: Partial<HubCookieWithTarget> = {
+  target: 'AGGREGATE',
+  aggregateNodeId: 'aggr_nid',
+  aggregateToken: 'AGGR_TOKEN'
+};

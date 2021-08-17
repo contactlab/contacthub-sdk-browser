@@ -21,6 +21,7 @@ Added in v2.0.0
 - [model](#model)
   - [Cookie (interface)](#cookie-interface)
   - [HubCookie (interface)](#hubcookie-interface)
+  - [HubCookieWithTarget (interface)](#hubcookiewithtarget-interface)
   - [UTMCookie (interface)](#utmcookie-interface)
 - [utils](#utils)
   - [CookieGet (interface)](#cookieget-interface)
@@ -69,7 +70,7 @@ export interface Cookie {
   /**
    * Gets the Hub cookie.
    */
-  getHub: CookieGet<HubCookie>;
+  getHub: CookieGet<HubCookie, HubCookieWithTarget>;
   /**
    * Sets the Hub cookie.
    */
@@ -112,6 +113,20 @@ export interface HubCookie {
 
 Added in v2.0.0
 
+## HubCookieWithTarget (interface)
+
+Makes mandatory the SDK's cookie `target` property.
+
+**Signature**
+
+```ts
+export interface HubCookieWithTarget extends HubCookie {
+  target: Exclude<HubCookie['target'], undefined>;
+}
+```
+
+Added in v2.1.0
+
 ## UTMCookie (interface)
 
 Defines the shape of the UTM cookie value.
@@ -137,8 +152,8 @@ Added in v2.0.0
 **Signature**
 
 ```ts
-export interface CookieGet<A> {
-  (fallback?: A): Effect<A>;
+export interface CookieGet<B, A extends B = B> {
+  (fallback?: B): Effect<A>;
 }
 ```
 

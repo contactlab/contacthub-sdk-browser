@@ -35,6 +35,24 @@ test('cookie.getHub() should return current value of Hub cookie', async () => {
   expect(result).toEqual(right(HUB_COOKIE));
 });
 
+test('cookie.getHub() should return current value of Hub cookie - target fallback to `ENTRY`', async () => {
+  const HUB_COOKIE: HubCookie = {
+    token: H.TOKEN,
+    workspaceId: H.WSID,
+    nodeId: H.NID,
+    debug: false,
+    context: 'WEB',
+    contextInfo: {},
+    sid: 'ABCD-1234'
+  };
+
+  H.setCookieJSON(H.CH, HUB_COOKIE);
+
+  const result = await cookie().getHub()();
+
+  expect(result).toEqual(right({...HUB_COOKIE, target: 'ENTRY'}));
+});
+
 test('cookie.getHub() should return current value of Hub cookie - use configured cookie name', async () => {
   (window as any).ContactHubCookie = '_foo';
 
