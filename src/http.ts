@@ -84,11 +84,9 @@ const request =
           throw new Error(`Request responded with status code ${resp.status}`);
         }
 
-        return resp.text().then(v => {
-          const result = JSON.parse(v.length === 0 ? '{}' : v);
-
-          return E.right(result);
-        });
+        return resp
+          .text()
+          .then(v => E.right(JSON.parse(v.length === 0 ? '{}' : v)));
       })
       .catch(e => E.left(e));
 
@@ -102,6 +100,7 @@ const stringify = <A>(a: A): TaskEither<Error, string> => {
 
 const headers = (token: string): Record<string, string> => ({
   Accept: 'application/json',
+  'Contactlab-ClientId': 'sdk-browser',
   'Content-Type': 'application/json',
   Authorization: `Bearer ${token}`
 });
