@@ -9,7 +9,7 @@ const sequenceTE = sequenceT(TE.ApplicativePar);
 
 const readFileTE = TE.taskify<
   fs.PathLike,
-  string,
+  BufferEncoding,
   NodeJS.ErrnoException,
   string
 >(fs.readFile);
@@ -33,7 +33,7 @@ const copyInDocs = (
   headline: string
 ): TE.TaskEither<Error, void> =>
   pipe(
-    TE.fromIO<Error, void>(info(`Copy content of ${source} into ${dest}...`)),
+    TE.fromIO<void, Error>(info(`Copy content of ${source} into ${dest}...`)),
     TE.chain(() => readFileTE(source, 'utf8')),
     TE.map(content => `${headline}${content}`),
     TE.chain(content => writeFileTE(dest, content)),
