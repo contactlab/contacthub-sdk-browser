@@ -96,7 +96,7 @@ const stringify = <A>(a: A): TaskEither<Error, string> => {
   try {
     return TE.right(JSON.stringify(a));
   } catch (e) {
-    return TE.left(e);
+    return TE.left(E.toError(e));
   }
 };
 
