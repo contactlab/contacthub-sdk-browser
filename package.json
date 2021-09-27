@@ -47,7 +47,7 @@
     "uuid": "8.3.2"
   },
   "devDependencies": {
-    "@types/chai": "4.2.21",
+    "@types/chai": "4.2.22",
     "@types/jest": "27.0.1",
     "@types/js-cookie": "2.2.7",
     "@types/karma": "6.3.1",
