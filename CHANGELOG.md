@@ -11,6 +11,7 @@
 - Bump js-cookie from 2.2.1 to 3.0.1 ([#89](https://github.com/contactlab/contacthub-sdk-browser/pull/89))
 - Bump tslib from 2.3.0 to 2.3.1 ([#103](https://github.com/contactlab/contacthub-sdk-browser/pull/103))
 - [Security] Bump ansi-regex from 5.0.0 to 5.0.1 ([#142](https://github.com/contactlab/contacthub-sdk-browser/pull/142))
+- [Security] Bump tmpl from 1.0.4 to 1.0.5 ([#131](https://github.com/contactlab/contacthub-sdk-browser/pull/131))
 - [Security] Bump path-parse from 1.0.6 to 1.0.7 ([#100](https://github.com/contactlab/contacthub-sdk-browser/pull/100))
 - Bump fp-ts from 2.10.5 to 2.11.4 ([#88](https://github.com/contactlab/contacthub-sdk-browser/pull/88), [#146](https://github.com/contactlab/contacthub-sdk-browser/pull/146))
 
