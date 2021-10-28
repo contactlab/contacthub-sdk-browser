@@ -43,7 +43,7 @@ test('main() should execute `config` command', async () => {
 
   await H.wait();
 
-  expect(S.SET_HUB_COOKIE).toBeCalledWith(S.HUB_COOKIE, {expires: 365});
+  expect(S.SET_HUB_COOKIE).toBeCalledWith(S.HUB_COOKIE(), {expires: 365});
   expect(S.SET_UTM_COOKIE).toBeCalledWith(
     {utm_source: 'abcd', utm_medium: 'web'},
     {expires: 1 / 48}
@@ -82,7 +82,7 @@ test('main() should execute `event` command', async () => {
       customerId: undefined,
       bringBackProperties: {
         type: 'SESSION_ID',
-        value: S.HUB_COOKIE.sid,
+        value: S.HUB_COOKIE().sid,
         nodeId: H.NID
       }
     },
@@ -107,13 +107,13 @@ test('main() should execute `customer` command', async () => {
   expect(_HTTP.post).toBeCalledTimes(1); // <-- `shouldUpdate` is false because;
   expect(_HTTP.post).toBeCalledWith(
     `/workspaces/${H.WSID}/customers/${H.CID}/sessions`,
-    {value: S.HUB_COOKIE.sid},
+    {value: S.HUB_COOKIE().sid},
     H.TOKEN
   );
   expect(_HTTP.patch).not.toBeCalled();
   expect(S.SET_HUB_COOKIE).toBeCalledWith(
     {
-      ...S.HUB_COOKIE_CID,
+      ...S.HUB_COOKIE_CID(),
       hash: '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a'
     },
     undefined
@@ -142,7 +142,7 @@ test('main() should execute command using configured Hub object name', async () 
 
   await H.wait();
 
-  expect(S.SET_HUB_COOKIE).toBeCalledWith(S.HUB_COOKIE, {expires: 365});
+  expect(S.SET_HUB_COOKIE).toBeCalledWith(S.HUB_COOKIE(), {expires: 365});
   expect(S.SET_UTM_COOKIE).toBeCalledWith(
     {utm_source: 'abcd', utm_medium: 'web'},
     {expires: 1 / 48}
@@ -172,7 +172,7 @@ test('main() should process operations queue', async () => {
 
   await H.wait();
 
-  expect(S.SET_HUB_COOKIE).toBeCalledWith(S.HUB_COOKIE, {expires: 365});
+  expect(S.SET_HUB_COOKIE).toBeCalledWith(S.HUB_COOKIE(), {expires: 365});
   expect(S.SET_UTM_COOKIE).toBeCalledWith(
     {utm_source: 'abcd', utm_medium: 'web'},
     {expires: 1 / 48}

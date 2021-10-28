@@ -6,9 +6,10 @@ import {Either, right, left} from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import {constVoid, pipe} from 'fp-ts/function';
 import sha256 from 'jssha/dist/sha256';
-import {CookieSvc} from './cookie';
+import {CookieSvc, HubCookieWithTarget} from './cookie';
 import {HttpSvc} from './http';
 import {Effect} from './program';
+import {getNodeAndToken} from './target';
 import {UuisSvc} from './uuid';
 
 type Nullable<A> = A | null;
@@ -294,7 +295,8 @@ const resetCookie = (E: CustomerEnv): Effect =>
 const createCustomer = (E: EffectEnv): Effect<string> =>
   pipe(
     E.cookie.getHub(),
-    TE.chain(({token, workspaceId, nodeId}) =>
+    TE.chain(shouldBeEntry),
+    TE.chain(({workspaceId, nodeId, token}) =>
       E.http.post(
         `/workspaces/${workspaceId}/customers`,
         {...E.data, nodeId},
@@ -316,7 +318,8 @@ const updateCustomer =
   (cid: string): Effect =>
     pipe(
       E.cookie.getHub(),
-      TE.chain(({token, workspaceId}) => {
+      TE.chain(shouldBeEntry),
+      TE.chain(({workspaceId, token}) => {
         if (!shouldUpdate(E.data)) {
           return TE.right(undefined);
         }
@@ -335,11 +338,13 @@ const reconcileCustomer =
   (cid: string): Effect =>
     pipe(
       E.cookie.getHub(),
-      TE.chain(({workspaceId, token, sid}) =>
+      TE.bindTo('ch'),
+      TE.bind('nt', ({ch}) => pipe(getNodeAndToken(ch))),
+      TE.chain(({ch, nt}) =>
         E.http.post(
-          `/workspaces/${workspaceId}/customers/${cid}/sessions`,
-          {value: sid},
-          token
+          `/workspaces/${ch.workspaceId}/customers/${cid}/sessions`,
+          {value: ch.sid},
+          nt.token
         )
       ),
       TE.map(constVoid)
@@ -388,3 +393,10 @@ const shouldUpdate = (data: CustomerData): boolean => {
     return false;
   }
 };
+
+const shouldBeEntry = (ch: HubCookieWithTarget): Effect<HubCookieWithTarget> =>
+  ch.target === 'ENTRY'
+    ? TE.right(ch)
+    : TE.left(
+        new Error('this operation is allowed only when "target" is "ENTRY"')
+      );

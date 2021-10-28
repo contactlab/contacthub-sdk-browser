@@ -1,10 +1,10 @@
 import {expect} from 'chai';
-import Cookies from 'js-cookie';
+import * as C from '../_helpers';
 import * as H from './_helpers';
 
 describe('Customer API:', () => {
   beforeEach(() => {
-    Cookies.remove(H.CH);
+    C.removeCookie(H.CH);
   });
 
   afterEach(() => {
@@ -56,7 +56,7 @@ describe('Customer API:', () => {
       expect(createHeaders.Authorization).to.equal(`Bearer ${H.TOKEN}`);
 
       // --- from cookie
-      const {customerId, hash, sid} = Cookies.getJSON(H.CH);
+      const {customerId, hash, sid} = C.getCookieJSON(H.CH);
 
       // --- store
       expect(customerId).to.equal(H.CID);
@@ -75,7 +75,7 @@ describe('Customer API:', () => {
 
       await H.setConfig();
 
-      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
+      C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
       H._ch('customer', H.CUSTOMER);
 
@@ -110,7 +110,7 @@ describe('Customer API:', () => {
     it('should not not make any API call if the same customerId is in cookie', async () => {
       await H.setConfig();
 
-      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
+      C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
       H._ch('customer', {id: H.CID});
 
@@ -122,8 +122,8 @@ describe('Customer API:', () => {
     it('should not make any API call if a different customerId is in cookie', async () => {
       await H.setConfig();
 
-      Cookies.set(H.CH, {
-        ...Cookies.getJSON(H.CH),
+      C.setCookieJSON(H.CH, {
+        ...C.getCookieJSON(H.CH),
         customerId: 'different-cid'
       });
 
@@ -140,14 +140,14 @@ describe('Customer API:', () => {
 
       await H.setConfig();
 
-      const {sid} = Cookies.getJSON(H.CH);
+      const {sid} = C.getCookieJSON(H.CH);
 
       H._ch('customer', {id: H.CID});
 
       await H.whenDone();
 
       // --- does not reset the sessionId
-      expect(Cookies.getJSON(H.CH).sid).to.eql(sid);
+      expect(C.getCookieJSON(H.CH).sid).to.eql(sid);
 
       // --- reconciles the sessionId with the customerId
       const body = H._fetchMock.lastOptions()?.body as unknown as string;
@@ -169,7 +169,7 @@ describe('Customer API:', () => {
 
       await H.setConfig();
 
-      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
+      C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
       H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
@@ -189,18 +189,18 @@ describe('Customer API:', () => {
 
       await H.setConfig();
 
-      Cookies.set(H.CH, {
-        ...Cookies.getJSON(H.CH),
+      C.setCookieJSON(H.CH, {
+        ...C.getCookieJSON(H.CH),
         customerId: 'different-cid'
       });
 
-      const {sid} = Cookies.getJSON(H.CH);
+      const {sid} = C.getCookieJSON(H.CH);
 
       H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
       await H.whenDone();
 
-      const newSid = Cookies.getJSON(H.CH).sid;
+      const newSid = C.getCookieJSON(H.CH).sid;
 
       const [reconcile, update] = H._fetchMock.calls();
 
@@ -228,13 +228,13 @@ describe('Customer API:', () => {
 
       await H.setConfig();
 
-      const {sid} = Cookies.getJSON(H.CH);
+      const {sid} = C.getCookieJSON(H.CH);
 
       H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
       await H.whenDone();
 
-      const newSid = Cookies.getJSON(H.CH).sid;
+      const newSid = C.getCookieJSON(H.CH).sid;
 
       const [reconcile, update] = H._fetchMock.calls();
 
@@ -260,8 +260,8 @@ describe('Customer API:', () => {
     it('should remove user data from cookie and generate new session', async () => {
       await H.setConfig();
 
-      Cookies.set(H.CH, {
-        ...Cookies.getJSON(H.CH),
+      C.setCookieJSON(H.CH, {
+        ...C.getCookieJSON(H.CH),
         customerId: 'old-customer-id',
         sid: 'old-session-id'
       });
@@ -270,7 +270,7 @@ describe('Customer API:', () => {
 
       await H.whenDone();
 
-      const {customerId, sid} = Cookies.getJSON(H.CH);
+      const {customerId, sid} = C.getCookieJSON(H.CH);
 
       const sidRgx =
         /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
@@ -288,7 +288,7 @@ describe('Customer API:', () => {
     beforeEach(async () => {
       await H.setConfig();
 
-      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
+      C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
     });
 
     it('should log errors if id != customerId and no other customer data provided', async () => {
@@ -399,7 +399,7 @@ describe('Customer API:', () => {
 
       await H.setConfig();
 
-      Cookies.set(H.CH, {...Cookies.getJSON(H.CH), customerId: H.CID});
+      C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
       H._ch('customer', {externalId: 'ANOTHER_ID'});
 

@@ -14,7 +14,7 @@ test('event() should send an event to API', async () => {
     location: S.LOCATION(),
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right(S.HUB_COOKIE_CID),
+      hub: TE.right(S.HUB_COOKIE_CID()),
       utm: TE.left(new Error())
     }),
     document: S.DOC({})
@@ -46,7 +46,7 @@ test('event() should send an event to API - with tracking', async () => {
     location: S.LOCATION(),
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right(S.HUB_COOKIE_CID)
+      hub: TE.right(S.HUB_COOKIE_CID())
     }),
     document: S.DOC({})
   });
@@ -99,7 +99,7 @@ test('event() should send an event to API - with bringBackProperties', async () 
       customerId: undefined,
       bringBackProperties: {
         type: 'SESSION_ID',
-        value: S.HUB_COOKIE.sid,
+        value: S.HUB_COOKIE().sid,
         nodeId: H.NID
       }
     },
@@ -112,7 +112,7 @@ test('event() should send an event to API - with inferred properties', async () 
     location: S.LOCATION(),
     http: _HTTP,
     cookie: S.COOKIE({
-      hub: TE.right(S.HUB_COOKIE_CID),
+      hub: TE.right(S.HUB_COOKIE_CID()),
       utm: TE.left(new Error())
     }),
     document: S.DOC({})
@@ -190,6 +190,31 @@ test('event() should fail if Hub cookie does not exists', async () => {
 
   expect(result).toEqual(
     left(new Error('Missing required ContactHub configuration.'))
+  );
+  expect(_HTTP.post).not.toBeCalled();
+});
+
+test('event() should fail if target is AGGREGATE but related nodeId and token are not defined', async () => {
+  const e = event({
+    location: S.LOCATION(),
+    http: _HTTP,
+    cookie: S.COOKIE({
+      hub: TE.right({...S.HUB_COOKIE(), target: 'AGGREGATE'})
+    }),
+    document: S.DOC({})
+  });
+
+  const result = await e({
+    type: 'completedOrder',
+    properties: {orderId: '1234'}
+  })();
+
+  expect(result).toEqual(
+    left(
+      new Error(
+        '"aggregateNodeId" and "aggregateToken" must be set when "target" is "AGGREGATE"'
+      )
+    )
   );
   expect(_HTTP.post).not.toBeCalled();
 });

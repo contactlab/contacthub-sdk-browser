@@ -28,6 +28,8 @@ This also offers an advantage that if the visitor to your webpage has already do
 
 To load a hosted library, copy and paste the HTML snippet for that library (shown below) in your web page.
 
+**Warning! The SDK is published in [UMD](https://github.com/umdjs/umd) format: if you use non-standard ways to load scripts in page (like [RequireJS](https://requirejs.org/)), please refer to the corresponding documentation.**
+
 #### ES6 version minified
 
 ```html
@@ -65,8 +67,9 @@ ch('config', {
   workspaceId: 'w_id', // required, found in the Customer Hub admin area
   nodeId: 'node_id', // required, found in the Customer Hub admin area
   token: 'UYTF546FUTF636JH', // required, found in the Customer Hub admin area
+  target: 'ENTRY', // optional, can be "ENTRY" or "AGGREGATE", defaults to "ENTRY"
   context: 'CTX', // optional, defaults to 'WEB'
-  contextInfo: {}, // optional, defaults to an empty object,
+  contextInfo: {}, // optional, defaults to an empty object
 });
 ```
 
@@ -219,7 +222,7 @@ ch('customer', {
 });
 ```
 
-#### The clabId query parameter
+#### The `clabId` query parameter
 
 You can also send a Customer Hub id using the `clabId` parameter in the query string (`?clabId=A_VALID_CONTACTHUB_ID`). This is transformed by the library in the following call:
 
@@ -229,8 +232,22 @@ ch('customer', {id: clabId});
 
 An example use case is if you send a newsletter to your customers and you want to make sure that if they reach your website from a link contained in the email, they are immediately recognised even if they are not logged in.
 
-Please note that if a different user is logged in, the Customer Hub id for the currently logged in user is stored in the Customer Hub cookie. The id contained in the Customer Hub cookie always takes precedence over an id specified using the
-`clabId` query string parameter.
+Please note that if a different user is logged in, the Customer Hub id for the currently logged in user is stored in the Customer Hub cookie. The id contained in the Customer Hub cookie always takes precedence over an id specified using the `clabId` query string parameter.
+
+#### Aggregate nodes (alpha)
+
+:warning: **Warning: this feature is in alpha phase - use it at your own risk** 
+
+The SDK can handle also [aggregate nodes](https://explore.contactlab.com/understanding-nodes-and-trees/?lang=en).
+
+In order to send data to this kind of nodes (instead of standard "entry" ones), you have to set these optional configuration properties:
+- `target` to `AGGREGATE`;
+- `aggregateNodeId` to the aggregate node's id (found in the Customer Hub admin area);
+- `aggregateToken` to the aggregate node's token (found in the Customer Hub admin area).
+
+Please be aware that customer's creation and updating **are bypassed** when `target` is `AGGREGATE`, but reconciliation and id conflict resolution keep executing.
+
+Just as `clabId` also the `target` property can be set using the `target` parameter in the query string (`?target=AGGREGATE`).
 
 ## Contributing to this library
 

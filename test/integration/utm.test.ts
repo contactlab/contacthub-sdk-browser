@@ -1,11 +1,11 @@
 import {expect} from 'chai';
-import Cookies from 'js-cookie';
 import {UTMCookie} from '../../src/cookie';
+import * as C from '../_helpers';
 import * as H from './_helpers';
 
 describe('UTM automatic handling', () => {
   beforeEach(() => {
-    Cookies.remove(H.CH);
+    C.removeCookie(H.CH);
   });
 
   afterEach(() => {
@@ -18,7 +18,7 @@ describe('UTM automatic handling', () => {
 
     await H.setConfig();
 
-    expect(Cookies.getJSON(H.CH).ga).to.equal(undefined);
+    expect(C.getCookieJSON(H.CH).ga).to.equal(undefined);
   });
 
   it('should store utm_* vars in a separate _chutm cookie', async () => {
@@ -27,7 +27,7 @@ describe('UTM automatic handling', () => {
 
     await H.setConfig();
 
-    expect(Cookies.getJSON(H.UTM)).to.eql({
+    expect(C.getCookieJSON(H.UTM)).to.eql({
       utm_source: 'foo',
       utm_medium: 'bar',
       utm_term: 'baz',
@@ -49,7 +49,7 @@ describe('UTM automatic handling', () => {
       utm_campaign: 'foobarbaz'
     };
 
-    Cookies.set(H.UTM, {...Cookies.getJSON(H.UTM), ...utm});
+    C.setCookieJSON(H.UTM, {...C.getCookieJSON(H.UTM), ...utm});
 
     H._ch('event', {type: 'viewedPage'});
 

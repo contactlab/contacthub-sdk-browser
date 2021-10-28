@@ -38,7 +38,7 @@ export interface Cookie {
   /**
    * Gets the Hub cookie.
    */
-  getHub: CookieGet<HubCookie>;
+  getHub: CookieGet<HubCookie, HubCookieWithTarget>;
   /**
    * Sets the Hub cookie.
    */
@@ -56,8 +56,8 @@ export interface Cookie {
 /**
  * @since 2.0.0
  */
-export interface CookieGet<A> {
-  (fallback?: A): Effect<A>;
+export interface CookieGet<B, A extends B = B> {
+  (fallback?: B): Effect<A>;
 }
 
 /**
@@ -80,7 +80,11 @@ export const cookie = (): Cookie => {
     (window as WithVars).ContactHubUtmCookie ?? '_chutm';
 
   return {
-    getHub: fallback => get(hubName(), CHDecoder, fallback),
+    getHub: fallback =>
+      pipe(
+        get(hubName(), CHDecoder, fallback),
+        TE.map(ch => ({...ch, target: ch.target || 'ENTRY'}))
+      ),
     setHub: (value, opts) => set(hubName(), value, opts),
     getUTM: fallback => get(utmName(), UTMDecoder, fallback),
     setUTM: (value, opts) => set(utmName(), value, opts)
@@ -104,6 +108,19 @@ export interface HubCookie {
   sid: string;
   customerId?: string;
   hash?: string;
+  target?: 'ENTRY' | 'AGGREGATE';
+  aggregateToken?: string;
+  aggregateNodeId?: string;
+}
+
+/**
+ * Makes mandatory the SDK's cookie `target` property.
+ *
+ * @category model
+ * @since 2.1.0
+ */
+export interface HubCookieWithTarget extends HubCookie {
+  target: Exclude<HubCookie['target'], undefined>;
 }
 
 const CHDecoder: Decoder<HubCookie> = u => {

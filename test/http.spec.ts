@@ -21,6 +21,7 @@ test('http.post() should fetch a `post` request - success', async () => {
   expect(fetch.lastOptions()?.body).toEqual(JSON.stringify({foo: 'bar'}));
   expect(fetch.lastOptions()?.headers).toEqual({
     Accept: 'application/json',
+    'Contactlab-ClientId': 'sdk-browser',
     'Content-Type': 'application/json',
     Authorization: `Bearer TOKEN`
   });
@@ -139,6 +140,7 @@ test('http.patch() should fetch a `patch` request - success', async () => {
   expect(fetch.lastOptions()?.body).toEqual(JSON.stringify({foo: 'bar'}));
   expect(fetch.lastOptions()?.headers).toEqual({
     Accept: 'application/json',
+    'Contactlab-ClientId': 'sdk-browser',
     'Content-Type': 'application/json',
     Authorization: `Bearer TOKEN`
   });

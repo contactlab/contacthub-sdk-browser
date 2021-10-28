@@ -3,15 +3,14 @@
  */
 
 import {left, right} from 'fp-ts/Either';
-import Cookies from 'js-cookie';
 import {cookie, HubCookie, UTMCookie} from '../src/cookie';
 import * as H from './_helpers';
 
 afterEach(() => {
   jest.clearAllMocks();
 
-  Cookies.remove(H.CH);
-  Cookies.remove(H.UTM);
+  H.removeCookie(H.CH);
+  H.removeCookie(H.UTM);
 
   (window as any).ContactHubCookie = undefined;
   (window as any).ContactHubUtmCookie = undefined;
@@ -19,6 +18,7 @@ afterEach(() => {
 
 test('cookie.getHub() should return current value of Hub cookie', async () => {
   const HUB_COOKIE: HubCookie = {
+    target: 'ENTRY',
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID,
@@ -28,16 +28,14 @@ test('cookie.getHub() should return current value of Hub cookie', async () => {
     sid: 'ABCD-1234'
   };
 
-  Cookies.set(H.CH, HUB_COOKIE);
+  H.setCookieJSON(H.CH, HUB_COOKIE);
 
   const result = await cookie().getHub()();
 
   expect(result).toEqual(right(HUB_COOKIE));
 });
 
-test('cookie.getHub() should return current value of Hub cookie - use configured cookie name', async () => {
-  (window as any).ContactHubCookie = '_foo';
-
+test('cookie.getHub() should return current value of Hub cookie - target fallback to `ENTRY`', async () => {
   const HUB_COOKIE: HubCookie = {
     token: H.TOKEN,
     workspaceId: H.WSID,
@@ -48,17 +46,39 @@ test('cookie.getHub() should return current value of Hub cookie - use configured
     sid: 'ABCD-1234'
   };
 
-  Cookies.set('_foo', HUB_COOKIE);
+  H.setCookieJSON(H.CH, HUB_COOKIE);
+
+  const result = await cookie().getHub()();
+
+  expect(result).toEqual(right({...HUB_COOKIE, target: 'ENTRY'}));
+});
+
+test('cookie.getHub() should return current value of Hub cookie - use configured cookie name', async () => {
+  (window as any).ContactHubCookie = '_foo';
+
+  const HUB_COOKIE: HubCookie = {
+    target: 'ENTRY',
+    token: H.TOKEN,
+    workspaceId: H.WSID,
+    nodeId: H.NID,
+    debug: false,
+    context: 'WEB',
+    contextInfo: {},
+    sid: 'ABCD-1234'
+  };
+
+  H.setCookieJSON('_foo', HUB_COOKIE);
 
   const result = await cookie().getHub()();
 
   expect(result).toEqual(right(HUB_COOKIE));
 
-  Cookies.remove('_foo');
+  H.removeCookie('_foo');
 });
 
 test('cookie.getHub() should return current value of Hub cookie - with fallback', async () => {
   const HUB_COOKIE_FALLBACK: HubCookie = {
+    target: 'ENTRY',
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID,
@@ -80,7 +100,7 @@ test('cookie.getHub() should return current value of Hub cookie - not found', as
 });
 
 test('cookie.getHub() should return current value of Hub cookie - decoding error', async () => {
-  Cookies.set(H.CH, {token: H.TOKEN});
+  H.setCookieJSON(H.CH, {token: H.TOKEN});
 
   const result = await cookie().getHub()();
 
@@ -91,7 +111,7 @@ test('cookie.getHub() should return current value of Hub cookie - decoding error
 
 test('cookie.getHub() should return current value of Hub cookie - parse error', async () => {
   // Parse will fail because of trailing comma
-  Cookies.set(
+  H.setCookieJSON(
     H.CH,
     '{"token":"ABC123","workspaceId":"workspace_id","nodeId":"node_id","sid":"ABCD-1234",}'
   );
@@ -103,6 +123,7 @@ test('cookie.getHub() should return current value of Hub cookie - parse error', 
 
 test('cookie.setHub() should set provided Hub cookie', async () => {
   const HUB_COOKIE: HubCookie = {
+    target: 'ENTRY',
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID,
@@ -116,7 +137,7 @@ test('cookie.setHub() should set provided Hub cookie', async () => {
 
   expect(result).toEqual(right(undefined));
 
-  expect(Cookies.getJSON(H.CH)).toEqual(HUB_COOKIE);
+  expect(H.getCookieJSON(H.CH)).toEqual(HUB_COOKIE);
 });
 
 test('cookie.setHub() should set provided Hub cookie - use configured cookie name', async () => {
@@ -136,9 +157,9 @@ test('cookie.setHub() should set provided Hub cookie - use configured cookie nam
 
   expect(result).toEqual(right(undefined));
 
-  expect(Cookies.getJSON('_foo')).toEqual(HUB_COOKIE);
+  expect(H.getCookieJSON('_foo')).toEqual(HUB_COOKIE);
 
-  Cookies.remove('_foo');
+  H.removeCookie('_foo');
 });
 
 test('cookie.setHub() should fail if provided Hub cookie cannot be stringified', async () => {
@@ -163,7 +184,7 @@ test('cookie.setHub() should fail if provided Hub cookie cannot be stringified',
     )
   );
 
-  expect(Cookies.get(H.CH)).toBe(undefined);
+  expect(H.getCookie(H.CH)).toBe(undefined);
 });
 
 test('cookie.getUTM() should return current value of UTM cookie', async () => {
@@ -172,7 +193,7 @@ test('cookie.getUTM() should return current value of UTM cookie', async () => {
     utm_medium: 'web'
   };
 
-  Cookies.set(H.UTM, UTM_COOKIE);
+  H.setCookieJSON(H.UTM, UTM_COOKIE);
 
   const result = await cookie().getUTM()();
 
@@ -187,13 +208,13 @@ test('cookie.getUTM() should return current value of UTM cookie - use configured
     utm_medium: 'web'
   };
 
-  Cookies.set('_foo', UTM_COOKIE);
+  H.setCookieJSON('_foo', UTM_COOKIE);
 
   const result = await cookie().getUTM()();
 
   expect(result).toEqual(right(UTM_COOKIE));
 
-  Cookies.remove('_foo');
+  H.removeCookie('_foo');
 });
 
 test('cookie.getUTM() should return current value of UTM cookie - with fallback', async () => {
@@ -223,7 +244,7 @@ test('cookie.setUTM() should set provided UTM cookie', async () => {
 
   expect(result).toEqual(right(undefined));
 
-  expect(Cookies.getJSON(H.UTM)).toEqual(UTM_COOKIE);
+  expect(H.getCookieJSON(H.UTM)).toEqual(UTM_COOKIE);
 });
 
 test('cookie.setUTM() should set provided UTM cookie - use configured cookie name', async () => {
@@ -238,9 +259,9 @@ test('cookie.setUTM() should set provided UTM cookie - use configured cookie nam
 
   expect(result).toEqual(right(undefined));
 
-  expect(Cookies.getJSON('_foo')).toEqual(UTM_COOKIE);
+  expect(H.getCookieJSON('_foo')).toEqual(UTM_COOKIE);
 
-  Cookies.remove('_foo');
+  H.removeCookie('_foo');
 });
 
 test('cookie.setUTM() should fail if provided UTM cookie cannot be stringified', async () => {
@@ -260,5 +281,5 @@ test('cookie.setUTM() should fail if provided UTM cookie cannot be stringified',
     )
   );
 
-  expect(Cookies.get(H.UTM)).toBe(undefined);
+  expect(H.getCookie(H.UTM)).toBe(undefined);
 });

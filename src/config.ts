@@ -2,8 +2,9 @@
  * @since 2.0.0
  */
 
+import {Endomorphism} from 'fp-ts/Endomorphism';
 import * as TE from 'fp-ts/TaskEither';
-import {Endomorphism, pipe} from 'fp-ts/function';
+import {pipe} from 'fp-ts/function';
 import * as C from './cookie';
 import {customer} from './customer';
 import {HttpSvc} from './http';
@@ -43,9 +44,12 @@ export interface ConfigOptions {
   token: string;
   workspaceId: string;
   nodeId: string;
+  target?: 'ENTRY' | 'AGGREGATE';
   context?: string;
   contextInfo?: Record<string, unknown>;
   debug?: boolean;
+  aggregateToken?: string;
+  aggregateNodeId?: string;
 }
 
 /**
@@ -98,6 +102,7 @@ interface WithOptionsEnv extends ConfigEnv {
 
 const withDefaults = (E: WithOptionsEnv): C.HubCookie => ({
   ...E.options,
+  target: 'ENTRY',
   sid: E.uuid.v4(),
   debug: E.options.debug || false,
   context: E.options.context || 'WEB',
@@ -107,6 +112,8 @@ const withDefaults = (E: WithOptionsEnv): C.HubCookie => ({
 const prepareCHCookie =
   (E: WithOptionsEnv): Endomorphism<C.HubCookie> =>
   ch => {
+    const target = E.location.qp('target');
+
     // check if the auth token has changed
     const _ch = E.options.token === ch.token ? ch : ({} as C.HubCookie);
 
@@ -117,6 +124,11 @@ const prepareCHCookie =
     _ch.context = E.options.context ?? ch.context;
     _ch.contextInfo = E.options.contextInfo ?? ch.contextInfo;
     _ch.debug = E.options.debug ?? ch.debug;
+    _ch.aggregateNodeId = E.options.aggregateNodeId ?? ch.aggregateNodeId;
+    _ch.aggregateToken = E.options.aggregateToken ?? ch.aggregateToken;
+
+    // set target from query string if any
+    _ch.target = isTarget(target) ? target : E.options.target ?? ch.target;
 
     return _ch;
   };
@@ -140,3 +152,6 @@ const prepareUTMCookie =
 
     return _chutm;
   };
+
+const isTarget = (s?: string): s is NonNullable<C.HubCookie['target']> =>
+  s === 'ENTRY' || s === 'AGGREGATE';
