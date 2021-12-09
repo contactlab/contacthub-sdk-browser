@@ -14,8 +14,8 @@
     "tracking"
   ],
   "engines": {
-    "node": ">= 14.0",
-    "npm": ">= 6.13"
+    "node": ">= 16.0",
+    "npm": ">= 8.0"
   },
   "main": "dist/sdk.js",
   "files": [
@@ -52,7 +52,7 @@
     "@types/js-cookie": "3.0.1",
     "@types/karma": "6.3.1",
     "@types/mocha": "9.0.0",
-    "@types/node": "14.18.0",
+    "@types/node": "16.11.12",
     "@types/sinon": "10.0.6",
     "@types/terser-webpack-plugin": "5.2.0",
     "@types/uuid": "8.3.3",
