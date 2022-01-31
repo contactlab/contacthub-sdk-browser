@@ -1,5 +1,13 @@
 # Change Log
 
+## [2.1.1](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.1.1)
+
+#### Dependencies:
+
+- [Security] fix vulnerabilities
+- Bump cross-fetch from 3.1.4 to 3.1.5 (#231)
+- Bump fp-ts from 2.11.5 to 2.11.8 (#215, #223, #232)
+
 ## [2.1.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.1.0)
 
 #### New features:
