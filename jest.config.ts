@@ -5,6 +5,7 @@ const config: Config.InitialOptions = {
 
   automock: false,
   bail: true,
+  clearMocks: true,
   collectCoverage: true,
   coveragePathIgnorePatterns: [
     '<rootDir>/test/_helpers.ts',

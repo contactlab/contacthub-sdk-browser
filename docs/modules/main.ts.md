@@ -1,6 +1,6 @@
 ---
 title: main.ts
-nav_order: 8
+nav_order: 9
 parent: Modules
 ---
 
@@ -30,7 +30,12 @@ Defines capabilities and services required by the SDK's `main` function.
 **Signature**
 
 ```ts
-export interface MainEnv extends ProgramSvc, ConfigEnv, CustomerEnv, EventEnv {}
+export interface MainEnv
+  extends GlobalsSvc,
+    ProgramSvc,
+    ConfigEnv,
+    CustomerEnv,
+    EventEnv {}
 ```
 
 Added in v2.0.0

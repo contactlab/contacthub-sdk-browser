@@ -1,20 +1,18 @@
 import fetchMock from 'fetch-mock';
 import {isRight, left, right} from 'fp-ts/Either';
 import {http} from '../src/http';
-import {WIN_MOCK} from './_helpers';
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
+import * as S from './services';
 
 test('http.post() should fetch a `post` request - success', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .post('https://api.contactlab.it/hub/v1/endpoint', {id: 'abcd'});
 
-  const result = await http(fetch).post('/endpoint', {foo: 'bar'}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).post(
+    '/endpoint',
+    {foo: 'bar'},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(right({id: 'abcd'}));
   expect(fetch.lastOptions()?.method).toBe('POST');
@@ -25,64 +23,64 @@ test('http.post() should fetch a `post` request - success', async () => {
     'Content-Type': 'application/json',
     Authorization: `Bearer TOKEN`
   });
-
-  teardown();
 });
 
 test('http.post() should fetch a `post` request - success empty response', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .post('https://api.contactlab.it/hub/v1/endpoint', 200);
 
-  const result = await http(fetch).post('/endpoint', {foo: 'bar'}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).post(
+    '/endpoint',
+    {foo: 'bar'},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(right({}));
-
-  teardown();
 });
 
 test('http.post() should fetch a `post` request - failure on request', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .post('https://api.contactlab.it/hub/v1/endpoint', {
       throws: new Error('network error')
     });
 
-  const result = await http(fetch).post('/endpoint', {foo: 'bar'}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).post(
+    '/endpoint',
+    {foo: 'bar'},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(left(new Error('network error')));
-
-  teardown();
 });
 
 test('http.post() should fetch a `post` request - failure on response', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .post('https://api.contactlab.it/hub/v1/endpoint', 500);
 
-  const result = await http(fetch).post('/endpoint', {foo: 'bar'}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).post(
+    '/endpoint',
+    {foo: 'bar'},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(
     left(new Error('Request responded with status code 500'))
   );
-
-  teardown();
 });
 
 test('http.post() should fetch a `post` request - failure stringify on request', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .post('https://api.contactlab.it/hub/v1/endpoint', 200);
 
-  const result = await http(fetch).post('/endpoint', CIRCULAR, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).post(
+    '/endpoint',
+    CIRCULAR,
+    'TOKEN'
+  )();
 
   expect(result).toEqual(
     left(
@@ -91,49 +89,46 @@ test('http.post() should fetch a `post` request - failure stringify on request',
     --- property 'reference' closes the circle`)
     )
   );
-
-  teardown();
 });
 
 test('http.post() should fetch a `post` request - failure parse on response', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .post('https://api.contactlab.it/hub/v1/endpoint', new Response('foo'));
 
-  const result = await http(fetch).post('/endpoint', {}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).post(
+    '/endpoint',
+    {},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(
     left(new SyntaxError(`Unexpected token o in JSON at position 1`))
   );
-
-  teardown();
 });
 
 test('http.post() should fetch a `post` request using configured api endpoint', async () => {
-  const teardown = WIN_MOCK({
-    href: 'http://test.com',
-    ContactHubAPI: 'http://api.endpoint/v2'
-  });
-
   const fetch = fetchMock.sandbox().post('http://api.endpoint/v2/path', 200);
 
-  const result = await http(fetch).post('/path', {}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_CUSTOM, fetch}).post(
+    '/path',
+    {},
+    'TOKEN'
+  )();
 
   expect(isRight(result)).toBe(true);
-
-  teardown();
 });
 
 test('http.patch() should fetch a `patch` request - success', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .patch('https://api.contactlab.it/hub/v1/endpoint', {id: 'abcd'});
 
-  const result = await http(fetch).patch('/endpoint', {foo: 'bar'}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).patch(
+    '/endpoint',
+    {foo: 'bar'},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(right({id: 'abcd'}));
   expect(fetch.lastOptions()?.method).toBe('PATCH');
@@ -144,64 +139,64 @@ test('http.patch() should fetch a `patch` request - success', async () => {
     'Content-Type': 'application/json',
     Authorization: `Bearer TOKEN`
   });
-
-  teardown();
 });
 
 test('http.patch() should fetch a `patch` request - success empty response', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .patch('https://api.contactlab.it/hub/v1/endpoint', 200);
 
-  const result = await http(fetch).patch('/endpoint', {foo: 'bar'}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).patch(
+    '/endpoint',
+    {foo: 'bar'},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(right({}));
-
-  teardown();
 });
 
 test('http.patch() should fetch a `patch` request - failure on request', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .patch('https://api.contactlab.it/hub/v1/endpoint', {
       throws: new Error('network error')
     });
 
-  const result = await http(fetch).patch('/endpoint', {foo: 'bar'}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).patch(
+    '/endpoint',
+    {foo: 'bar'},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(left(new Error('network error')));
-
-  teardown();
 });
 
 test('http.patch() should fetch a `patch` request - failure on response', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .patch('https://api.contactlab.it/hub/v1/endpoint', 500);
 
-  const result = await http(fetch).patch('/endpoint', {foo: 'bar'}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).patch(
+    '/endpoint',
+    {foo: 'bar'},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(
     left(new Error('Request responded with status code 500'))
   );
-
-  teardown();
 });
 
 test('http.patch() should fetch a `patch` request - failure stringify on request', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .patch('https://api.contactlab.it/hub/v1/endpoint', 200);
 
-  const result = await http(fetch).patch('/endpoint', CIRCULAR, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).patch(
+    '/endpoint',
+    CIRCULAR,
+    'TOKEN'
+  )();
 
   expect(result).toEqual(
     left(
@@ -210,39 +205,34 @@ test('http.patch() should fetch a `patch` request - failure stringify on request
     --- property 'reference' closes the circle`)
     )
   );
-
-  teardown();
 });
 
 test('http.patch() should fetch a `patch` request - failure parse on response', async () => {
-  const teardown = WIN_MOCK({href: 'http://test.com'});
-
   const fetch = fetchMock
     .sandbox()
     .patch('https://api.contactlab.it/hub/v1/endpoint', new Response('foo'));
 
-  const result = await http(fetch).patch('/endpoint', {}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_DEFAULTS, fetch}).patch(
+    '/endpoint',
+    {},
+    'TOKEN'
+  )();
 
   expect(result).toEqual(
     left(new SyntaxError(`Unexpected token o in JSON at position 1`))
   );
-
-  teardown();
 });
 
 test('http.patch() should fetch a `patch` request using configured api endpoint', async () => {
-  const teardown = WIN_MOCK({
-    href: 'http://test.com',
-    ContactHubAPI: 'http://api.endpoint/v2'
-  });
-
   const fetch = fetchMock.sandbox().patch('http://api.endpoint/v2/path', 200);
 
-  const result = await http(fetch).patch('/path', {}, 'TOKEN')();
+  const result = await http({globals: S.GLOBALS_CUSTOM, fetch}).patch(
+    '/path',
+    {},
+    'TOKEN'
+  )();
 
   expect(isRight(result)).toBe(true);
-
-  teardown();
 });
 
 // --- Helpers

@@ -7,16 +7,13 @@
 import * as E from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import {pipe} from 'fp-ts/function';
+import {GlobalsSvc} from './globals';
 
 // --- Aliases for better documentation
 import TaskEither = TE.TaskEither;
 // ---
 
 type FetchInstance = typeof fetch;
-
-interface WithVars extends Window {
-  ContactHubAPI?: string;
-}
 
 /**
  * @category capabilities
@@ -42,24 +39,29 @@ export interface Http {
   ) => TaskEither<Error, unknown>;
 }
 
+interface HttpEnv extends GlobalsSvc {
+  fetch: FetchInstance;
+}
+
 /**
  * Live instance of `Http` service.
  *
  * @category instances
  * @since 2.0.0
  */
-export const http = (F: FetchInstance): Http => {
-  const apiUrl = (): string =>
-    (window as WithVars).ContactHubAPI ?? 'https://api.contactlab.it/hub/v1';
-
-  const r = request(F);
+export const http = (Env: HttpEnv): Http => {
+  const r = request(Env.fetch);
 
   return {
     post: (p, b, t) =>
       pipe(
         stringify(b),
         TE.chain(body =>
-          r(`${apiUrl()}${p}`, {method: 'POST', body, headers: headers(t)})
+          r(`${Env.globals().apiURL}${p}`, {
+            method: 'POST',
+            body,
+            headers: headers(t)
+          })
         )
       ),
 
@@ -67,7 +69,11 @@ export const http = (F: FetchInstance): Http => {
       pipe(
         stringify(b),
         TE.chain(body =>
-          r(`${apiUrl()}${p}`, {method: 'PATCH', body, headers: headers(t)})
+          r(`${Env.globals().apiURL}${p}`, {
+            method: 'PATCH',
+            body,
+            headers: headers(t)
+          })
         )
       )
   };

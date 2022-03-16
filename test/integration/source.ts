@@ -2,6 +2,7 @@ import {polyfill} from 'es6-promise';
 import FM from 'fetch-mock';
 import {cookie} from '../../src/cookie';
 import {document} from '../../src/doc';
+import {globals} from '../../src/globals';
 import {http} from '../../src/http';
 import {location} from '../../src/location';
 import {main} from '../../src/main';
@@ -17,9 +18,10 @@ sb.config.overwriteRoutes = true;
 (window as any).fetchMock = sb;
 
 main({
+  globals,
   document: document(),
-  cookie: cookie(),
-  http: http(sb),
+  cookie: cookie({globals}),
+  http: http({fetch: sb, globals}),
   location: location(),
   program: program(),
   uuid: uuid()

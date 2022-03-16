@@ -2,6 +2,7 @@ import {fetch} from 'cross-fetch';
 import {polyfill} from 'es6-promise';
 import {cookie} from './cookie';
 import {document} from './doc';
+import {globals} from './globals';
 import {http} from './http';
 import {location} from './location';
 import {main} from './main';
@@ -11,9 +12,10 @@ import {uuid} from './uuid';
 polyfill();
 
 main({
+  globals,
   document: document(),
-  cookie: cookie(),
-  http: http(fetch),
+  cookie: cookie({globals}),
+  http: http({globals, fetch}),
   location: location(),
   program: program(),
   uuid: uuid()

@@ -5,7 +5,7 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-test('location.data() should return window.locatio object', () => {
+test('location.data() should return window.location object', () => {
   const teardown = WIN_MOCK({href: 'http://test.com/some/path'});
 
   expect(location().data()).toEqual({
