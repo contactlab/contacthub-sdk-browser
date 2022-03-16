@@ -234,6 +234,12 @@ An example use case is if you send a newsletter to your customers and you want t
 
 Please note that if a different user is logged in, the Customer Hub id for the currently logged in user is stored in the Customer Hub cookie. The id contained in the Customer Hub cookie always takes precedence over an id specified using the `clabId` query string parameter.
 
+If needed you can **set a custom name** for the `clabId` query parameter through global configuration:
+
+```js
+window.ContactHubClabId = 'custom_id'; // expected query string should be `?custom_id=A_VALID_CONTACTHUB_ID`
+```
+
 #### Aggregate nodes (alpha)
 
 :warning: **Warning: this feature is in alpha phase - use it at your own risk** 
