@@ -4,12 +4,9 @@ import {config, ConfigOptions} from '../src/config';
 import * as H from './_helpers';
 import * as S from './services';
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 test('config() should set SDK configuration - with defaults', async () => {
   const c = config({
+    globals: S.GLOBALS_DEFAULTS,
     location: S.LOCATION(),
     cookie: S.COOKIE({
       hub: TE.left(new Error()),
@@ -46,6 +43,7 @@ test('config() should set SDK configuration - with defaults', async () => {
 
 test('config() should set SDK configuration - with cookies values', async () => {
   const c = config({
+    globals: S.GLOBALS_DEFAULTS,
     location: S.LOCATION(),
     cookie: S.COOKIE({}),
     http: _HTTP,
@@ -89,6 +87,7 @@ test('config() should set SDK configuration - with cookies values', async () => 
 
 test('config() should fail if provided options are not valid', async () => {
   const c = config({
+    globals: S.GLOBALS_DEFAULTS,
     location: S.LOCATION(),
     cookie: S.COOKIE({hub: TE.left(new Error()), utm: TE.left(new Error())}),
     http: _HTTP,
@@ -106,6 +105,7 @@ test('config() should fail if provided options are not valid', async () => {
 
 test('config() should use utm_* query params to set UTM cookie', async () => {
   const c = config({
+    globals: S.GLOBALS_DEFAULTS,
     location: S.LOCATION(
       'http://test.com?utm_source=def&utm_campaign=foo&utm_term=bar'
     ),
@@ -137,6 +137,7 @@ test('config() should use utm_* query params to set UTM cookie', async () => {
 
 test('config() should fail is service fails', async () => {
   const c = config({
+    globals: S.GLOBALS_DEFAULTS,
     location: S.LOCATION(),
     cookie: S.COOKIE_SET_KO({
       hub: TE.left(new Error()),
@@ -160,6 +161,7 @@ test('config() should fail is service fails', async () => {
 
 test('config() should set target if there is a `target` param in query string', async () => {
   const withRightParam = config({
+    globals: S.GLOBALS_DEFAULTS,
     location: S.LOCATION('http://test.com?target=AGGREGATE'),
     cookie: S.COOKIE({}),
     http: _HTTP,
@@ -167,6 +169,7 @@ test('config() should set target if there is a `target` param in query string', 
   });
 
   const withWrongParam = config({
+    globals: S.GLOBALS_DEFAULTS,
     location: S.LOCATION('http://test.com?target=foobarbaz'),
     cookie: S.COOKIE({}),
     http: _HTTP,
@@ -193,7 +196,46 @@ test('config() should set target if there is a `target` param in query string', 
 
 test('config() should set customer if there is a clabId param in query string', async () => {
   const c = config({
+    globals: S.GLOBALS_DEFAULTS,
     location: S.LOCATION('http://test.com?clabId=abcdef123456'),
+    cookie: S.COOKIE({}),
+    http: _HTTP,
+    uuid: S.UUID
+  });
+
+  const OPTIONS: ConfigOptions = {
+    token: H.TOKEN,
+    workspaceId: H.WSID,
+    nodeId: H.NID
+  };
+
+  const result = await c(OPTIONS)();
+  expect(result).toEqual(right(undefined));
+  expect(S.SET_HUB_COOKIE).toBeCalledTimes(2);
+  expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(1, S.HUB_COOKIE(), {
+    expires: 365
+  });
+  expect(S.SET_HUB_COOKIE).toHaveBeenNthCalledWith(
+    2,
+    {
+      ...S.HUB_COOKIE(),
+      customerId: 'abcdef123456',
+      hash: '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a'
+    },
+    undefined
+  );
+  expect(_HTTP.post).toBeCalledTimes(1); // <-- customer `shouldUpdate` return false;
+  expect(_HTTP.post).toBeCalledWith(
+    `/workspaces/${H.WSID}/customers/abcdef123456/sessions`,
+    {value: S.HUB_COOKIE().sid},
+    H.TOKEN
+  );
+});
+
+test('config() should set customer if there is a custom clabId param in query string', async () => {
+  const c = config({
+    globals: S.GLOBALS_CUSTOM,
+    location: S.LOCATION('http://test.com?custom_id=abcdef123456'),
     cookie: S.COOKIE({}),
     http: _HTTP,
     uuid: S.UUID

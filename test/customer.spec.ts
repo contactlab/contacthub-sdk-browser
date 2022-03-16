@@ -6,10 +6,6 @@ import {Http} from '../src/http';
 import * as H from './_helpers';
 import * as S from './services';
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 test('customer() should reset Hub cookie when called without options', async () => {
   const c = customer({
     http: _HTTP,

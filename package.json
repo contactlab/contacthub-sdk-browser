@@ -1,6 +1,6 @@
 {
   "name": "@contactlab/sdk-browser",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Contactlab Browser SDK",
   "author": "Contactlab",
   "license": "Apache-2.0",
@@ -27,8 +27,8 @@
     "check": "tsc",
     "karma": "karma start",
     "pretest": "npm run check && npm run lint",
-    "test": "jest && npm run karma",
-    "test:bs": "jest && BS=true npm run karma",
+    "test": "jest -i && npm run karma",
+    "test:bs": "jest -i && BS=true npm run karma",
     "prebuild": "npm run test",
     "build": "webpack",
     "prepublishOnly": "npm run build",

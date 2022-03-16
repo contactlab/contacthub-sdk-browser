@@ -7,6 +7,7 @@ import * as TE from 'fp-ts/TaskEither';
 import {pipe} from 'fp-ts/function';
 import * as C from './cookie';
 import {customer} from './customer';
+import {GlobalsSvc} from './globals';
 import {HttpSvc} from './http';
 import {LocationSvc} from './location';
 import {Effect} from './program';
@@ -22,7 +23,12 @@ import CookieSvc = C.CookieSvc;
  * @category capabilities
  * @since 2.0.0
  */
-export interface ConfigEnv extends HttpSvc, CookieSvc, LocationSvc, UuisSvc {}
+export interface ConfigEnv
+  extends GlobalsSvc,
+    HttpSvc,
+    CookieSvc,
+    LocationSvc,
+    UuisSvc {}
 
 /**
  * Defines the `config` method signature.
@@ -82,7 +88,7 @@ export const config =
         )
       ),
       TE.chain(() => {
-        const id = E.location.qp('clabId');
+        const id = E.location.qp(E.globals().clabIdName);
 
         return typeof id === 'undefined'
           ? TE.right(undefined)

@@ -5,13 +5,23 @@ nav_order: 2
 
 # Change Log
 
+## [2.2.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.2.0)
+
+#### New features:
+
+- Configurable `clabId` query parameter name ([#283](https://github.com/contactlab/contacthub-sdk-browser/issues/283))
+
+#### Dependencies
+
+- [Security] Bump follow-redirects from 1.14.7 to 1.14.8 ([#260](https://github.com/contactlab/contacthub-sdk-browser/pull/260))
+
 ## [2.1.1](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.1.1)
 
 #### Dependencies:
 
 - [Security] fix vulnerabilities
-- Bump cross-fetch from 3.1.4 to 3.1.5 (#231)
-- Bump fp-ts from 2.11.5 to 2.11.8 (#215, #223, #232)
+- Bump cross-fetch from 3.1.4 to 3.1.5 ([#231](https://github.com/contactlab/contacthub-sdk-browser/pull/231))
+- Bump fp-ts from 2.11.5 to 2.11.8 ([#215](https://github.com/contactlab/contacthub-sdk-browser/pull/215), [#223](https://github.com/contactlab/contacthub-sdk-browser/pull/223), [#232](https://github.com/contactlab/contacthub-sdk-browser/pull/232))
 
 ## [2.1.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.1.0)
 

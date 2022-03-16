@@ -1,6 +1,6 @@
 ---
 title: http.ts
-nav_order: 6
+nav_order: 7
 parent: Modules
 ---
 
@@ -46,7 +46,7 @@ Live instance of `Http` service.
 **Signature**
 
 ```ts
-export declare const http: (F: FetchInstance) => Http;
+export declare const http: (Env: HttpEnv) => Http;
 ```
 
 Added in v2.0.0

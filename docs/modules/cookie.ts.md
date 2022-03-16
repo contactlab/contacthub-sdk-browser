@@ -52,7 +52,7 @@ Live instance of `Cookie` service.
 **Signature**
 
 ```ts
-export declare const cookie: () => Cookie;
+export declare const cookie: (E: CookieEnv) => Cookie;
 ```
 
 Added in v2.0.0

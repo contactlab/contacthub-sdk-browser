@@ -11,10 +11,6 @@ beforeAll(() => {
   /* eslint-enable*/
 });
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 afterAll(() => {
   // eslint-disable-next-line no-console
   console.error = oriConsole;

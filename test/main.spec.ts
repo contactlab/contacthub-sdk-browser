@@ -20,13 +20,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
-
   delete (window as any).ch;
 });
 
 test('main() should execute `config` command', async () => {
   main({
+    globals: S.GLOBALS_DEFAULTS,
     cookie: S.COOKIE({}),
     document: S.DOC({}),
     http: _HTTP,
@@ -54,6 +53,7 @@ test('main() should execute `config` command', async () => {
 
 test('main() should execute `event` command', async () => {
   main({
+    globals: S.GLOBALS_DEFAULTS,
     cookie: S.COOKIE({
       utm: TE.left(new Error())
     }),
@@ -92,6 +92,7 @@ test('main() should execute `event` command', async () => {
 
 test('main() should execute `customer` command', async () => {
   main({
+    globals: S.GLOBALS_DEFAULTS,
     cookie: S.COOKIE({}),
     document: S.DOC({}),
     http: _HTTP,
@@ -121,11 +122,11 @@ test('main() should execute `customer` command', async () => {
 });
 
 test('main() should execute command using configured Hub object name', async () => {
-  (window as any).ContactHubObject = 'FOO';
-  (window as any).FOO = (...args: any[]) =>
-    ((window as any).FOO.q = (window as any).FOO.q || []).push(args);
+  (window as any).chub = (...args: any[]) =>
+    ((window as any).chub.q = (window as any).chub.q || []).push(args);
 
   main({
+    globals: S.GLOBALS_CUSTOM,
     cookie: S.COOKIE({}),
     document: S.DOC({}),
     http: _HTTP,
@@ -134,7 +135,7 @@ test('main() should execute command using configured Hub object name', async () 
     uuid: S.UUID
   });
 
-  (window as any).FOO('config', {
+  (window as any).chub('config', {
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID
@@ -150,8 +151,7 @@ test('main() should execute command using configured Hub object name', async () 
   expect(_HTTP.post).not.toBeCalled();
   expect(_HTTP.patch).not.toBeCalled();
 
-  delete (window as any).ContactHubObject;
-  delete (window as any).FOO;
+  delete (window as any).chub;
 });
 
 test('main() should process operations queue', async () => {
@@ -162,6 +162,7 @@ test('main() should process operations queue', async () => {
   });
 
   main({
+    globals: S.GLOBALS_DEFAULTS,
     cookie: S.COOKIE({}),
     document: S.DOC({}),
     http: _HTTP,

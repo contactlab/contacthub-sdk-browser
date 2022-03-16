@@ -5,6 +5,7 @@
 import {ConfigOptions, ConfigEnv, config} from './config';
 import {CustomerData, CustomerEnv, customer} from './customer';
 import {EventOptions, EventEnv, event} from './event';
+import {GlobalsSvc} from './globals';
 import {Effect, ProgramSvc} from './program';
 
 /**
@@ -13,7 +14,12 @@ import {Effect, ProgramSvc} from './program';
  * @category capabilities
  * @since 2.0.0
  */
-export interface MainEnv extends ProgramSvc, ConfigEnv, CustomerEnv, EventEnv {}
+export interface MainEnv
+  extends GlobalsSvc,
+    ProgramSvc,
+    ConfigEnv,
+    CustomerEnv,
+    EventEnv {}
 
 /**
  * SDK signature.
@@ -64,7 +70,7 @@ export const main = (E: MainEnv): void => {
   // Necessary evil...
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const win = window as any;
-  const varName = win.ContactHubObject ?? 'ch';
+  const varName = E.globals().chName;
   const ch = win[varName];
 
   if (ch && ch.q) {

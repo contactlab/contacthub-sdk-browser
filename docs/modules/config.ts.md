@@ -31,7 +31,12 @@ Defines capabilities and services required by the `config` method in order to wo
 **Signature**
 
 ```ts
-export interface ConfigEnv extends HttpSvc, CookieSvc, LocationSvc, UuisSvc {}
+export interface ConfigEnv
+  extends GlobalsSvc,
+    HttpSvc,
+    CookieSvc,
+    LocationSvc,
+    UuisSvc {}
 ```
 
 Added in v2.0.0

@@ -8,6 +8,7 @@ import {Either, right, left} from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 import {pipe} from 'fp-ts/function';
 import Cookies from 'js-cookie';
+import {GlobalsSvc} from './globals';
 import {Effect} from './program';
 
 interface Decoder<A> {
@@ -15,11 +16,6 @@ interface Decoder<A> {
 }
 
 // --- Service
-interface WithVars extends Window {
-  ContactHubCookie?: string;
-  ContactHubUtmCookie?: string;
-}
-
 /**
  * @category capabilities
  * @since 2.0.0
@@ -67,29 +63,24 @@ export interface CookieSet<A> {
   (value: A, options?: Cookies.CookieAttributes): Effect;
 }
 
+interface CookieEnv extends GlobalsSvc {}
+
 /**
  * Live instance of `Cookie` service.
  *
  * @category instances
  * @since 2.0.0
  */
-export const cookie = (): Cookie => {
-  const hubName = (): string => (window as WithVars).ContactHubCookie ?? '_ch';
-
-  const utmName = (): string =>
-    (window as WithVars).ContactHubUtmCookie ?? '_chutm';
-
-  return {
-    getHub: fallback =>
-      pipe(
-        get(hubName(), CHDecoder, fallback),
-        TE.map(ch => ({...ch, target: ch.target || 'ENTRY'}))
-      ),
-    setHub: (value, opts) => set(hubName(), value, opts),
-    getUTM: fallback => get(utmName(), UTMDecoder, fallback),
-    setUTM: (value, opts) => set(utmName(), value, opts)
-  };
-};
+export const cookie = (E: CookieEnv): Cookie => ({
+  getHub: fallback =>
+    pipe(
+      get(E.globals().cookieName, CHDecoder, fallback),
+      TE.map(ch => ({...ch, target: ch.target || 'ENTRY'}))
+    ),
+  setHub: (value, opts) => set(E.globals().cookieName, value, opts),
+  getUTM: fallback => get(E.globals().utmCookieName, UTMDecoder, fallback),
+  setUTM: (value, opts) => set(E.globals().utmCookieName, value, opts)
+});
 
 // --- CH cookie
 /**
