@@ -5,10 +5,6 @@ import {event} from '../src/event';
 import * as H from './_helpers';
 import * as S from './services';
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 test('event() should send an event to API', async () => {
   const e = event({
     location: S.LOCATION(),

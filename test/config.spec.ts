@@ -4,10 +4,6 @@ import {config, ConfigOptions} from '../src/config';
 import * as H from './_helpers';
 import * as S from './services';
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 test('config() should set SDK configuration - with defaults', async () => {
   const c = config({
     location: S.LOCATION(),
