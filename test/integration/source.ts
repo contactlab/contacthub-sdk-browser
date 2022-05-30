@@ -21,7 +21,7 @@ main({
   globals,
   document: document(),
   cookie: cookie({globals}),
-  http: http({fetch: sb, globals}),
+  http: http({fetch: sb as any, globals}),
   location: location(),
   program: program(),
   uuid: uuid()
