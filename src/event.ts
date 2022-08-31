@@ -63,7 +63,7 @@ export const event =
         'utm',
         pipe(
           E.cookie.getUTM(),
-          TE.altW(() => TE.right(undefined))
+          TE.altW(() => TE.right<Error, undefined>(undefined))
         )
       ),
       // TODO: is this right? should the operation fail if target is AGGREGATE but aggregateNodeId and aggregateToken are not defined?
