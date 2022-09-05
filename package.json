@@ -52,7 +52,7 @@
     "@types/js-cookie": "3.0.2",
     "@types/karma": "6.3.3",
     "@types/mocha": "9.1.1",
-    "@types/node": "16.11.56",
+    "@types/node": "16.11.57",
     "@types/sinon": "10.0.13",
     "@types/terser-webpack-plugin": "5.2.0",
     "@types/uuid": "8.3.4",
