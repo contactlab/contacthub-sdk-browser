@@ -43,7 +43,7 @@
     "fp-ts": "2.13.1",
     "js-cookie": "3.0.1",
     "jssha": "3.3.0",
-    "tslib": "2.4.0",
+    "tslib": "2.4.1",
     "uuid": "9.0.0"
   },
   "devDependencies": {
