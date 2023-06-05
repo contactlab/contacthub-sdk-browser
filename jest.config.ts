@@ -1,6 +1,6 @@
-import type {Config} from '@jest/types';
+import type {JestConfigWithTsJest} from 'ts-jest';
 
-const config: Config.InitialOptions = {
+const config: JestConfigWithTsJest = {
   preset: 'ts-jest',
 
   automock: false,
@@ -13,17 +13,15 @@ const config: Config.InitialOptions = {
     '<rootDir>/node_modules/'
   ],
   coverageReporters: ['text'],
-  globals: {
-    'ts-jest': {
-      diagnostics: true
-    }
-  },
   moduleFileExtensions: ['js', 'json', 'node', 'ts'],
   roots: ['<rootDir>/test/'],
   setupFiles: ['<rootDir>/test/_setup.ts'],
   testEnvironment: 'node',
   testMatch: undefined,
-  testRegex: '(\\.|/)spec\\.ts$'
+  testRegex: '(\\.|/)spec\\.ts$',
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {diagnostics: true}]
+  }
 };
 
 export default config;
