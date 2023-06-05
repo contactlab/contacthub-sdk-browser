@@ -3,9 +3,6 @@ import {Configuration} from 'webpack';
 import {merge} from 'webpack-merge';
 import {latest} from './webpack.config';
 
-// FIXME: really hacky...
-declare const process: NodeJS.Process;
-
 interface WithPlugins extends ConfigOptions {
   webpack?: Configuration;
   browserStack?: {
@@ -24,9 +21,6 @@ interface BSLauncher extends CustomLauncher {
 }
 
 // --- Env vars
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-process.env.CHROME_BIN = require('puppeteer').executablePath();
-
 const BS = process.env.BS === 'true';
 
 const STD_BROWSERS = ['ChromeHeadlessNoSandbox'];
