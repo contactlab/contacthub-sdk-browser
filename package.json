@@ -56,7 +56,7 @@
     "@types/sinon": "10.0.15",
     "@types/uuid": "9.0.1",
     "chai": "4.3.7",
-    "docs-ts": "0.7.2",
+    "docs-ts": "0.8.0",
     "eslint": "8.42.0",
     "eslint-config-contactlab": "9.0.0",
     "eslint-config-prettier": "8.8.0",
