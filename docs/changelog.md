@@ -5,13 +5,31 @@ nav_order: 2
 
 # Change Log
 
+## [2.2.1](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.2.1)
+
+#### Dependencies:
+
+[Security] Bump socket.io-parser from 4.2.1 to 4.2.3 (#535)
+Bump cross-fetch from 3.1.5 to 3.1.6 (#523)
+[Security] Bump engine.io and socket.io (#515)
+Bump js-cookie from 3.0.1 to 3.0.5 (#509)
+[Security] Bump ua-parser-js from 0.7.31 to 0.7.33 (#457)
+[Security] Bump json5 from 2.2.0 to 2.2.3 (#450)
+[Security] Bump qs and body-parser (#437)
+[Security] Bump engine.io and socket.io (#426)
+[Security] Bump socket.io-parser from 4.0.4 to 4.0.5 (#418)
+Bump jssha from 2.3.1 to 3.3.0 (#307, #416, #458, #529, #544, #406)
+[Security] Bump async from 2.6.3 to 2.6.4 (#303)
+[Security] Bump minimist from 1.2.5 to 1.2.6 (#291)
+Bump fp-ts from 2.11.8 to 2.15.0 (#286, #298, #309, #317, #367, #382, #410, #506, #527)
+
 ## [2.2.0](https://github.com/contactlab/contacthub-sdk-browser/releases/tag/v2.2.0)
 
 #### New features:
 
 - Configurable `clabId` query parameter name ([#283](https://github.com/contactlab/contacthub-sdk-browser/issues/283))
 
-#### Dependencies
+#### Dependencies:
 
 - [Security] Bump follow-redirects from 1.14.7 to 1.14.8 ([#260](https://github.com/contactlab/contacthub-sdk-browser/pull/260))
 
