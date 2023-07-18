@@ -15,9 +15,7 @@ describe('Customer API:', () => {
 
   describe('when required config is not set', () => {
     it('should log error', async () => {
-      expect(() => {
-        H._ch('customer', H.CUSTOMER);
-      }).not.to.throw();
+      await H._ch('customer', H.CUSTOMER);
 
       await H.whenDone();
 
@@ -40,7 +38,7 @@ describe('Customer API:', () => {
 
       await H.setConfig();
 
-      H._ch('customer', H.CUSTOMER);
+      await H._ch('customer', H.CUSTOMER);
 
       await H.whenDone();
 
@@ -77,7 +75,7 @@ describe('Customer API:', () => {
 
       C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
-      H._ch('customer', H.CUSTOMER);
+      await H._ch('customer', H.CUSTOMER);
 
       await H.whenDone();
 
@@ -89,14 +87,14 @@ describe('Customer API:', () => {
       expect(JSON.parse(body)).to.eql(H.CUSTOMER);
 
       // --- does not update the customer if the same data is sent
-      H._ch('customer', H.CUSTOMER);
+      await H._ch('customer', H.CUSTOMER);
 
       await H.whenDone();
 
       expect(H._fetchMock.calls().length).to.equal(1);
 
       // --- does update the customer if updated data is sent
-      H._ch('customer', {...H.CUSTOMER, externalId: 'baz'});
+      await H._ch('customer', {...H.CUSTOMER, externalId: 'baz'});
 
       await H.whenDone();
 
@@ -112,7 +110,7 @@ describe('Customer API:', () => {
 
       C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
-      H._ch('customer', {id: H.CID});
+      await H._ch('customer', {id: H.CID});
 
       await H.whenDone();
 
@@ -127,7 +125,7 @@ describe('Customer API:', () => {
         customerId: 'different-cid'
       });
 
-      H._ch('customer', {id: H.CID});
+      await H._ch('customer', {id: H.CID});
 
       expect(H._fetchMock.called()).to.equal(false);
     });
@@ -142,7 +140,7 @@ describe('Customer API:', () => {
 
       const {sid} = C.getCookieJSON(H.CH);
 
-      H._ch('customer', {id: H.CID});
+      await H._ch('customer', {id: H.CID});
 
       await H.whenDone();
 
@@ -171,7 +169,7 @@ describe('Customer API:', () => {
 
       C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
-      H._ch('customer', {...H.CUSTOMER, id: H.CID});
+      await H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
       await H.whenDone();
 
@@ -196,7 +194,7 @@ describe('Customer API:', () => {
 
       const {sid} = C.getCookieJSON(H.CH);
 
-      H._ch('customer', {...H.CUSTOMER, id: H.CID});
+      await H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
       await H.whenDone();
 
@@ -230,7 +228,7 @@ describe('Customer API:', () => {
 
       const {sid} = C.getCookieJSON(H.CH);
 
-      H._ch('customer', {...H.CUSTOMER, id: H.CID});
+      await H._ch('customer', {...H.CUSTOMER, id: H.CID});
 
       await H.whenDone();
 
@@ -266,7 +264,7 @@ describe('Customer API:', () => {
         sid: 'old-session-id'
       });
 
-      H._ch('customer');
+      await H._ch('customer');
 
       await H.whenDone();
 
@@ -292,7 +290,7 @@ describe('Customer API:', () => {
     });
 
     it('should log errors if id != customerId and no other customer data provided', async () => {
-      H._ch('customer', {id: OTHER_CID});
+      await H._ch('customer', {id: OTHER_CID});
 
       await H.whenDone();
 
@@ -310,7 +308,7 @@ describe('Customer API:', () => {
         500
       );
 
-      H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
+      await H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
 
       await H.whenDone();
 
@@ -330,7 +328,7 @@ describe('Customer API:', () => {
           200
         );
 
-      H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
+      await H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
 
       await H.whenDone();
 
@@ -358,7 +356,7 @@ describe('Customer API:', () => {
           500
         );
 
-      H._ch('customer', {id: OTHER_CID});
+      await H._ch('customer', {id: OTHER_CID});
 
       await H.whenDone();
 
@@ -378,7 +376,7 @@ describe('Customer API:', () => {
           200
         );
 
-      H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
+      await H._ch('customer', {id: OTHER_CID, externalId: 'ANOTHER_ID'});
 
       await H.whenDone();
 
@@ -401,7 +399,7 @@ describe('Customer API:', () => {
 
       C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
-      H._ch('customer', {externalId: 'ANOTHER_ID'});
+      await H._ch('customer', {externalId: 'ANOTHER_ID'});
 
       await H.whenDone();
 
@@ -424,7 +422,7 @@ describe('Customer API:', () => {
         .post(`${H.API}/workspaces/${H.WSID}/customers`, 500)
         .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 200);
 
-      H._ch('customer', {});
+      await H._ch('customer', {});
 
       await H.whenDone();
 
@@ -441,7 +439,7 @@ describe('Customer API:', () => {
         .post(`${H.API}/workspaces/${H.WSID}/customers`, {id: H.CID})
         .post(`${H.API}/workspaces/${H.WSID}/customers/${H.CID}/sessions`, 500);
 
-      H._ch('customer', {});
+      await H._ch('customer', {});
 
       await H.whenDone();
 

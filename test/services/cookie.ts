@@ -99,5 +99,5 @@ const withFallback = <A>(f?: A) =>
 
 const withTarget = map<HubCookie, HubCookieWithTarget>(ch => ({
   ...ch,
-  target: ch.target || 'ENTRY'
+  target: ch.target ?? 'ENTRY'
 }));

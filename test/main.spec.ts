@@ -14,14 +14,7 @@ declare global {
   }
 }
 
-beforeEach(() => {
-  (window as any).ch = (...args: any[]) =>
-    (window.ch.q = window.ch.q || []).push(args);
-});
-
-afterEach(() => {
-  delete (window as any).ch;
-});
+const _HTTP = S.HTTP({});
 
 test('main() should execute `config` command', async () => {
   main({
@@ -34,7 +27,7 @@ test('main() should execute `config` command', async () => {
     uuid: S.UUID
   });
 
-  window.ch('config', {
+  await window.ch('config', {
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID
@@ -64,7 +57,7 @@ test('main() should execute `event` command', async () => {
     uuid: S.UUID
   });
 
-  window.ch('event', {
+  await window.ch('event', {
     type: 'completedOrder',
     properties: {orderId: '1234'}
   });
@@ -101,7 +94,7 @@ test('main() should execute `customer` command', async () => {
     uuid: S.UUID
   });
 
-  window.ch('customer', {id: H.CID});
+  await window.ch('customer', {id: H.CID});
 
   await H.wait();
 
@@ -122,8 +115,9 @@ test('main() should execute `customer` command', async () => {
 });
 
 test('main() should execute command using configured Hub object name', async () => {
-  (window as any).chub = (...args: any[]) =>
-    ((window as any).chub.q = (window as any).chub.q || []).push(args);
+  const w = window as any;
+
+  w.chub = (...args: any[]) => (w.chub.q = w.chub.q || []).push(args);
 
   main({
     globals: S.GLOBALS_CUSTOM,
@@ -155,7 +149,10 @@ test('main() should execute command using configured Hub object name', async () 
 });
 
 test('main() should process operations queue', async () => {
-  window.ch('config', {
+  (window as any).ch = (...args: any[]) =>
+    (window.ch.q = window.ch.q ?? []).push(args);
+
+  await window.ch('config', {
     token: H.TOKEN,
     workspaceId: H.WSID,
     nodeId: H.NID
@@ -180,7 +177,6 @@ test('main() should process operations queue', async () => {
   );
   expect(_HTTP.post).not.toBeCalled();
   expect(_HTTP.patch).not.toBeCalled();
-});
 
-// --- Helpers
-const _HTTP = S.HTTP({});
+  delete (window as any).ch;
+});

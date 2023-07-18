@@ -110,9 +110,9 @@ const withDefaults = (E: WithOptionsEnv): C.HubCookie => ({
   ...E.options,
   target: 'ENTRY',
   sid: E.uuid.v4(),
-  debug: E.options.debug || false,
-  context: E.options.context || 'WEB',
-  contextInfo: E.options.contextInfo || {}
+  debug: E.options.debug ?? false,
+  context: E.options.context ?? 'WEB',
+  contextInfo: E.options.contextInfo ?? {}
 });
 
 const prepareCHCookie =

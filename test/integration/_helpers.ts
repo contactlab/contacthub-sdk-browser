@@ -68,7 +68,7 @@ export const spy = sinon.stub(console, 'error').callsFake(() => undefined);
  * Sets test configuration (token + wsid + nodeid)
  */
 export const setConfig = async (): Promise<void> => {
-  _ch('config', CONFIG);
+  await _ch('config', CONFIG);
 
   await whenDone();
 };

@@ -29,8 +29,8 @@ export const WIN_MOCK = (E: WinMockEnv): (() => void) => {
     ContactHubUtmCookie: E.ContactHubUtmCookie,
     ContactHubClabId: E.ContactHubClabId,
     document: {
-      title: E.title || '',
-      referrer: E.referrer || ''
+      title: E.title ?? '',
+      referrer: E.referrer ?? ''
     },
     location: {
       href: E.href,
@@ -55,7 +55,7 @@ export const removeCookie = Cookies.remove;
 export const getCookie = Cookies.get;
 
 export const getCookieJSON = (name: string): any =>
-  JSON.parse(Cookies.get(name) || '{}');
+  JSON.parse(Cookies.get(name) ?? '{}');
 
 export const setCookieJSON = (name: string, value: any): string | undefined =>
   Cookies.set(name, JSON.stringify(value));
