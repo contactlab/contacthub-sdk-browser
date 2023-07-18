@@ -3,7 +3,7 @@ import * as C from '../_helpers';
 import * as H from './_helpers';
 
 describe('Config API', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     C.removeCookie(H.CH);
   });
 
@@ -26,7 +26,7 @@ describe('Config API', () => {
 
     const sid = C.getCookieJSON(H.CH).sid;
 
-    H._ch('config', H.CONFIG);
+    await H._ch('config', H.CONFIG);
 
     await H.whenDone();
 
@@ -48,7 +48,7 @@ describe('Config API', () => {
   });
 
   it('should allow to specify optional fields', async () => {
-    H._ch('config', {
+    await H._ch('config', {
       ...H.CONFIG,
       context: 'foo',
       contextInfo: {foo: 'bar'},
@@ -71,7 +71,11 @@ describe('Config API', () => {
       token: H.TOKEN
     });
 
-    H._ch('config', {workspaceId: H.WSID, nodeId: H.NID, token: 'CDE456'});
+    await H._ch('config', {
+      workspaceId: H.WSID,
+      nodeId: H.NID,
+      token: 'CDE456'
+    });
 
     await H.whenDone();
 
@@ -83,9 +87,7 @@ describe('Config API', () => {
   });
 
   it('should log error if required option are not specified (no throw)', async () => {
-    expect(() => {
-      H._ch('config', {} as any);
-    }).not.to.throw();
+    await H._ch('config', {} as any);
 
     await H.whenDone();
 

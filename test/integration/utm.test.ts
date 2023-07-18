@@ -51,7 +51,7 @@ describe('UTM automatic handling', () => {
 
     C.setCookieJSON(H.UTM, {...C.getCookieJSON(H.UTM), ...utm});
 
-    H._ch('event', {type: 'viewedPage'});
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 

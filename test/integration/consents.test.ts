@@ -18,7 +18,7 @@ describe('Consents', () => {
 
     await H.setConfig();
 
-    H._ch('customer', H.CUSTOMER);
+    await H._ch('customer', H.CUSTOMER);
 
     await H.whenDone();
 
@@ -39,11 +39,11 @@ describe('Consents', () => {
 
     C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
-    H._ch('customer', H.CUSTOMER);
+    await H._ch('customer', H.CUSTOMER);
 
     await H.whenDone();
 
-    H._ch('customer', {
+    await H._ch('customer', {
       ...H.CUSTOMER,
       consents: {
         softSpam: {email: {objection: true}}

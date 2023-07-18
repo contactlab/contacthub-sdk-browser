@@ -75,7 +75,7 @@ export const cookie = (E: CookieEnv): Cookie => ({
   getHub: fallback =>
     pipe(
       get(E.globals().cookieName, CHDecoder, fallback),
-      TE.map(ch => ({...ch, target: ch.target || 'ENTRY'}))
+      TE.map(ch => ({...ch, target: ch.target ?? 'ENTRY'}))
     ),
   setHub: (value, opts) => set(E.globals().cookieName, value, opts),
   getUTM: fallback => get(E.globals().utmCookieName, UTMDecoder, fallback),

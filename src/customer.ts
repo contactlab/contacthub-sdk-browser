@@ -381,12 +381,14 @@ const storeCustomer =
 // FIXME: do we REALLY need this???
 const shouldUpdate = (data: CustomerData): boolean => {
   if (
+    /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
     data.externalId ||
     data.base ||
     data.extended ||
     data.consents ||
     data.extra ||
     data.tags
+    /* eslint-enable */
   ) {
     return true;
   } else {

@@ -16,9 +16,7 @@ describe('Event API', () => {
   });
 
   it('should checks if required config is set', async () => {
-    expect(() => {
-      H._ch('event', {type: 'viewedPage'});
-    }).not.to.throw();
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 
@@ -35,7 +33,7 @@ describe('Event API', () => {
   it('should send the event to the API', async () => {
     await H.setConfig();
 
-    H._ch('event', {type: 'viewedPage'});
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 
@@ -58,7 +56,7 @@ describe('Event API', () => {
 
     C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
-    H._ch('event', {type: 'viewedPage'});
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 
@@ -72,7 +70,7 @@ describe('Event API', () => {
 
     C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), customerId: H.CID});
 
-    H._ch('event', {type: 'viewedPage'});
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 
@@ -86,7 +84,7 @@ describe('Event API', () => {
 
     await H.setConfig();
 
-    H._ch('event', {type: 'viewedPage'});
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 
@@ -102,7 +100,10 @@ describe('Event API', () => {
   it('should allow to override inferred properties', async () => {
     await H.setConfig();
 
-    H._ch('event', {type: 'viewedPage', properties: {title: 'Custom title'}});
+    await H._ch('event', {
+      type: 'viewedPage',
+      properties: {title: 'Custom title'}
+    });
 
     await H.whenDone();
 
@@ -118,7 +119,7 @@ describe('Event API', () => {
 
     await H.setConfig();
 
-    H._ch('event', {type: 'something'});
+    await H._ch('event', {type: 'something'});
 
     await H.whenDone();
 
@@ -133,7 +134,7 @@ describe('Event API', () => {
 
     C.setCookieJSON(H.CH, {...C.getCookieJSON(H.CH), context: 'FOO'});
 
-    H._ch('event', {type: 'viewedPage'});
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 
@@ -150,7 +151,7 @@ describe('Event API', () => {
       contextInfo: {foo: 'bar'}
     });
 
-    H._ch('event', {type: 'viewedPage'});
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 
@@ -163,9 +164,7 @@ describe('Event API', () => {
   it('should log error when event type is not defined (no throws)', async () => {
     await H.setConfig();
 
-    expect(() => {
-      H._ch('event', {} as any);
-    }).not.to.throw();
+    await H._ch('event', {} as any);
 
     await H.whenDone();
 
@@ -185,7 +184,7 @@ describe('Event API', () => {
 
     await H.setConfig();
 
-    H._ch('event', {type: 'viewedPage'});
+    await H._ch('event', {type: 'viewedPage'});
 
     await H.whenDone();
 

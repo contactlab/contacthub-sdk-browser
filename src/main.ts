@@ -68,12 +68,12 @@ export const main = (E: MainEnv): void => {
   };
 
   // Necessary evil...
-  /* eslint-disable @typescript-eslint/no-explicit-any */
+  /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   const win = window as any;
   const varName = E.globals().chName;
   const ch = win[varName];
 
-  if (ch && ch.q) {
+  if (ch?.q) {
     const q: any[] = ch.q;
     q.map(command => sdk(command[0], command[1]));
   }

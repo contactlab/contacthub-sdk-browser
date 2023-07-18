@@ -43,7 +43,7 @@
   ],
   "prettier.arrowParens": "avoid",
   "prettier.bracketSpacing": false,
-  "prettier.jsxBracketSameLine": false,
+  "prettier.bracketSameLine": false,
   "prettier.printWidth": 80,
   "prettier.singleQuote": true,
   "prettier.trailingComma": "none",

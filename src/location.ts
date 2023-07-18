@@ -45,6 +45,6 @@ export const location = (): Location => ({
     const match = new RegExp(`[?&]${name}=([^&]*)`).exec(window.location.href);
     const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 
-    return val || undefined;
+    return val ?? undefined;
   }
 });

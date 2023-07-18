@@ -12,7 +12,7 @@ export const LOCATION = (
       const match = new RegExp(`[?&]${name}=([^&]*)`).exec(href);
       const val = match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 
-      return val || undefined;
+      return val ?? undefined;
     }
   };
 };
