@@ -32,7 +32,7 @@ Insert this snippet in your website (preferably in the `<HEAD>` section):
 </script>
 <script
   async
-  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.min.js"
+  src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.min.js"
 ></script>
 ```
 
@@ -51,7 +51,7 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 ```html
 <script
   async
-  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.min.js"
+  src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.min.js"
 ></script>
 ```
 
@@ -60,7 +60,7 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 ```html
 <script
   async
-  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.js"
+  src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.js"
 ></script>
 ```
 
@@ -69,7 +69,7 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 ```html
 <script
   async
-  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.legacy.min.js"
+  src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.legacy.min.js"
 ></script>
 ```
 
@@ -78,7 +78,7 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 ```html
 <script
   async
-  src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.legacy.js"
+  src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.legacy.js"
 ></script>
 ```
 
@@ -220,7 +220,7 @@ You also have to replace all occurrences of `ch` in the snippet:
 </script>
 <script
   async
-  src="https://unpkg.com/@contactlab/sdk-browser@2/sdk.min.js"
+  src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/sdk.min.js"
 ></script>
 ```
 

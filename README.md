@@ -17,7 +17,7 @@ Insert this snippet in your website (preferably in the `<HEAD>` section):
   ch('customer', { /* see below */ });
   ch('event', { /* see below */ });
 </script>
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.min.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.min.js"></script>
 ```
 
 Compressed and uncompressed copies of Customer Hub SDK files are available.
@@ -33,25 +33,25 @@ To load a hosted library, copy and paste the HTML snippet for that library (show
 #### ES6 version minified
 
 ```html
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.min.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.min.js"></script>
 ```
 
 #### ES6 version uncompressed
 
 ```html
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.js"></script>
 ```
 
 #### ES5 version minified
 
 ```html
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.legacy.min.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.legacy.min.js"></script>
 ```
 
 #### ES5 version uncompressed
 
 ```html
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/dist/sdk.legacy.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/dist/sdk.legacy.js"></script>
 ```
 
 To load a specific version, replace `2` with the version number.
@@ -190,7 +190,7 @@ You also have to replace all occurrences of `ch` in the snippet:
   chub('customer', { ... });
   chub('event', { ... });
 </script>
-<script async src="https://unpkg.com/@contactlab/sdk-browser@2/sdk.min.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/@contactlab/sdk-browser@2/sdk.min.js"></script>
 ```
 
 #### Renaming the Customer Hub cookie
