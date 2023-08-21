@@ -58,7 +58,7 @@
     "chai": "4.3.7",
     "docs-ts": "0.8.0",
     "eslint": "8.47.0",
-    "eslint-config-contactlab": "11.1.0",
+    "eslint-config-contactlab": "11.2.0",
     "eslint-config-prettier": "9.0.0",
     "fetch-mock": "9.11.0",
     "http-server": "14.1.1",
