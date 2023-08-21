@@ -52,7 +52,7 @@
     "@types/js-cookie": "3.0.3",
     "@types/karma": "6.3.4",
     "@types/mocha": "10.0.1",
-    "@types/node": "16.18.40",
+    "@types/node": "16.18.41",
     "@types/sinon": "10.0.16",
     "@types/uuid": "9.0.2",
     "chai": "4.3.7",
