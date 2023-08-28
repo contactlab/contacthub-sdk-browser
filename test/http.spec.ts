@@ -1,5 +1,5 @@
 import fetchMock from 'fetch-mock';
-import {isRight, left, right} from 'fp-ts/Either';
+import * as E from 'fp-ts/Either';
 import {http} from '../src/http';
 import * as S from './services';
 
@@ -13,7 +13,7 @@ test('http.post() should fetch a `post` request - success', async () => {
     fetch: f as any
   }).post('/endpoint', {foo: 'bar'}, 'TOKEN')();
 
-  expect(result).toEqual(right({id: 'abcd'}));
+  expect(result).toEqual(E.right({id: 'abcd'}));
   expect(f.lastOptions()?.method).toBe('POST');
   expect(f.lastOptions()?.body).toEqual(JSON.stringify({foo: 'bar'}));
   expect(f.lastOptions()?.headers).toEqual({
@@ -34,7 +34,7 @@ test('http.post() should fetch a `post` request - success empty response', async
     fetch: f as any
   }).post('/endpoint', {foo: 'bar'}, 'TOKEN')();
 
-  expect(result).toEqual(right({}));
+  expect(result).toEqual(E.right({}));
 });
 
 test('http.post() should fetch a `post` request - failure on request', async () => {
@@ -49,7 +49,7 @@ test('http.post() should fetch a `post` request - failure on request', async () 
     fetch: f as any
   }).post('/endpoint', {foo: 'bar'}, 'TOKEN')();
 
-  expect(result).toEqual(left(new Error('network error')));
+  expect(result).toEqual(E.left(new Error('network error')));
 });
 
 test('http.post() should fetch a `post` request - failure on response', async () => {
@@ -63,7 +63,7 @@ test('http.post() should fetch a `post` request - failure on response', async ()
   }).post('/endpoint', {foo: 'bar'}, 'TOKEN')();
 
   expect(result).toEqual(
-    left(new Error('Request responded with status code 500'))
+    E.left(new Error('Request responded with status code 500'))
   );
 });
 
@@ -78,7 +78,7 @@ test('http.post() should fetch a `post` request - failure stringify on request',
   }).post('/endpoint', CIRCULAR, 'TOKEN')();
 
   expect(result).toEqual(
-    left(
+    E.left(
       new TypeError(`Converting circular structure to JSON
     --> starting at object with constructor 'Object'
     --- property 'reference' closes the circle`)
@@ -96,9 +96,12 @@ test('http.post() should fetch a `post` request - failure parse on response', as
     fetch: f as any
   }).post('/endpoint', {}, 'TOKEN')();
 
-  expect(result).toEqual(
-    left(new SyntaxError(`Unexpected token o in JSON at position 1`))
-  );
+  // --- we need this trick because `SyntaxError` messages are not consistent between platform versions
+  expect(E.isLeft(result)).toBe(true);
+
+  const error = (result as E.Left<Error>).left;
+
+  expect(error.name).toBe('SyntaxError');
 });
 
 test('http.post() should fetch a `post` request using configured api endpoint', async () => {
@@ -110,7 +113,7 @@ test('http.post() should fetch a `post` request using configured api endpoint', 
     'TOKEN'
   )();
 
-  expect(isRight(result)).toBe(true);
+  expect(E.isRight(result)).toBe(true);
 });
 
 test('http.patch() should fetch a `patch` request - success', async () => {
@@ -123,7 +126,7 @@ test('http.patch() should fetch a `patch` request - success', async () => {
     fetch: f as any
   }).patch('/endpoint', {foo: 'bar'}, 'TOKEN')();
 
-  expect(result).toEqual(right({id: 'abcd'}));
+  expect(result).toEqual(E.right({id: 'abcd'}));
   expect(f.lastOptions()?.method).toBe('PATCH');
   expect(f.lastOptions()?.body).toEqual(JSON.stringify({foo: 'bar'}));
   expect(f.lastOptions()?.headers).toEqual({
@@ -144,7 +147,7 @@ test('http.patch() should fetch a `patch` request - success empty response', asy
     fetch: f as any
   }).patch('/endpoint', {foo: 'bar'}, 'TOKEN')();
 
-  expect(result).toEqual(right({}));
+  expect(result).toEqual(E.right({}));
 });
 
 test('http.patch() should fetch a `patch` request - failure on request', async () => {
@@ -159,7 +162,7 @@ test('http.patch() should fetch a `patch` request - failure on request', async (
     fetch: f as any
   }).patch('/endpoint', {foo: 'bar'}, 'TOKEN')();
 
-  expect(result).toEqual(left(new Error('network error')));
+  expect(result).toEqual(E.left(new Error('network error')));
 });
 
 test('http.patch() should fetch a `patch` request - failure on response', async () => {
@@ -173,7 +176,7 @@ test('http.patch() should fetch a `patch` request - failure on response', async 
   }).patch('/endpoint', {foo: 'bar'}, 'TOKEN')();
 
   expect(result).toEqual(
-    left(new Error('Request responded with status code 500'))
+    E.left(new Error('Request responded with status code 500'))
   );
 });
 
@@ -188,7 +191,7 @@ test('http.patch() should fetch a `patch` request - failure stringify on request
   }).patch('/endpoint', CIRCULAR, 'TOKEN')();
 
   expect(result).toEqual(
-    left(
+    E.left(
       new TypeError(`Converting circular structure to JSON
     --> starting at object with constructor 'Object'
     --- property 'reference' closes the circle`)
@@ -206,9 +209,12 @@ test('http.patch() should fetch a `patch` request - failure parse on response', 
     fetch: f as any
   }).patch('/endpoint', {}, 'TOKEN')();
 
-  expect(result).toEqual(
-    left(new SyntaxError(`Unexpected token o in JSON at position 1`))
-  );
+  // --- we need this trick because `SyntaxError` messages are not consistent between platform versions
+  expect(E.isLeft(result)).toBe(true);
+
+  const error = (result as E.Left<Error>).left;
+
+  expect(error.name).toBe('SyntaxError');
 });
 
 test('http.patch() should fetch a `patch` request using configured api endpoint', async () => {
@@ -220,7 +226,7 @@ test('http.patch() should fetch a `patch` request using configured api endpoint'
     'TOKEN'
   )();
 
-  expect(isRight(result)).toBe(true);
+  expect(E.isRight(result)).toBe(true);
 });
 
 // --- Helpers
