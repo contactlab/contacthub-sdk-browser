@@ -54,7 +54,7 @@
     "@types/mocha": "10.0.2",
     "@types/node": "20.5.7",
     "@types/sinon": "10.0.17",
-    "@types/uuid": "9.0.4",
+    "@types/uuid": "9.0.5",
     "chai": "4.3.10",
     "docs-ts": "0.8.0",
     "eslint": "8.51.0",
