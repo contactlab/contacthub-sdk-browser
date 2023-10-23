@@ -49,7 +49,7 @@
   "devDependencies": {
     "@types/chai": "4.3.8",
     "@types/jest": "29.5.5",
-    "@types/js-cookie": "3.0.4",
+    "@types/js-cookie": "3.0.5",
     "@types/karma": "6.3.5",
     "@types/mocha": "10.0.2",
     "@types/node": "20.5.7",
