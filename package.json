@@ -57,7 +57,7 @@
     "@types/uuid": "9.0.5",
     "chai": "4.3.10",
     "docs-ts": "0.8.0",
-    "eslint": "8.51.0",
+    "eslint": "8.52.0",
     "eslint-config-contactlab": "11.2.0",
     "eslint-config-prettier": "9.0.0",
     "fetch-mock": "9.11.0",
