@@ -50,7 +50,7 @@
     "@types/chai": "4.3.11",
     "@types/jest": "29.5.10",
     "@types/js-cookie": "3.0.6",
-    "@types/karma": "6.3.7",
+    "@types/karma": "6.3.8",
     "@types/mocha": "10.0.4",
     "@types/node": "20.5.7",
     "@types/sinon": "17.0.1",
